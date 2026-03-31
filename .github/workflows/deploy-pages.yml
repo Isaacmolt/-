@@ -1,0 +1,62 @@
+name: Deploy Website to GitHub Pages
+
+on:
+  push:
+    branches: [claude/ai-ceo-business-ops-LKFzy, main]
+    paths:
+      - 'website/**'
+      - 'index.html'
+      - '.github/workflows/deploy-pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Create site directory
+        run: |
+          mkdir -p _site
+          cp index.html _site/
+          cp -r website _site/website
+          # Copy product images for the website
+          for dir in products/*/images; do
+            product_id=$(echo $dir | cut -d'/' -f2)
+            mkdir -p "_site/website/images/$product_id"
+            cp -r "$dir"/* "_site/website/images/$product_id/" 2>/dev/null || true
+          done
+          # Copy xlsx files for direct download links
+          mkdir -p _site/downloads
+          for dir in products/*/; do
+            product_id=$(basename "$dir")
+            for f in "$dir"*.xlsx; do
+              [ -f "$f" ] && cp "$f" "_site/downloads/"
+            done
+          done
+          # Copy bundle zips
+          mkdir -p _site/downloads/bundles
+          cp bundles/*.zip _site/downloads/bundles/ 2>/dev/null || true
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
