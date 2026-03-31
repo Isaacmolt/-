@@ -1,0 +1,13 @@
+Manage all your client relationships in one powerful spreadsheet! This CRM Tracker for Google Sheets includes client database, interaction logging, sales pipeline, and revenue tracking.
+
+WHAT'S INCLUDED:
+- Dashboard with total clients, revenue, pipeline value
+- Client database with status tracking (Active/Lead/Inactive)
+- Interaction log with color-coded types (Call/Email/Meeting)
+- Sales pipeline with weighted deal values
+- Revenue log with payment status (Paid/Pending/Overdue)
+- Instructions tab
+
+PERFECT FOR: Freelancers, consultants, small businesses, agencies who need simple CRM without expensive software.
+
+INSTANT DOWNLOAD!

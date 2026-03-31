@@ -1,0 +1,196 @@
+{
+  "company": "SheetCraft AI",
+  "products": [
+    {
+      "id": "01-monthly-budget-tracker",
+      "name": "Monthly Budget Tracker",
+      "price": 5.99,
+      "category": "Personal Finance",
+      "tags": [
+        "budget",
+        "expense tracker",
+        "personal finance",
+        "monthly budget"
+      ],
+      "status": "ready",
+      "files": [
+        "Monthly_Budget_Tracker_SheetCraft.xlsx"
+      ]
+    },
+    {
+      "id": "02-annual-financial-overview",
+      "name": "Annual Financial Overview",
+      "price": 7.99,
+      "category": "Personal Finance",
+      "tags": [
+        "annual budget",
+        "financial overview",
+        "net worth",
+        "yearly planner"
+      ],
+      "status": "ready",
+      "files": [
+        "Annual_Financial_Overview_SheetCraft.xlsx"
+      ]
+    },
+    {
+      "id": "03-freelancer-income-tracker",
+      "name": "Freelancer Income Tracker",
+      "price": 6.99,
+      "category": "Freelancer",
+      "tags": [
+        "freelancer",
+        "income tracker",
+        "invoice",
+        "tax estimator"
+      ],
+      "status": "ready",
+      "files": [
+        "Freelancer_Income_Tracker_SheetCraft.xlsx"
+      ]
+    },
+    {
+      "id": "04-debt-payoff-planner",
+      "name": "Debt Payoff Planner",
+      "price": 4.99,
+      "category": "Personal Finance",
+      "tags": [
+        "debt payoff",
+        "snowball",
+        "avalanche",
+        "debt tracker"
+      ],
+      "status": "ready",
+      "files": [
+        "Debt_Payoff_Planner_SheetCraft.xlsx"
+      ]
+    },
+    {
+      "id": "05-503020-budget",
+      "name": "50/30/20 Budget Template",
+      "price": 3.99,
+      "category": "Personal Finance",
+      "tags": [
+        "50 30 20",
+        "budget rule",
+        "needs wants savings"
+      ],
+      "status": "ready",
+      "files": [
+        "503020_Budget_Template_SheetCraft.xlsx"
+      ]
+    },
+    {
+      "id": "06-small-business-pl",
+      "name": "Small Business P&L",
+      "price": 9.99,
+      "category": "Business",
+      "tags": [
+        "profit loss",
+        "small business",
+        "P&L",
+        "accounting"
+      ],
+      "status": "ready",
+      "files": [
+        "Small_Business_PL_SheetCraft.xlsx"
+      ]
+    },
+    {
+      "id": "07-inventory-manager",
+      "name": "Inventory Manager",
+      "price": 8.99,
+      "category": "Business",
+      "tags": [
+        "inventory",
+        "stock tracker",
+        "warehouse",
+        "SKU"
+      ],
+      "status": "ready",
+      "files": [
+        "Inventory_Manager_SheetCraft.xlsx"
+      ]
+    },
+    {
+      "id": "08-client-crm",
+      "name": "Client CRM Tracker",
+      "price": 9.99,
+      "category": "Business",
+      "tags": [
+        "CRM",
+        "client tracker",
+        "sales pipeline",
+        "customer"
+      ],
+      "status": "ready",
+      "files": [
+        "Client_CRM_Tracker_SheetCraft.xlsx"
+      ]
+    },
+    {
+      "id": "09-habit-tracker",
+      "name": "Annual Habit Tracker",
+      "price": 5.99,
+      "category": "Productivity",
+      "tags": [
+        "habit tracker",
+        "daily routine",
+        "goal tracker",
+        "streak"
+      ],
+      "status": "ready",
+      "files": [
+        "Annual_Habit_Tracker_SheetCraft.xlsx"
+      ]
+    },
+    {
+      "id": "10-project-management",
+      "name": "Project Management Board",
+      "price": 7.99,
+      "category": "Productivity",
+      "tags": [
+        "project management",
+        "task tracker",
+        "gantt",
+        "team"
+      ],
+      "status": "ready",
+      "files": [
+        "Project_Management_Board_SheetCraft.xlsx"
+      ]
+    }
+  ],
+  "bundles": [
+    {
+      "id": "Personal_Finance_Bundle",
+      "name": "Personal Finance Bundle",
+      "price": 19.99,
+      "exists": true
+    },
+    {
+      "id": "Small_Business_Bundle",
+      "name": "Small Business Bundle",
+      "price": 24.99,
+      "exists": true
+    },
+    {
+      "id": "Freelancer_Bundle",
+      "name": "Freelancer Bundle",
+      "price": 14.99,
+      "exists": true
+    },
+    {
+      "id": "Ultimate_Productivity_Bundle",
+      "name": "Ultimate Productivity Bundle",
+      "price": 39.99,
+      "exists": true
+    }
+  ],
+  "summary": {
+    "total_products": 10,
+    "ready_products": 10,
+    "total_individual_value": 72.9,
+    "total_bundles": 4
+  }
+}
