@@ -274,14 +274,22 @@ def generate_features(product_name, features, output_path):
             "✓", font=font_ck, fill=COLOR_WHITE
         )
 
-        # Feature text — truncate if too wide
+        # Feature text — truncate if too wide using binary search
         max_text_w = WIDTH - x_left - 70 - 150  # leave right margin
         display_feat = feat
-        while True:
-            bbox_f = draw.textbbox((0, 0), display_feat, font=font_feat)
-            if bbox_f[2] - bbox_f[0] <= max_text_w or len(display_feat) <= 10:
-                break
-            display_feat = display_feat[:len(display_feat) - 2].rstrip() + "..."
+        bbox_f = draw.textbbox((0, 0), display_feat, font=font_feat)
+        if bbox_f[2] - bbox_f[0] > max_text_w:
+            # Binary search for max length that fits
+            lo, hi = 10, len(display_feat)
+            while lo < hi:
+                mid = (lo + hi + 1) // 2
+                test = feat[:mid] + "..."
+                bx = draw.textbbox((0, 0), test, font=font_feat)
+                if bx[2] - bx[0] <= max_text_w:
+                    lo = mid
+                else:
+                    hi = mid - 1
+            display_feat = feat[:lo].rstrip() + "..."
         draw.text((x_left + 70, y - 18), display_feat, font=font_feat, fill=COLOR_BLACK)
 
         # Subtle separator line (except after last)
