@@ -1,4 +1,4 @@
-.PHONY: all generate check bundle catalog clean images
+.PHONY: all generate check bundle catalog clean images upload-kit
 
 all: generate check bundle catalog
 
@@ -26,3 +26,6 @@ images:
 	else \
 		echo "No image generator script found at scripts/generate_images.py"; \
 	fi
+
+upload-kit:
+	python scripts/generate_upload_kit.py
