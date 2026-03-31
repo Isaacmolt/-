@@ -1,0 +1,68 @@
+Take control of your money with this beautifully designed Monthly Budget Tracker for Google Sheets!
+
+This template automatically calculates your spending, tracks your savings rate, and gives you a clear visual dashboard of where your money goes each month.
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+
+WHAT'S INCLUDED:
+
+✔ Monthly Dashboard — See your income, expenses, savings rate, and budget progress at a glance
+✔ Easy Input Sheet — Simply enter your transactions and everything calculates automatically
+✔ 15+ Expense Categories — Pre-built and fully customizable to match your spending habits
+✔ Annual Overview — Track your financial trends across all 12 months
+✔ Visual Charts — Pie charts, bar graphs, and progress bars update in real-time
+✔ Budget vs Actual — Instantly see where you're over or under budget
+✔ Instructions Page — Step-by-step guide to get started in minutes
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+
+KEY FEATURES:
+
+→ 100% Automatic Calculations — No manual math needed
+→ Conditional Formatting — Over-budget items highlight in red automatically
+→ Savings Rate Tracker — Know exactly how much you're saving each month
+→ Mobile Friendly — Works on Google Sheets mobile app
+→ Fully Customizable — Edit categories, colors, and budget amounts
+→ Print Ready — Clean layout for physical copies
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+
+HOW IT WORKS:
+
+1. Purchase and download the file
+2. Open in Google Sheets (File → Make a Copy)
+3. Set your monthly income and budget goals
+4. Enter your daily expenses
+5. Watch your dashboard update automatically!
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+
+PERFECT FOR:
+
+• Anyone wanting to take control of their finances
+• Beginners who find budgeting apps overwhelming
+• People who love spreadsheets and customization
+• Couples managing household finances together
+• Anyone following the 50/30/20 budgeting method
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+
+FAQ:
+
+Q: Do I need to install anything?
+A: No! This works entirely in Google Sheets (free). No software needed.
+
+Q: Can I customize the categories?
+A: Yes! All categories are fully editable to match your needs.
+
+Q: Does it work on mobile?
+A: Yes! Google Sheets works on iOS and Android.
+
+Q: Is this a one-time purchase?
+A: Yes! Pay once, use forever. Free updates included.
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+
+INSTANT DOWNLOAD — Start budgeting in minutes!
+
+If you have any questions, feel free to message me. I'm happy to help!
