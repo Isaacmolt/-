@@ -1,0 +1,57 @@
+name: Generate Products & Quality Check
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  generate-and-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r scripts/requirements.txt
+
+      - name: Generate all products
+        run: python scripts/generate_all.py
+
+      - name: Run quality check
+        id: quality
+        run: |
+          python scripts/quality_check.py
+          echo "qa_passed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Generate bundles
+        run: python scripts/bundle_generator.py
+
+      - name: Update product catalog
+        run: python scripts/product_catalog.py
+
+      - name: Fail if quality check failed
+        if: steps.quality.outcome == 'failure'
+        run: |
+          echo "Quality check failed — blocking workflow."
+          exit 1
+
+      - name: Upload product spreadsheets
+        uses: actions/upload-artifact@v4
+        with:
+          name: product-spreadsheets
+          path: products/*/*.xlsx
+          if-no-files-found: warn
+
+      - name: Upload bundle archives
+        uses: actions/upload-artifact@v4
+        with:
+          name: product-bundles
+          path: bundles/*.zip
+          if-no-files-found: warn

@@ -1,0 +1,67 @@
+name: Quality Gate (PR)
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  quality-gate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r scripts/requirements.txt
+
+      - name: Generate all products
+        run: python scripts/generate_all.py
+
+      - name: Run quality check and capture report
+        id: qa
+        run: |
+          set +e
+          QA_OUTPUT=$(python scripts/quality_check.py 2>&1)
+          QA_EXIT=$?
+          set -e
+
+          echo "exit_code=$QA_EXIT" >> "$GITHUB_OUTPUT"
+
+          # Write report to file for the comment step
+          {
+            echo "report<<REPORT_EOF"
+            echo "$QA_OUTPUT"
+            echo "REPORT_EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Comment QA report on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const passed = '${{ steps.qa.outputs.exit_code }}' === '0';
+            const icon = passed ? '✅' : '❌';
+            const status = passed ? 'PASSED' : 'FAILED';
+            const report = `### ${icon} Quality Gate ${status}\n\n\`\`\`\n${{ steps.qa.outputs.report }}\n\`\`\``;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: report
+            });
+
+      - name: Fail if quality check did not pass
+        if: steps.qa.outputs.exit_code != '0'
+        run: |
+          echo "Quality gate failed — merge is blocked."
+          exit 1
