@@ -1,0 +1,15 @@
+Track every product in your business with this Inventory Manager for Google Sheets!
+
+Automatic low-stock alerts, stock movement logging, supplier directory, and a visual dashboard — all in one template.
+
+WHAT'S INCLUDED:
+- Dashboard with total SKUs, units, value, and low-stock alerts
+- Full inventory list with auto-calculated values and reorder alerts
+- Stock movement log (IN/OUT tracking with color coding)
+- Supplier directory
+- Category breakdown pie chart
+- Instructions tab
+
+PERFECT FOR: Small businesses, Etsy sellers, e-commerce shops, warehouse managers.
+
+INSTANT DOWNLOAD!
