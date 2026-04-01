@@ -1,4 +1,4 @@
-.PHONY: all generate check bundle catalog clean images upload-kit
+.PHONY: all generate check bundle catalog clean images upload-kit upload-gumroad upload-etsy
 
 all: generate check bundle catalog
 
@@ -29,3 +29,11 @@ images:
 
 upload-kit:
 	python scripts/generate_upload_kit.py
+
+upload-gumroad:
+	@python -c "from playwright.sync_api import sync_playwright" 2>/dev/null || { echo "請先安裝: pip install playwright && playwright install chromium"; exit 1; }
+	python scripts/auto_upload_gumroad.py
+
+upload-etsy:
+	@python -c "from playwright.sync_api import sync_playwright" 2>/dev/null || { echo "請先安裝: pip install playwright && playwright install chromium"; exit 1; }
+	python scripts/auto_upload_etsy.py
