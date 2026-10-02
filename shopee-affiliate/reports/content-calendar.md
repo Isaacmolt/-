@@ -1,5 +1,5 @@
 # 蝦皮分潤 — 發文日曆
-_由 scripts/shopee_post_generator.py 於 2026-10-02 13:52 產生_
+_由 scripts/shopee_post_generator.py 於 2026-10-02 14:07 產生_
 _期間：2026-10-02 到 2026-10-31，共 90 篇_
 
 發文前把 `file` 那份草稿改成自己的語氣，連結用對應的 sub_id 在後台產生，發完回 `shopee-affiliate/tracker.xlsx` 的「貼文日誌」登記。
