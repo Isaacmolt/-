@@ -1,0 +1,72 @@
+name: Shopee Affiliate — 重新產生工具輸出
+
+# 兩種觸發：
+# 1. 在 GitHub 網頁 Actions 分頁按「Run workflow」
+# 2. 改了選品、設定、模板或腳本並推上來
+# 跑完會把 tracker.xlsx、posts/、reports/、linkpage/ 直接 commit 回同一個分支，
+# 並且打包成可下載的 artifact。
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [claude/shopee-commission-planning-isbmsh, claude/ai-ceo-business-ops-LKFzy, main]
+    paths:
+      - 'shopee-affiliate/products.csv'
+      - 'shopee-affiliate/niches.json'
+      - 'shopee-affiliate/config.example.json'
+      - 'shopee-affiliate/templates/**'
+      - 'scripts/shopee_*.py'
+      - '.github/workflows/shopee-affiliate.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: shopee-affiliate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install openpyxl
+        run: pip install openpyxl==3.1.2
+
+      - name: Run all Shopee affiliate tools
+        run: |
+          python scripts/shopee_niche_scorer.py
+          python scripts/shopee_link_builder.py
+          python scripts/shopee_post_generator.py
+          python scripts/shopee_tracker.py
+          python scripts/shopee_roi_calc.py
+
+      - name: Upload outputs (download from the run page)
+        uses: actions/upload-artifact@v4
+        with:
+          name: shopee-affiliate-outputs
+          path: |
+            shopee-affiliate/tracker.xlsx
+            shopee-affiliate/reports/
+            shopee-affiliate/posts/
+            shopee-affiliate/linkpage/index.html
+          if-no-files-found: error
+
+      - name: Commit outputs back to the branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add shopee-affiliate/
+          if git diff --cached --quiet; then
+            echo "Nothing changed."
+            exit 0
+          fi
+          git commit -m "chore(shopee): regenerate tool outputs [skip ci]"
+          git push

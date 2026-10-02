@@ -15,6 +15,10 @@ SheetCraft AI 的第二個事業線：用「小資效率實驗室」這個中文
 
 ## 快速開始
 
+不想打指令：Windows 雙擊 `一鍵執行-Windows.bat`、Mac 右鍵打開 `一鍵執行-Mac.command`，或到 GitHub **Actions → Shopee Affiliate → Run workflow**。詳見 `起床看這裡-蝦皮分潤.md` 的「工具怎麼打開」。
+
+有終端機的話：
+
 ```bash
 cp shopee-affiliate/config.example.json shopee-affiliate/config.json   # 填帳號名稱、揭露文字
 # 編輯 shopee-affiliate/products.csv，把 12 個範例換成真實商品
@@ -54,7 +58,8 @@ products.csv（選品）
 ```
 shopee-affiliate/
 ├── README.md                       ← 你在這
-├── 起床看這裡-蝦皮分潤.md             ← 行動清單
+├── 起床看這裡-蝦皮分潤.md             ← 行動清單（含「工具怎麼打開」）
+├── 一鍵執行-Windows.bat / 一鍵執行-Mac.command   ← 雙擊跑全部工具
 ├── 01-制度懶人包.md … 05-請款稅務與合規.md
 ├── niches.json                     ← 12 個利基方向與評分
 ├── products.csv                    ← 選品庫（12 個範例，請換成真實商品）
