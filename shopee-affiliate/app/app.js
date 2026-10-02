@@ -17,55 +17,36 @@ const PLATFORMS = {
 
 const TEMPLATES = {
   threads: {
-    pain_point: { label: "痛點共鳴", body: `{pain_point}。
+    hot_take: { label: "反直覺觀點", body: `{hot_take}
 
-這件事困擾我超久，直到試了這個：{name}（NT\${price}）
+我自己{pain_point}很久，網路上教的方法幾乎都試過，沒一個撐過一個月。
+後來隨便買了個{name}，{sp1}，反而是最便宜的那個有用。
 
-→ {sp1}
-→ {sp2}
-→ {sp3}
+不懂為什麼都沒人講這個。` },
+    rant: { label: "抱怨文", body: `{pain_point}這件事到底還要困擾我多久
 
-{audience}真的可以試試。
-連結放留言 👇
+認真問，大家都怎麼解的？
+我目前是靠{name}撐著，{sp1}，算解了一半。
+有更好的方法拜託告訴我 🙏` },
+    confession: { label: "真心話", body: `老實說{name}我一開始覺得超雞肋。
 
-{disclosure}` },
+用了兩週收回這句話。{sp1}，{sp2}，最有感的是{sp3}。
+缺點也有：（這裡寫一個真實的小缺點，例如顏色很醜、組裝要十分鐘）
+
+{audience}應該會懂我在說什麼。` },
+    question: { label: "丟問題", body: `{audience}真的有人沒遇過{pain_point}嗎？
+
+我不信。
+我是靠{name}才解決的，{sp1}。
+你們是怎麼活下來的，還是直接放棄治療？` },
     before_after: { label: "前後對比", body: `以前：{pain_point}
 現在：{sp1}
 
-差別就只是多了一個 {name}。
-NT\${price}，{sp2}，我覺得值。
+中間只差一個{name}，笑死，早買早享受。
+對比照在第二張。` },
+    campaign: { label: "檔期提醒", body: `平常不會特別講，但{name}這波有降價（這裡填折扣或券）。
 
-不信的話你滑到第二張圖看對比。
-連結在留言 👇
-
-{disclosure}` },
-    one_liner: { label: "一句話推薦", body: `如果你是{audience}，{name} 這個東西你會想知道：{sp1}。
-
-NT\${price}，{sp2}。就這樣，沒有別的話了。
-
-連結 👇
-
-{disclosure}` },
-    listicle: { label: "清單文", body: `我把 {name} 用了一陣子，整理 3 個我覺得它值 NT\${price} 的理由：
-
-1. {sp1}
-2. {sp2}
-3. {sp3}
-
-缺點也說一下：（這裡寫一個真實的小缺點，可信度會差很多）
-
-{audience}可以收藏起來。連結在留言 👇
-
-{disclosure}` },
-    campaign: { label: "檔期提醒", body: `蝦皮這波活動，{name} 現在 NT\${price}（這裡填折扣後價格或優惠券資訊）。
-
-為什麼我會推它：{sp1}、{sp2}。
-
-{pain_point}的人，這波可以直接下手。
-活動到期日：（填日期）
-連結 👇
-
-{disclosure}` },
+{pain_point}的人，我只提醒這一次。` },
   },
   instagram: {
     carousel: { label: "輪播圖文", body: `【{category}】{name}｜{sp1}
@@ -190,7 +171,7 @@ function download(filename, text) {
 function normalize(d) {
   d = d && typeof d === "object" ? d : {};
   d.version = 1;
-  d.brand = Object.assign({ account_name: "蝦皮分潤助手", handle: "", tagline: "", disclosure: "✨ 文內含蝦皮分潤連結，透過連結購買我會獲得少量回饋，不會影響你的價格。" }, d.brand || {});
+  d.brand = Object.assign({ account_name: "蝦皮分潤助手", handle: "", tagline: "", disclosure: "這是蝦皮分潤連結，用它買我會拿到一點回饋，你的價格不變。" }, d.brand || {});
   const s = d.settings || {};
   d.settings = {
     ...DEFAULT_SETTINGS, ...s,
@@ -200,7 +181,7 @@ function normalize(d) {
     goals: { ...DEFAULT_SETTINGS.goals, ...(s.goals || {}) },
     github: { ...DEFAULT_SETTINGS.github, ...(s.github || {}) },
   };
-  d.products = (d.products || []).map((p) => ({ id: p.id || uid(), niche: p.niche || "home", category: p.category || "", name: p.name || "", price: Number(p.price) || 0, pct: Number(p.pct) || 0, selling_points: Array.isArray(p.selling_points) ? p.selling_points : String(p.selling_points || "").split("|").map((x) => x.trim()).filter(Boolean), pain_point: p.pain_point || "", audience: p.audience || "", shopee_url: p.shopee_url || "", affiliate_link: p.affiliate_link || "", status: p.status || "idea", notes: p.notes || "" }));
+  d.products = (d.products || []).map((p) => ({ id: p.id || uid(), niche: p.niche || "home", category: p.category || "", name: p.name || "", price: Number(p.price) || 0, pct: Number(p.pct) || 0, selling_points: Array.isArray(p.selling_points) ? p.selling_points : String(p.selling_points || "").split("|").map((x) => x.trim()).filter(Boolean), pain_point: p.pain_point || "", hot_take: p.hot_take || "", audience: p.audience || "", shopee_url: p.shopee_url || "", affiliate_link: p.affiliate_link || "", status: p.status || "idea", notes: p.notes || "" }));
   d.schedule = (d.schedule || []).map((x) => ({ id: x.id || uid(), datetime: x.datetime, platform: x.platform || "threads", product_id: x.product_id || "", type: x.type || "", type_label: x.type_label || "", sub_id: x.sub_id || "", text: x.text || "", link: x.link || "", status: x.status || "scheduled", auto: x.auto !== false, posted_id: x.posted_id || "", posted_at: x.posted_at || "", error: x.error || "" }));
   d.daily = (d.daily || []).map((x) => ({ date: x.date, clicks: Number(x.clicks) || 0, orders: Number(x.orders) || 0, revenue: Number(x.revenue) || 0, commission: Number(x.commission) || 0, note: x.note || "" }));
   d.updated_at = d.updated_at || new Date().toISOString();
@@ -234,11 +215,15 @@ function productById(id) { return state.products.find((p) => p.id === id); }
 // ── 模板 ─────────────────────────────────────────────────────────
 function templateVars(p) {
   const sps = [...(p.selling_points || [])]; while (sps.length < 3) sps.push("（補一個賣點）");
-  return { name: p.name, price: p.price, sp1: sps[0], sp2: sps[1], sp3: sps[2], pain_point: p.pain_point, audience: p.audience, category: p.category, link: p.affiliate_link || "（分潤連結待補）", disclosure: state.brand.disclosure, account: state.brand.handle };
+  return { name: p.name, price: p.price, sp1: sps[0], sp2: sps[1], sp3: sps[2], pain_point: p.pain_point, hot_take: p.hot_take || "（這裡寫一句反直覺的觀點）", audience: p.audience, category: p.category, link: p.affiliate_link || "（分潤連結待補）", disclosure: state.brand.disclosure, account: state.brand.handle };
 }
 function renderTemplate(body, vars) { return body.replace(/\{(\w+)\}/g, (m, k) => (k in vars ? String(vars[k]) : m)); }
 function subIdFor(platform, p, date) {
   return state.settings.sub_id_pattern.replace("{platform}", PLATFORMS[platform].code).replace("{niche}", p.niche).replace("{yyyymm}", date.slice(0, 7).replace("-", "")).replace("{product_id}", p.id).toLowerCase().replace(/[^a-z0-9_]/g, "_");
+}
+function replyText(item) {
+  const link = item.link || productById(item.product_id)?.affiliate_link || "";
+  return [link, state.brand.disclosure].filter(Boolean).join("\n");
 }
 function composeForShare(item) {
   const link = item.link || productById(item.product_id)?.affiliate_link || "";
@@ -280,7 +265,7 @@ function postCard(item, opts = {}) {
     <div class="post-text" data-toggle>${esc(item.text)}</div>
     <div class="actions">
       <button class="btn sm" data-act="copy">📋 複製文案</button>
-      ${link ? `<button class="btn sm" data-act="copylink">🔗 複製連結</button>` : `<span class="chip warn">待補分潤連結</span>`}
+      ${link ? (item.platform === "threads" ? `<button class="btn sm" data-act="copyreply">💬 複製留言（連結＋揭露）</button>` : `<button class="btn sm" data-act="copylink">🔗 複製連結</button>`) : `<span class="chip warn">待補分潤連結</span>`}
       ${item.platform === "threads" ? `<a class="btn sm" target="_blank" rel="noopener" href="https://www.threads.net/intent/post?text=${encodeURIComponent(composeForShare(item))}">🧵 開 Threads 發文</a>` : ""}
       ${navigator.share && !window.ARTIFACT_BUILD ? `<button class="btn sm" data-act="share">📤 分享</button>` : ""}
       ${item.status === "scheduled" ? `<button class="btn sm primary" data-act="posted">✅ 已發佈</button><button class="btn sm ghost" data-act="skip">跳過</button>` : ""}
@@ -299,6 +284,7 @@ function bindPostCards(container, afterChange) {
     const link = item.link || p.affiliate_link || "";
     if (act === "copy") copyText(composeForShare(item));
     if (act === "copylink") copyText(link);
+    if (act === "copyreply") copyText(replyText(item));
     if (act === "share") { try { await navigator.share({ text: composeForShare(item) }); } catch (err) { if (err && err.name !== "AbortError") { await copyText(composeForShare(item)); toast("這裡不支援系統分享，文案已複製"); } } }
     if (act === "posted") { item.status = "posted"; item.posted_at = new Date().toISOString(); save(); toast("已標記為已發佈"); afterChange(); }
     if (act === "skip") { item.status = "skipped"; save(); afterChange(); }
@@ -374,7 +360,7 @@ function renderProducts() {
 }
 function productForm(p) {
   const isNew = !p;
-  p = p || { id: "P" + String(state.products.length + 1).padStart(3, "0"), niche: "home", category: "", name: "", price: 0, pct: 1, selling_points: [], pain_point: "", audience: "", shopee_url: "", affiliate_link: "", status: "idea", notes: "" };
+  p = p || { id: "P" + String(state.products.length + 1).padStart(3, "0"), niche: "home", category: "", name: "", price: 0, pct: 1, selling_points: [], pain_point: "", hot_take: "", audience: "", shopee_url: "", affiliate_link: "", status: "idea", notes: "" };
   openModal(isNew ? "新增商品" : "編輯商品", `
     <div class="inline-fields">
       <div class="field"><label>ID</label><input id="f-id" value="${esc(p.id)}" ${isNew ? "" : "readonly"}></div>
@@ -389,6 +375,7 @@ function productForm(p) {
     </div>
     <div class="field"><label>賣點（一行一個，3 個最好）</label><textarea id="f-sp" style="min-height:90px">${esc(p.selling_points.join("\n"))}</textarea></div>
     <div class="field"><label>痛點（一句話）</label><input id="f-pain" value="${esc(p.pain_point)}"></div>
+    <div class="field"><label>爭議句 / 反直覺觀點（Threads 第一行）</label><input id="f-hot" value="${esc(p.hot_take || "")}" placeholder="例：租屋族買收納用品九成是智商稅"><div class="hint">像在跟朋友嗆聲的一句話，沒有這句 Threads 很難被推</div></div>
     <div class="field"><label>受眾</label><input id="f-aud" value="${esc(p.audience)}"></div>
     <div class="field"><label>蝦皮商品網址</label><input id="f-url" value="${esc(p.shopee_url)}" placeholder="https://shopee.tw/..."></div>
     <div class="field"><label>分潤短連結（後台產生）</label><input id="f-aff" value="${esc(p.affiliate_link)}" placeholder="https://s.shopee.tw/..."><div class="hint">到 affiliate.shopee.tw 後台「商品連結產生器」貼網址 + sub_id 取得</div></div>
@@ -398,7 +385,7 @@ function productForm(p) {
     $("#f-save", body).onclick = () => {
       const id = $("#f-id", body).value.trim(); if (!id || !$("#f-name", body).value.trim()) return toast("ID 與名稱必填");
       if (isNew && productById(id)) return toast("ID 重複");
-      Object.assign(p, { id, niche: $("#f-niche", body).value.trim() || "home", category: $("#f-category", body).value.trim(), name: $("#f-name", body).value.trim(), price: Number($("#f-price", body).value) || 0, pct: Number($("#f-pct", body).value) || 0, status: $("#f-status", body).value, selling_points: $("#f-sp", body).value.split("\n").map((x) => x.trim()).filter(Boolean), pain_point: $("#f-pain", body).value.trim(), audience: $("#f-aud", body).value.trim(), shopee_url: $("#f-url", body).value.trim(), affiliate_link: $("#f-aff", body).value.trim(), notes: $("#f-notes", body).value.trim() });
+      Object.assign(p, { id, niche: $("#f-niche", body).value.trim() || "home", category: $("#f-category", body).value.trim(), name: $("#f-name", body).value.trim(), price: Number($("#f-price", body).value) || 0, pct: Number($("#f-pct", body).value) || 0, status: $("#f-status", body).value, selling_points: $("#f-sp", body).value.split("\n").map((x) => x.trim()).filter(Boolean), pain_point: $("#f-pain", body).value.trim(), hot_take: $("#f-hot", body).value.trim(), audience: $("#f-aud", body).value.trim(), shopee_url: $("#f-url", body).value.trim(), affiliate_link: $("#f-aff", body).value.trim(), notes: $("#f-notes", body).value.trim() });
       if (isNew) state.products.push(p);
       // 商品連結更新時，同步到還沒發的排程
       state.schedule.forEach((s) => { if (s.product_id === p.id && s.status === "scheduled" && !s.link) s.link = p.affiliate_link; });
@@ -461,7 +448,8 @@ function renderPosts() {
         <div class="field"><label>平台</label><select id="g-platform">${Object.entries(PLATFORMS).map(([k, v]) => `<option value="${k}">${v.label}</option>`).join("")}</select></div>
         <div class="field"><label>類型</label><select id="g-type"></select></div>
       </div>
-      <div class="field"><label>文案（可直接改）</label><textarea id="g-text"></textarea><div class="hint"><span id="g-count">0</span> / 500 · 鉤子（第一行）請改成自己的語氣</div></div>
+      <div class="field"><label>主文（可直接改）</label><textarea id="g-text"></textarea><div class="hint"><span id="g-count">0</span> / 500 · Threads 主文不放價格、不放連結、不放揭露；第一行改成自己的口氣</div></div>
+      <div class="field" id="g-reply-wrap"><label>第一則留言（主文發完馬上回）</label><textarea id="g-reply" readonly style="min-height:70px"></textarea></div>
       <div class="field"><label>發文時間</label><input type="datetime-local" id="g-dt"></div>
       <div class="actions"><button class="btn primary" id="g-add" style="flex:1">＋ 加入排程</button><button class="btn" id="g-copy">📋 複製</button></div>
     </div>
@@ -472,7 +460,8 @@ function renderPosts() {
         <div class="field"><label>從</label><input type="date" id="a-start" value="${todayStr()}"></div>
         <div class="field"><label>天數</label><input type="number" id="a-days" value="14" min="1" max="60"></div>
       </div>
-      <button class="btn block" id="a-run">⚡ 自動排 ${Object.keys(PLATFORMS).filter((k) => state.settings.platforms[k]).map((k) => PLATFORMS[k].label).join(" + ")}</button>
+      <div class="actions"><button class="btn primary" id="a-run" style="flex:1">⚡ 自動排 ${Object.keys(PLATFORMS).filter((k) => state.settings.platforms[k]).map((k) => PLATFORMS[k].label).join(" + ")}</button><button class="btn ghost" id="a-clear">清除所有待發</button></div>
+      <div class="hint" style="margin-top:6px">模板改版後，先「清除所有待發」再重新自動排，舊草稿才會換成新風格。</div>
     </div>
     <div class="row" style="margin:14px 0 6px">
       ${[["scheduled", "待發"], ["posted", "已發"], ["error", "失敗"], ["skipped", "跳過"], ["all", "全部"]].map(([k, l]) => `<button class="btn sm ${postsFilter === k ? "primary" : ""}" data-filter="${k}">${l}${k !== "all" ? ` ${counts[k] || 0}` : ""}</button>`).join("")}
@@ -481,7 +470,8 @@ function renderPosts() {
 
   const selType = $("#g-type", el), selPf = $("#g-platform", el), selProd = $("#g-product", el), ta = $("#g-text", el), dt = $("#g-dt", el), count = $("#g-count", el);
   function fillTypes() { selType.innerHTML = Object.entries(TEMPLATES[selPf.value]).map(([k, v]) => `<option value="${k}">${v.label}</option>`).join(""); }
-  function fillText() { const p = productById(selProd.value); if (!p) return; ta.value = renderTemplate(TEMPLATES[selPf.value][selType.value].body, templateVars(p)); count.textContent = ta.value.length; dt.value = nextSlot(selPf.value).slice(0, 16); }
+  function fillText() { const p = productById(selProd.value); if (!p) return; ta.value = renderTemplate(TEMPLATES[selPf.value][selType.value].body, templateVars(p)); count.textContent = ta.value.length; dt.value = nextSlot(selPf.value).slice(0, 16);
+    const rw = $("#g-reply-wrap", el); rw.hidden = selPf.value !== "threads"; $("#g-reply", el).value = [p.affiliate_link || "（分潤連結待補）", state.brand.disclosure].join("\n"); }
   fillTypes(); fillText();
   selPf.onchange = () => { fillTypes(); fillText(); }; selType.onchange = fillText; selProd.onchange = fillText;
   ta.oninput = () => (count.textContent = ta.value.length);
@@ -491,6 +481,7 @@ function renderPosts() {
     state.schedule.push({ id: uid(), datetime: dt.value + ":00+08:00", platform: selPf.value, product_id: p.id, type: selType.value, type_label: TEMPLATES[selPf.value][selType.value].label, sub_id: subIdFor(selPf.value, p, dt.value.slice(0, 10)), text: ta.value, link: p.affiliate_link, status: "scheduled", auto: selPf.value === "threads", posted_id: "", posted_at: "", error: "" });
     state.schedule.sort((a, b) => a.datetime.localeCompare(b.datetime)); save(); toast("已加入排程"); renderPosts();
   };
+  $("#a-clear", el).onclick = (e) => armConfirm(e.currentTarget, () => { const n = state.schedule.filter((x) => x.status === "scheduled").length; state.schedule = state.schedule.filter((x) => x.status !== "scheduled"); save(); toast(`已清除 ${n} 篇待發`); renderPosts(); }, "確定清除？");
   $("#a-run", el).onclick = () => { const n = autoSchedule($("#a-start", el).value || todayStr(), Number($("#a-days", el).value) || 14); save(); toast(`已排 ${n} 篇`); renderPosts(); };
   $$("[data-filter]", el).forEach((b) => (b.onclick = () => { postsFilter = b.dataset.filter; renderPosts(); }));
   bindPostCards($("#g-list", el), renderPosts);

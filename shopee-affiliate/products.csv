@@ -1,13 +1,13 @@
-id,niche,category,name,price_twd,est_commission_pct,selling_points,pain_point,target_audience,shopee_url,affiliate_link,sub_id,status,notes
-P001,home,居家收納,免釘壁掛收納架（3入）,299,3,免打孔不傷牆|承重 5kg|浴室廚房都能用,租屋不能釘牆、東西沒地方放,租屋族,https://shopee.tw/product/SHOPID/ITEMID,,,idea,範例資料：請換成真實商品網址
-P002,home,居家收納,衣櫃分層伸縮隔板,189,3,免工具安裝|寬度可調 38-60cm|衣櫃空間翻倍,衣櫃上層塞成一團拿不到,租屋族/小家庭,https://shopee.tw/product/SHOPID/ITEMID,,,idea,範例資料：請換成真實商品網址
-P003,home,居家收納,真空壓縮收納袋（8入）,359,3,換季衣物體積減 70%|附手泵|可重複使用,換季棉被衣服爆滿,租屋族,https://shopee.tw/product/SHOPID/ITEMID,,,idea,範例資料：請換成真實商品網址
-P004,home,居家收納,床邊掛袋收納,159,3,手機遙控器一袋收|免安裝|多色,床頭沒地方放東西,學生/租屋族,https://shopee.tw/product/SHOPID/ITEMID,,,idea,範例資料：請換成真實商品網址
-P005,desk,3C 配件,實木螢幕增高架,699,5,墊高 8cm 改善頸椎角度|下方可收鍵盤|質感好拍,低頭看螢幕肩頸痠,上班族/遠端工作者,https://shopee.tw/product/SHOPID/ITEMID,,,idea,範例資料：請換成真實商品網址
-P006,desk,3C 配件,桌下理線盒（含束帶）,329,5,電線延長線全藏|磁吸開蓋|桌面瞬間清爽,桌下電線像義大利麵,上班族,https://shopee.tw/product/SHOPID/ITEMID,,,idea,範例資料：請換成真實商品網址
-P007,desk,3C 配件,USB-C 7合1 擴充埠,899,5,HDMI 4K|PD 100W 充電|SD 讀卡,筆電只有兩個孔,上班族/學生,https://shopee.tw/product/SHOPID/ITEMID,,,idea,範例資料：請換成真實商品網址
-P008,desk,3C 配件,人體工學垂直滑鼠,590,5,握姿像握手|手腕不再痠|無線靜音,用滑鼠用到手腕痛,上班族,https://shopee.tw/product/SHOPID/ITEMID,,,idea,範例資料：請換成真實商品網址
-P009,kitchen,生活家電,迷你氣炸鍋 3.5L,1290,7,一人份剛好|免油少煙|可拆洗,下班太累不想開火,租屋族/小家庭,https://shopee.tw/product/SHOPID/ITEMID,,,idea,範例資料：請換成真實商品網址
-P010,kitchen,生活家電,多功能電煮鍋 1.5L,699,7,煮麵火鍋蒸蛋一鍋搞定|宿舍可用|不沾內鍋,宿舍不能開火,學生/租屋族,https://shopee.tw/product/SHOPID/ITEMID,,,idea,範例資料：請換成真實商品網址
-P011,money,文具,信封預算分帳夾（12格）,249,2,薪水一到手先分 12 格|透明看得見|搭配記帳表,月底總是沒錢,小資族/理財新手,https://shopee.tw/product/SHOPID/ITEMID,,,idea,範例資料：可與 SheetCraft 預算模板一起推
-P012,money,文具,無時效手帳記帳本,329,2,任何月份開始都行|每日支出欄|年度總覽頁,記帳 App 懶得開,小資族,https://shopee.tw/product/SHOPID/ITEMID,,,idea,範例資料：可與 SheetCraft 預算模板一起推
+id,niche,category,name,price_twd,est_commission_pct,selling_points,pain_point,hot_take,target_audience,shopee_url,affiliate_link,sub_id,status,notes
+P001,home,居家收納,免釘壁掛收納架（3入）,299,3,免打孔不傷牆|承重 5kg|浴室廚房都能用,租屋不能釘牆、東西沒地方放,租屋族買收納用品九成都是在交智商稅,租屋族,https://shopee.tw/product/SHOPID/ITEMID,,,idea,範例資料：請換成真實商品網址
+P002,home,居家收納,衣櫃分層伸縮隔板,189,3,免工具安裝|寬度可調 38-60cm|衣櫃空間翻倍,衣櫃上層塞成一團拿不到,衣櫃不夠用的人，問題不是衣服太多，是上面那 30 公分全浪費了,租屋族/小家庭,https://shopee.tw/product/SHOPID/ITEMID,,,idea,範例資料：請換成真實商品網址
+P003,home,居家收納,真空壓縮收納袋（8入）,359,3,換季衣物體積減 70%|附手泵|可重複使用,換季棉被衣服爆滿,換季衣服塞不下就去買大櫃子的人，我真的不懂,租屋族,https://shopee.tw/product/SHOPID/ITEMID,,,idea,範例資料：請換成真實商品網址
+P004,home,居家收納,床邊掛袋收納,159,3,手機遙控器一袋收|免安裝|多色,床頭沒地方放東西,床頭櫃是租屋族最沒必要的家具,學生/租屋族,https://shopee.tw/product/SHOPID/ITEMID,,,idea,範例資料：請換成真實商品網址
+P005,desk,3C 配件,實木螢幕增高架,699,5,墊高 8cm 改善頸椎角度|下方可收鍵盤|質感好拍,低頭看螢幕肩頸痠,肩頸痠去按摩是治標，問題是你的螢幕太低,上班族/遠端工作者,https://shopee.tw/product/SHOPID/ITEMID,,,idea,範例資料：請換成真實商品網址
+P006,desk,3C 配件,桌下理線盒（含束帶）,329,5,電線延長線全藏|磁吸開蓋|桌面瞬間清爽,桌下電線像義大利麵,桌面再乾淨，桌下一團線就是沒整理,上班族,https://shopee.tw/product/SHOPID/ITEMID,,,idea,範例資料：請換成真實商品網址
+P007,desk,3C 配件,USB-C 7合1 擴充埠,899,5,HDMI 4K|PD 100W 充電|SD 讀卡,筆電只有兩個孔,筆電只有兩個孔不是缺點，是逼你買對東西,上班族/學生,https://shopee.tw/product/SHOPID/ITEMID,,,idea,範例資料：請換成真實商品網址
+P008,desk,3C 配件,人體工學垂直滑鼠,590,5,握姿像握手|手腕不再痠|無線靜音,用滑鼠用到手腕痛,滑鼠用到手腕痛的人，換鍵盤沒用，是握法錯了,上班族,https://shopee.tw/product/SHOPID/ITEMID,,,idea,範例資料：請換成真實商品網址
+P009,kitchen,生活家電,迷你氣炸鍋 3.5L,1290,7,一人份剛好|免油少煙|可拆洗,下班太累不想開火,一個人住買大氣炸鍋的，最後都變成置物架,租屋族/小家庭,https://shopee.tw/product/SHOPID/ITEMID,,,idea,範例資料：請換成真實商品網址
+P010,kitchen,生活家電,多功能電煮鍋 1.5L,699,7,煮麵火鍋蒸蛋一鍋搞定|宿舍可用|不沾內鍋,宿舍不能開火,宿舍不能開火不是藉口，是你沒買對鍋,學生/租屋族,https://shopee.tw/product/SHOPID/ITEMID,,,idea,範例資料：請換成真實商品網址
+P011,money,文具,信封預算分帳夾（12格）,249,2,薪水一到手先分 12 格|透明看得見|搭配記帳表,月底總是沒錢,記帳 App 記了三年還是沒存到錢的人，問題不在記帳,小資族/理財新手,https://shopee.tw/product/SHOPID/ITEMID,,,idea,範例資料：可與 SheetCraft 預算模板一起推
+P012,money,文具,無時效手帳記帳本,329,2,任何月份開始都行|每日支出欄|年度總覽頁,記帳 App 懶得開,數位記帳失敗的人，退回紙本反而存得到錢,小資族,https://shopee.tw/product/SHOPID/ITEMID,,,idea,範例資料：可與 SheetCraft 預算模板一起推

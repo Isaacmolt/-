@@ -28,6 +28,7 @@ DATA_PATH = MODULE_DIR / "app" / "data.json"
 DATA_JS_PATH = MODULE_DIR / "app" / "data.js"  # 直接雙擊 index.html（file://）時的備援
 
 TZ = timezone(timedelta(hours=8))  # Asia/Taipei
+REPLY_MARK = "=== 第一則留言（主文發完馬上回這則）==="
 PLATFORM_CODE = {"Threads": "threads", "Instagram": "instagram", "蝦皮影音 / Reels": "shopee_video"}
 SLOTS = {"threads": ["09:00", "21:00"], "instagram": ["20:00"], "shopee_video": ["19:00"]}
 TYPE_LABELS = {
@@ -51,7 +52,7 @@ def load_products():
             "id": p["id"], "niche": p["niche"], "category": p["category"], "name": p["name"],
             "price": float(p["price_twd"] or 0), "pct": float(p["est_commission_pct"] or 0),
             "selling_points": [s.strip() for s in p["selling_points"].split("|") if s.strip()],
-            "pain_point": p.get("pain_point", ""), "audience": p.get("target_audience", ""),
+            "pain_point": p.get("pain_point", ""), "hot_take": p.get("hot_take", ""), "audience": p.get("target_audience", ""),
             "shopee_url": p.get("shopee_url", ""), "affiliate_link": p.get("affiliate_link", ""),
             "status": p.get("status", "idea") or "idea", "notes": p.get("notes", ""),
         })
@@ -62,8 +63,8 @@ def read_post_text(rel_file):
     path = MODULE_DIR / rel_file
     if not path.exists():
         return ""
-    lines = path.read_text(encoding="utf-8").splitlines()
-    body = [l for l in lines if not l.startswith("# ")]
+    raw = path.read_text(encoding="utf-8").split(REPLY_MARK)[0]
+    body = [l for l in raw.splitlines() if not l.startswith("# ")]
     return "\n".join(body).strip()
 
 

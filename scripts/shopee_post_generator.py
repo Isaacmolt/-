@@ -44,6 +44,7 @@ PLATFORM_LABELS = {
     "shopee_video": "蝦皮影音 / Reels",
 }
 WEEKDAYS = ["一", "二", "三", "四", "五", "六", "日"]
+REPLY_MARK = "=== 第一則留言（主文發完馬上回這則）==="  # Threads 草稿裡第一則留言的分隔線；seed 會把它之後的內容切掉
 
 
 def load_config():
@@ -82,6 +83,7 @@ def product_vars(p, cfg):
         "price": p["price_twd"],
         "sp1": sps[0], "sp2": sps[1], "sp3": sps[2],
         "pain_point": p.get("pain_point", ""),
+        "hot_take": p.get("hot_take", "") or "（這裡寫一句反直覺的觀點）",
         "audience": p.get("target_audience", ""),
         "category": p.get("category", ""),
         "link": link,
@@ -107,7 +109,10 @@ def generate_posts(products, cfg, enabled_platforms):
         for pf, templates in all_templates.items():
             for key, (title, body) in templates.items():
                 header = f"# {p['id']} {p['name']}｜{PLATFORM_LABELS[pf]}｜{title}\n# 連結：{variables['link']}\n\n"
-                (out_dir / f"{pf}_{key}.txt").write_text(header + render(body, variables), encoding="utf-8")
+                text = render(body, variables)
+                if pf == "threads":
+                    text += f"\n\n{REPLY_MARK}\n{variables['link']}\n{variables['disclosure']}\n"
+                (out_dir / f"{pf}_{key}.txt").write_text(header + text, encoding="utf-8")
                 count += 1
     return count, all_templates
 

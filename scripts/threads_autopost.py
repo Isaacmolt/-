@@ -97,10 +97,14 @@ def compose(item, data):
                 link = (p.get("affiliate_link") or "").strip()
                 break
     mode = data.get("settings", {}).get("link_mode", "reply")
+    disclosure = (data.get("brand", {}).get("disclosure") or "").strip()
     text = (item.get("text") or "").strip()
     if mode == "inline" and link:
-        text = f"{text}\n{link}"
-    return text, link, mode
+        text = f"{text}\n\n{link}\n{disclosure}".strip()
+    elif mode == "attach" and link and disclosure:
+        text = f"{text}\n\n{disclosure}"
+    reply = f"{link}\n{disclosure}".strip() if link else ""
+    return text, link, mode, reply
 
 
 def main():
@@ -152,7 +156,7 @@ def main():
 
     posted = errors = 0
     for item in due[: args.limit]:
-        text, link, mode = compose(item, data)
+        text, link, mode, reply = compose(item, data)
         head = f"[{item['datetime'][:16]}] {item.get('product_id')} {item.get('type_label', '')}"
         if len(text) > TEXT_LIMIT:
             item["status"], item["error"] = "error", f"文案 {len(text)} 字，超過 500 字上限"
@@ -164,9 +168,9 @@ def main():
             continue
         try:
             media_id = create_and_publish(user_id, token, text, link_attachment=link if (mode == "attach" and link) else None)
-            if mode == "reply" and link:
+            if mode == "reply" and reply:
                 try:
-                    create_and_publish(user_id, token, f"🔗 {link}", reply_to_id=media_id)
+                    create_and_publish(user_id, token, reply, reply_to_id=media_id)
                 except Exception as e:  # 留言失敗不影響主貼文
                     print(f"  ⚠ 連結留言失敗：{e}")
             item.update({"status": "posted", "posted_id": media_id, "posted_at": datetime.now(TZ).isoformat(timespec="seconds"), "error": ""})
