@@ -5,7 +5,7 @@ AI-powered digital product company. We create and sell high-quality Google Sheet
 Two revenue lines:
 
 1. **Templates** — Google Sheets / Excel templates sold on Etsy & Gumroad (this README).
-2. **蝦皮分潤 (Shopee Affiliate)** — Taiwan-market affiliate account on Threads / IG. Planning docs, content templates, link tooling and a tracking workbook live in [`shopee-affiliate/`](shopee-affiliate/README.md). Start with [`shopee-affiliate/起床看這裡-蝦皮分潤.md`](shopee-affiliate/起床看這裡-蝦皮分潤.md).
+2. **蝦皮分潤 (Shopee Affiliate)** — Taiwan-market affiliate account on Threads / IG. Planning docs, content templates, link tooling and a tracking workbook live in [`shopee-affiliate/`](shopee-affiliate/README.md). Start with [`shopee-affiliate/起床看這裡-蝦皮分潤.md`](shopee-affiliate/起床看這裡-蝦皮分潤.md). Phone/desktop app: https://isaacmolt.github.io/-/shopee-affiliate/app/ (PWA, GitHub-synced data, Threads auto-posting bot).
 
 ## Structure
 

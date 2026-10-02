@@ -1,0 +1,81 @@
+name: Threads 自動發文
+
+# 每小時檢查 data.json 的排程，時間到的 Threads 貼文用官方 API 發出去，結果寫回 data.json。
+# 需要 Secrets：THREADS_ACCESS_TOKEN（必要）、THREADS_USER_ID（可省略）。
+# 注意：GitHub 的排程（cron）只會在「預設分支」上執行；合併進預設分支後才會自動跑。
+# 合併前可以用 Actions → Run workflow 手動跑。要在別的分支讀寫 data.json，設 repo 變數 AUTOPOST_BRANCH。
+
+on:
+  schedule:
+    - cron: "5 * * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "只列出會發什麼，不真的發"
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: threads-autopost
+  cancel-in-progress: false
+
+jobs:
+  autopost:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ vars.AUTOPOST_BRANCH || github.ref_name }}
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Post due items
+        env:
+          THREADS_ACCESS_TOKEN: ${{ secrets.THREADS_ACCESS_TOKEN }}
+          THREADS_USER_ID: ${{ secrets.THREADS_USER_ID }}
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.dry_run }}" = "true" ]; then
+            python scripts/threads_autopost.py --dry-run
+          else
+            python scripts/threads_autopost.py --limit 5
+          fi
+
+      - name: Commit data.json back
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add shopee-affiliate/app/data.json
+          if git diff --cached --quiet; then echo "Nothing changed."; exit 0; fi
+          git commit -m "chore(autopost): record posted items [skip ci]"
+          git pull --rebase origin "${{ vars.AUTOPOST_BRANCH || github.ref_name }}" || true
+          git push
+
+  refresh-token:
+    # 每週一換一次長效 token（60 天到期）。需要另一個 Secret GH_PAT（有更新 Secrets 的權限）才會真的寫回。
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    needs: autopost
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Refresh and store token (Mondays 03:05 only)
+        env:
+          THREADS_ACCESS_TOKEN: ${{ secrets.THREADS_ACCESS_TOKEN }}
+          GH_PAT: ${{ secrets.GH_PAT }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          if [ "$(date -u +%u)" != "1" ] || [ "$(date -u +%H)" != "03" ]; then echo "Not refresh time."; exit 0; fi
+          if [ -z "$THREADS_ACCESS_TOKEN" ] || [ -z "$GH_PAT" ]; then echo "Missing THREADS_ACCESS_TOKEN or GH_PAT; skip."; exit 0; fi
+          NEW=$(python scripts/threads_autopost.py --refresh-token)
+          if [ -z "$NEW" ]; then echo "Refresh failed."; exit 0; fi
+          echo "$NEW" | GH_TOKEN="$GH_PAT" gh secret set THREADS_ACCESS_TOKEN --repo "$GH_REPO"
+          echo "Token refreshed."

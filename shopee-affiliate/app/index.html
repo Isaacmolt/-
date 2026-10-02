@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>蝦皮分潤助手</title>
+  <meta name="description" content="蝦皮分潤的選品、貼文、排程、數據追蹤。手機電腦都能用。">
+  <meta name="theme-color" content="#2d5f2d">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="分潤助手">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="icon" href="icon-192.png">
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <span class="brand-dot"></span>
+        <span id="brand-name">蝦皮分潤助手</span>
+      </div>
+      <nav class="tabs tabs-top" aria-label="主選單">
+        <button class="tab" data-view="today">今日</button>
+        <button class="tab" data-view="products">選品</button>
+        <button class="tab" data-view="posts">貼文</button>
+        <button class="tab" data-view="data">數據</button>
+        <button class="tab" data-view="settings">設定</button>
+      </nav>
+      <button id="sync-btn" class="sync" title="同步到 GitHub">
+        <span id="sync-dot" class="sync-dot"></span><span id="sync-label">未同步</span>
+      </button>
+    </div>
+  </header>
+
+  <main id="app">
+    <section class="view" id="view-today"></section>
+    <section class="view" id="view-products"></section>
+    <section class="view" id="view-posts"></section>
+    <section class="view" id="view-data"></section>
+    <section class="view" id="view-settings"></section>
+  </main>
+
+  <nav class="tabs tabs-bottom" aria-label="主選單（手機）">
+    <button class="tab" data-view="today"><span class="tab-icon">📅</span>今日</button>
+    <button class="tab" data-view="products"><span class="tab-icon">🛒</span>選品</button>
+    <button class="tab" data-view="posts"><span class="tab-icon">✍️</span>貼文</button>
+    <button class="tab" data-view="data"><span class="tab-icon">📈</span>數據</button>
+    <button class="tab" data-view="settings"><span class="tab-icon">⚙️</span>設定</button>
+  </nav>
+
+  <div id="modal" class="modal" hidden>
+    <div class="modal-backdrop" data-close></div>
+    <div class="modal-panel" role="dialog" aria-modal="true">
+      <div class="modal-head"><h3 id="modal-title"></h3><button class="icon-btn" data-close aria-label="關閉">✕</button></div>
+      <div id="modal-body" class="modal-body"></div>
+    </div>
+  </div>
+  <div id="toast" class="toast" hidden></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

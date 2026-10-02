@@ -12,8 +12,13 @@ SheetCraft AI 的第二個事業線：用「小資效率實驗室」這個中文
 | 3 | [`03-利基發想.md`](03-利基發想.md) | 12 個方向評分、推薦組合、20 個貼文點子、選品清單 |
 | 4 | [`04-內容SOP.md`](04-內容SOP.md) | 貼文公式、短影音腳本、揭露、每日流程、數據判讀 |
 | 5 | [`05-請款稅務與合規.md`](05-請款稅務與合規.md) | 對帳、勞報單、5 萬門檻、公司戶、處罰 |
+| 6 | [`06-應用程式與自動發文.md`](06-應用程式與自動發文.md) | 手機 / 電腦應用怎麼用、GitHub 同步、Threads 自動發文設定 |
 
-## 快速開始
+## 應用程式（手機 / 電腦）
+
+**https://isaacmolt.github.io/-/shopee-affiliate/app/** — 選品、貼文產生、排程、數據追蹤。資料存在裝置，可同步到 repo 的 `app/data.json`；Threads 自動發文機器人（`scripts/threads_autopost.py` + `.github/workflows/threads-autopost.yml`）讀同一份排程。設定步驟見 06。
+
+## 快速開始（檔案版工具）
 
 不想打指令：Windows 雙擊 `一鍵執行-Windows.bat`、Mac 右鍵打開 `一鍵執行-Mac.command`，或到 GitHub **Actions → Shopee Affiliate → Run workflow**。詳見 `起床看這裡-蝦皮分潤.md` 的「工具怎麼打開」。
 
@@ -34,6 +39,7 @@ make shopee-all
 | `make shopee-posts` | `scripts/shopee_post_generator.py` | `posts/<ID>/*.txt` 貼文與腳本草稿、`posts/schedule.csv`、`reports/content-calendar.md` 30 天排程 |
 | `make shopee-tracker` | `scripts/shopee_tracker.py` | `tracker.xlsx` 7 分頁營運追蹤表（可匯入 Google Sheets） |
 | `make shopee-roi` | `scripts/shopee_roi_calc.py` | `reports/income-model.md` 收入模型 |
+| `make shopee-app` | `scripts/shopee_app_seed.py` | `app/data.json` 應用的初始資料（已存在不覆蓋；`--force` 重建） |
 
 ## 工作流程
 
@@ -71,6 +77,7 @@ shopee-affiliate/
 ├── posts/                          ← 產生的草稿與 schedule.csv
 ├── reports/                        ← 利基排名、批次表、收入模型、發文日曆
 ├── linkpage/index.html             ← 好物清單頁（GitHub Pages 部署）
+├── app/                            ← 網頁應用（PWA）：index.html、app.js、app.css、data.json
 └── tracker.xlsx                    ← 營運追蹤表
 ```
 

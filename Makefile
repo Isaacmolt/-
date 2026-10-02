@@ -1,4 +1,4 @@
-.PHONY: all generate check bundle catalog clean images upload-kit upload-gumroad upload-etsy shopee-all shopee-niches shopee-links shopee-posts shopee-tracker shopee-roi
+.PHONY: all generate check bundle catalog clean images upload-kit upload-gumroad upload-etsy shopee-all shopee-niches shopee-links shopee-posts shopee-tracker shopee-roi shopee-app shopee-autopost-dry
 
 all: generate check bundle catalog
 
@@ -56,3 +56,9 @@ shopee-tracker:
 
 shopee-roi:
 	python scripts/shopee_roi_calc.py
+
+shopee-app:
+	python scripts/shopee_app_seed.py
+
+shopee-autopost-dry:
+	python scripts/threads_autopost.py --dry-run

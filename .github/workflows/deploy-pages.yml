@@ -2,11 +2,13 @@ name: Deploy Website to GitHub Pages
 
 on:
   push:
-    branches: [claude/ai-ceo-business-ops-LKFzy, main]
+    branches: [claude/ai-ceo-business-ops-LKFzy, claude/shopee-commission-planning-isbmsh, main]
     paths:
       - 'website/**'
       - 'index.html'
       - 'shopee-affiliate/linkpage/**'
+      - 'shopee-affiliate/app/**'
+      - '!shopee-affiliate/app/data.json'
       - '.github/workflows/deploy-pages.yml'
   workflow_dispatch:
 
@@ -57,6 +59,9 @@ jobs:
           # Shopee affiliate link page (bio link for Threads / IG)
           mkdir -p _site/shopee-affiliate/linkpage
           cp shopee-affiliate/linkpage/index.html _site/shopee-affiliate/linkpage/
+          # Shopee affiliate web app (PWA, phone + desktop)
+          mkdir -p _site/shopee-affiliate/app
+          cp -r shopee-affiliate/app/* _site/shopee-affiliate/app/
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
