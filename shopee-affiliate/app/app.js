@@ -175,6 +175,11 @@ async function copyText(text) {
   try { await navigator.clipboard.writeText(text); toast("已複製"); }
   catch { const ta = document.createElement("textarea"); ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); ta.remove(); toast("已複製"); }
 }
+function armConfirm(btn, fn, label = "再按一次確認") {
+  if (btn.dataset.armed) { delete btn.dataset.armed; btn.classList.remove("danger"); fn(); return; }
+  btn.dataset.armed = "1"; const orig = btn.innerHTML; btn.innerHTML = label; btn.classList.add("danger");
+  setTimeout(() => { if (btn.isConnected && btn.dataset.armed) { delete btn.dataset.armed; btn.innerHTML = orig; btn.classList.remove("danger"); } }, 3000);
+}
 function download(filename, text) {
   const a = document.createElement("a");
   a.href = URL.createObjectURL(new Blob([text], { type: "application/json" }));
@@ -203,8 +208,9 @@ function normalize(d) {
 }
 
 async function load() {
-  const raw = localStorage.getItem(LS_DATA);
+  let raw = null; try { raw = localStorage.getItem(LS_DATA); } catch {}
   if (raw) { try { state = normalize(JSON.parse(raw)); return; } catch { /* fallthrough */ } }
+  if (window.ARTIFACT_BUILD && window.SEED_DATA) { state = normalize(JSON.parse(JSON.stringify(window.SEED_DATA))); try { localStorage.setItem(LS_DATA, JSON.stringify(state)); } catch {} return; }
   try {
     const res = await fetch(DATA_URL, { cache: "no-store" });
     if (!res.ok) throw new Error(res.status);
@@ -218,8 +224,8 @@ async function load() {
 
 function save(markDirty = true) {
   state.updated_at = new Date().toISOString();
-  localStorage.setItem(LS_DATA, JSON.stringify(state));
-  if (markDirty) { dirty = true; if (ghReady() && state.settings.github.autosync) schedulePush(); }
+  try { localStorage.setItem(LS_DATA, JSON.stringify(state)); } catch {}
+  if (markDirty) { dirty = true; if (ghReady() && state.settings.github.autosync) schedulePush(); if (cloud) cloudPush(); }
   renderSyncState();
 }
 
@@ -241,7 +247,7 @@ function composeForShare(item) {
 
 // ── 畫面切換 ─────────────────────────────────────────────────────
 function setView(name) {
-  currentView = name; localStorage.setItem(LS_VIEW, name);
+  currentView = name; try { localStorage.setItem(LS_VIEW, name); } catch {}
   $$(".view").forEach((v) => v.classList.toggle("active", v.id === "view-" + name));
   $$(".tab").forEach((t) => t.classList.toggle("active", t.dataset.view === name));
   render();
@@ -276,7 +282,7 @@ function postCard(item, opts = {}) {
       <button class="btn sm" data-act="copy">📋 複製文案</button>
       ${link ? `<button class="btn sm" data-act="copylink">🔗 複製連結</button>` : `<span class="chip warn">待補分潤連結</span>`}
       ${item.platform === "threads" ? `<a class="btn sm" target="_blank" rel="noopener" href="https://www.threads.net/intent/post?text=${encodeURIComponent(composeForShare(item))}">🧵 開 Threads 發文</a>` : ""}
-      ${navigator.share ? `<button class="btn sm" data-act="share">📤 分享</button>` : ""}
+      ${navigator.share && !window.ARTIFACT_BUILD ? `<button class="btn sm" data-act="share">📤 分享</button>` : ""}
       ${item.status === "scheduled" ? `<button class="btn sm primary" data-act="posted">✅ 已發佈</button><button class="btn sm ghost" data-act="skip">跳過</button>` : ""}
       <button class="btn sm ghost" data-act="edit">✏️</button>
       ${opts.allowDelete ? `<button class="btn sm ghost" data-act="delete">🗑</button>` : ""}
@@ -293,10 +299,10 @@ function bindPostCards(container, afterChange) {
     const link = item.link || p.affiliate_link || "";
     if (act === "copy") copyText(composeForShare(item));
     if (act === "copylink") copyText(link);
-    if (act === "share") { try { await navigator.share({ text: composeForShare(item) }); } catch { /* 使用者取消 */ } }
+    if (act === "share") { try { await navigator.share({ text: composeForShare(item) }); } catch (err) { if (err && err.name !== "AbortError") { await copyText(composeForShare(item)); toast("這裡不支援系統分享，文案已複製"); } } }
     if (act === "posted") { item.status = "posted"; item.posted_at = new Date().toISOString(); save(); toast("已標記為已發佈"); afterChange(); }
     if (act === "skip") { item.status = "skipped"; save(); afterChange(); }
-    if (act === "delete") { if (confirm("刪除這篇排程？")) { state.schedule = state.schedule.filter((s) => s.id !== item.id); save(); afterChange(); } }
+    if (act === "delete") armConfirm(e.target.closest("[data-act]"), () => { state.schedule = state.schedule.filter((s) => s.id !== item.id); save(); afterChange(); }, "確定刪除？");
     if (act === "edit") editPostModal(item, afterChange);
   });
 }
@@ -398,7 +404,7 @@ function productForm(p) {
       state.schedule.forEach((s) => { if (s.product_id === p.id && s.status === "scheduled" && !s.link) s.link = p.affiliate_link; });
       save(); closeModal(); render(); toast("已儲存");
     };
-    const del = $("#f-del", body); if (del) del.onclick = () => { if (confirm(`刪除 ${p.name}？`)) { state.products = state.products.filter((x) => x.id !== p.id); save(); closeModal(); render(); } };
+    const del = $("#f-del", body); if (del) del.onclick = () => armConfirm(del, () => { state.products = state.products.filter((x) => x.id !== p.id); save(); closeModal(); render(); }, "確定刪除？");
   });
 }
 
@@ -542,7 +548,7 @@ function renderData() {
     state.daily = state.daily.filter((r) => r.date !== date); state.daily.push(row); state.daily.sort((a, b) => a.date.localeCompare(b.date));
     save(); toast("已儲存"); renderData();
   };
-  el.addEventListener("click", (e) => { const b = e.target.closest("[data-del]"); if (!b) return; const date = b.closest("tr").dataset.date; state.daily = state.daily.filter((r) => r.date !== date); save(); renderData(); });
+  el.addEventListener("click", (e) => { const b = e.target.closest("[data-del]"); if (!b) return; const date = b.closest("tr").dataset.date; armConfirm(b, () => { state.daily = state.daily.filter((r) => r.date !== date); save(); renderData(); }, "確定？"); });
 }
 
 // ── 設定 ─────────────────────────────────────────────────────────
@@ -571,7 +577,8 @@ function renderSettings() {
         <div class="field"><label>已提領總額</label><input type="number" id="s-wd" value="${s.withdrawn_total}"></div>
       </div>
     </div>
-    <div class="card"><h2>GitHub 同步 <span class="chip ${ghReady() ? "ok" : ""}">${ghReady() ? "已設定" : "未設定"}</span></h2>
+    ${window.ARTIFACT_BUILD ? `<div class="card"><h2>跨裝置</h2><div class="small muted">登入同一個 Claude 帳號開這個頁面，手機和電腦會自動用同一份資料（右上角顯示「雲端已同步」）。沒登入時只存在這台裝置，可用下面的匯出 / 匯入搬資料。Threads 自動發文機器人讀的是 GitHub 上的 data.json，要讓機器人發文，請把這裡匯出的 JSON 貼給 Claude 更新。</div></div>` : ""}
+    <div class="card" ${window.ARTIFACT_BUILD ? "hidden" : ""}><h2>GitHub 同步 <span class="chip ${ghReady() ? "ok" : ""}">${ghReady() ? "已設定" : "未設定"}</span></h2>
       <div class="small muted" style="margin-bottom:8px">把資料存到 repo 的 data.json，手機和電腦就會同一份，自動發文機器人也讀這份。需要一個只有這個 repo「Contents 讀寫」權限的 fine-grained token。token 只存在這台裝置。</div>
       <div class="inline-fields">
         <div class="field"><label>owner</label><input id="s-owner" value="${esc(gh.owner)}" placeholder="Isaacmolt"></div>
@@ -603,13 +610,13 @@ function renderSettings() {
   $("#s-test", el).onclick = async () => { collect(); save(false); try { const r = await ghGet(); toast(`連線 OK，遠端有 ${r.data.schedule?.length ?? 0} 篇排程`); } catch (e) { toast("連線失敗：" + e.message); } };
   $("#s-pull", el).onclick = async () => { collect(); save(false); await pull(); };
   $("#s-push", el).onclick = async () => { collect(); save(); await push(); };
-  $("#s-export", el).onclick = () => download(`shopee-affiliate-${todayStr()}.json`, JSON.stringify(state, null, 2));
+  $("#s-export", el).onclick = () => { const json = JSON.stringify(state, null, 2); openModal("匯出 JSON", `<div class="small muted" style="margin-bottom:8px">全選複製後存成 .json，或貼給 Claude。</div><div class="field"><textarea id="x-json" style="min-height:220px;font-family:ui-monospace,Menlo,monospace;font-size:.75rem">${esc(json)}</textarea></div><div class="actions"><button class="btn primary" id="x-copy" style="flex:1">📋 複製全部</button>${window.ARTIFACT_BUILD ? "" : `<button class="btn" id="x-dl">⬇️ 下載檔案</button>`}</div>`, (body) => { $("#x-copy", body).onclick = () => copyText(json); const dl = $("#x-dl", body); if (dl) dl.onclick = () => download(`shopee-affiliate-${todayStr()}.json`, json); }); };
   $("#s-import", el).onchange = async (e) => { const f = e.target.files[0]; if (!f) return; try { state = normalize(JSON.parse(await f.text())); save(); render(); toast("已匯入"); } catch { toast("檔案格式不對"); } };
-  $("#s-reset", el).onclick = async () => { if (!confirm("會丟掉這台裝置上的所有變更，確定？")) return; localStorage.removeItem(LS_DATA); await load(); render(); toast("已重設"); };
+  $("#s-reset", el).onclick = (e) => armConfirm(e.currentTarget, async () => { localStorage.removeItem(LS_DATA); await load(); render(); toast("已重設"); }, "會丟掉這台裝置的變更，再按一次確認");
 }
 
 // ── GitHub 同步 ──────────────────────────────────────────────────
-function ghReady() { const g = state?.settings?.github; return !!(g && g.owner && g.repo && g.branch && g.path && localStorage.getItem(LS_TOKEN)); }
+function ghReady() { if (window.ARTIFACT_BUILD) return false; const g = state?.settings?.github; let t = null; try { t = localStorage.getItem(LS_TOKEN); } catch {} return !!(g && g.owner && g.repo && g.branch && g.path && t); }
 function ghUrl() { const g = state.settings.github; return `https://api.github.com/repos/${g.owner}/${g.repo}/contents/${g.path}`; }
 function ghHeaders() { return { Authorization: "Bearer " + localStorage.getItem(LS_TOKEN), Accept: "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28" }; }
 const b64encode = (str) => btoa(String.fromCharCode(...new TextEncoder().encode(str)));
@@ -664,8 +671,56 @@ async function push() {
 function schedulePush() { clearTimeout(pushTimer); pushTimer = setTimeout(push, 4000); }
 function setSync(kind, label) { const d = $("#sync-dot"); d.className = "sync-dot " + (kind === "ok" ? "ok" : kind === "dirty" ? "dirty" : kind === "err" ? "err" : ""); $("#sync-label").textContent = label; }
 function renderSyncState() {
+  if (cloud || cloudState) return setCloud(dirty && cloudState === "ok" ? "busy" : cloudState);
   if (!ghReady()) return setSync("", "未同步");
   setSync(dirty ? "dirty" : "ok", dirty ? "有變更" : "已同步");
+}
+
+
+// ── claude.ai 跨裝置儲存（db capability；只有在 claude.ai 開啟時才會有 window.claude）──
+let cloud = null, cloudWriting = null, cloudTimer = null, cloudLastWritten = "", cloudState = "";
+function setCloud(kind) {
+  cloudState = kind;
+  const label = { ok: "雲端已同步", busy: "雲端儲存中…", err: "雲端儲存失敗", local: "僅存本機" }[kind] || "";
+  if (label) setSync(kind === "ok" ? "ok" : kind === "busy" ? "dirty" : kind === "err" ? "err" : "", label);
+}
+function adoptRemote(d) {
+  state = normalize(JSON.parse(JSON.stringify(d)));
+  cloudLastWritten = state.updated_at;
+  try { localStorage.setItem(LS_DATA, JSON.stringify(state)); } catch {}
+  dirty = false; setCloud("ok"); render();
+}
+async function initCloud() {
+  if (!(window.claude && typeof window.claude.use === "function")) return;
+  let db = null;
+  try { db = await window.claude.use("db"); } catch { db = null; }
+  if (!db) { setCloud("local"); return; }
+  const ref = db.doc("app/state");
+  cloud = { db, ref };
+  try {
+    const snap = await ref.get();
+    if (snap.exists && snap.data()?.updated_at && snap.data().updated_at > (state.updated_at || "")) adoptRemote(snap.data());
+    else setCloud("ok");
+  } catch (e) { setCloud("err"); return; }
+  ref.onSnapshot((snap) => {
+    if (!snap.exists || snap.metadata.hasPendingWrites) return;
+    const d = snap.data();
+    if (d && d.updated_at && d.updated_at !== cloudLastWritten && d.updated_at > (state.updated_at || "")) adoptRemote(d);
+  }, () => setCloud("err"));
+}
+function cloudPush() {
+  if (!cloud) return;
+  clearTimeout(cloudTimer);
+  cloudTimer = setTimeout(async () => {
+    const payload = JSON.parse(JSON.stringify(state));
+    const stamp = payload.updated_at;
+    if (cloudWriting) { try { await cloudWriting; } catch {} }
+    setCloud("busy");
+    cloudWriting = cloud.ref.set(payload)
+      .then(() => { cloudLastWritten = stamp; dirty = false; setCloud("ok"); })
+      .catch((e) => { setCloud("err"); toast(["quota_exceeded", "invalid_argument"].includes(e?.code) ? "雲端儲存失敗：資料太大，請刪除舊的已發佈貼文" : "雲端儲存失敗，資料仍在這台裝置"); });
+    try { await cloudWriting; } catch {} finally { cloudWriting = null; }
+  }, 1500);
 }
 
 // ── 啟動 ─────────────────────────────────────────────────────────
@@ -673,9 +728,11 @@ async function init() {
   await load();
   $$(".tab").forEach((t) => (t.onclick = () => setView(t.dataset.view)));
   $$("[data-close]").forEach((b) => (b.onclick = closeModal));
-  $("#sync-btn").onclick = () => { if (!ghReady()) return setView("settings"); dirty ? push() : pull(); };
-  setView(localStorage.getItem(LS_VIEW) || "today");
+  $("#sync-btn").onclick = () => { if (cloud) return toast(cloudState === "ok" ? "資料已自動同步到你的 Claude 帳號" : "雲端尚未同步，資料先存在這台裝置"); if (cloudState === "local") return toast("未登入 Claude，資料只存在這台裝置"); if (!ghReady()) return setView("settings"); dirty ? push() : pull(); };
+  let v = "today"; try { v = localStorage.getItem(LS_VIEW) || "today"; } catch {}
+  setView(v);
   if (ghReady() && state.settings.github.autosync) pull();
-  if ("serviceWorker" in navigator && location.protocol.startsWith("http")) navigator.serviceWorker.register("sw.js").catch(() => {});
+  if ("serviceWorker" in navigator && location.protocol.startsWith("http") && !window.ARTIFACT_BUILD) navigator.serviceWorker.register("sw.js").catch(() => {});
+  initCloud();
 }
 init();
