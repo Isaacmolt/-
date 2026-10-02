@@ -15,7 +15,7 @@ self.addEventListener("activate", (e) => {
 self.addEventListener("fetch", (e) => {
   const url = new URL(e.request.url);
   if (e.request.method !== "GET" || url.origin !== location.origin) return;
-  if (url.pathname.endsWith("data.json")) return; // 永遠拿最新
+  if (url.pathname.endsWith("data.json") || url.pathname.endsWith("data.js")) return; // 永遠拿最新
   e.respondWith(
     caches.match(e.request).then((hit) => {
       const net = fetch(e.request).then((res) => {

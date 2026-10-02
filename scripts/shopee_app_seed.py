@@ -25,6 +25,7 @@ CONFIG_PATH = MODULE_DIR / "config.json"
 CONFIG_EXAMPLE_PATH = MODULE_DIR / "config.example.json"
 SCHEDULE_PATH = MODULE_DIR / "posts" / "schedule.csv"
 DATA_PATH = MODULE_DIR / "app" / "data.json"
+DATA_JS_PATH = MODULE_DIR / "app" / "data.js"  # 直接雙擊 index.html（file://）時的備援
 
 TZ = timezone(timedelta(hours=8))  # Asia/Taipei
 PLATFORM_CODE = {"Threads": "threads", "Instagram": "instagram", "蝦皮影音 / Reels": "shopee_video"}
@@ -147,10 +148,12 @@ def main():
     data = build(cfg, existing)
     DATA_PATH.parent.mkdir(parents=True, exist_ok=True)
     DATA_PATH.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+    DATA_JS_PATH.write_text("// 由 scripts/shopee_app_seed.py 產生；只在無法 fetch data.json（例如直接雙擊 index.html）時使用\n"
+                            "window.SEED_DATA = " + json.dumps(data, ensure_ascii=False) + ";\n", encoding="utf-8")
     print("=" * 70)
     print("蝦皮分潤 — App 資料種子")
     print("=" * 70)
-    print(f"已寫入：{DATA_PATH.relative_to(BASE_DIR)}")
+    print(f"已寫入：{DATA_PATH.relative_to(BASE_DIR)} 與 data.js")
     print(f"商品 {len(data['products'])} 個｜排程 {len(data['schedule'])} 篇｜每日數據 {len(data['daily'])} 筆")
     print("提醒：settings.autopost.threads 預設關閉，在 App 設定裡打開後，機器人才會真的發文。")
 

@@ -211,8 +211,8 @@ async function load() {
     state = normalize(await res.json());
     localStorage.setItem(LS_DATA, JSON.stringify(state));
   } catch (e) {
-    state = normalize({});
-    toast("載入 data.json 失敗，先用空白資料");
+    if (window.SEED_DATA) { state = normalize(JSON.parse(JSON.stringify(window.SEED_DATA))); localStorage.setItem(LS_DATA, JSON.stringify(state)); }
+    else { state = normalize({}); toast("載入 data.json 失敗，先用空白資料"); }
   }
 }
 

@@ -34,7 +34,9 @@ echo    tracker.xlsx          營運追蹤表（會自動打開）
 echo    posts\                貼文草稿、schedule.csv
 echo    reports\              利基排名、批次表、發文日曆、收入模型
 echo    linkpage\index.html   好物清單頁（雙擊可預覽）
+echo    app\index.html        分潤助手應用（會自動打開）
 echo ==========================================
 start "" "%~dp0tracker.xlsx"
+start "" "%~dp0app\index.html"
 echo.
 pause

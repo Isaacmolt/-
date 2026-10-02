@@ -30,7 +30,9 @@ echo "   tracker.xlsx          營運追蹤表（會自動打開）"
 echo "   posts/                貼文草稿、schedule.csv"
 echo "   reports/              利基排名、批次表、發文日曆、收入模型"
 echo "   linkpage/index.html   好物清單頁（雙擊可預覽）"
+echo "   app/index.html        分潤助手應用（會自動打開）"
 echo "=========================================="
 open shopee-affiliate/tracker.xlsx 2>/dev/null || true
+open shopee-affiliate/app/index.html 2>/dev/null || true
 echo
 read -r -p "按 Enter 關閉 "
