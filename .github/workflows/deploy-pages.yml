@@ -6,6 +6,7 @@ on:
     paths:
       - 'website/**'
       - 'index.html'
+      - 'shopee-affiliate/linkpage/**'
       - '.github/workflows/deploy-pages.yml'
   workflow_dispatch:
 
@@ -53,6 +54,9 @@ jobs:
           # Copy bundle zips
           mkdir -p _site/downloads/bundles
           cp bundles/*.zip _site/downloads/bundles/ 2>/dev/null || true
+          # Shopee affiliate link page (bio link for Threads / IG)
+          mkdir -p _site/shopee-affiliate/linkpage
+          cp shopee-affiliate/linkpage/index.html _site/shopee-affiliate/linkpage/
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

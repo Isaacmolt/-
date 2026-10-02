@@ -1,0 +1,25 @@
+{
+  "_說明": "複製成 config.json 後填入自己的設定。config.json 已加入 .gitignore，不會被提交。",
+  "brand": {
+    "account_name": "小資效率實驗室",
+    "handle": "@your_threads_handle",
+    "tagline": "租屋族的省錢 × 效率好物實測",
+    "disclosure": "✨ 文內含蝦皮分潤連結，透過連結購買我會獲得少量回饋，不會影響你的價格。"
+  },
+  "platforms": {
+    "threads": {"enabled": true, "code": "th", "posts_per_day": 2},
+    "instagram": {"enabled": true, "code": "ig", "posts_per_day": 1},
+    "shopee_video": {"enabled": false, "code": "sv", "posts_per_day": 1},
+    "youtube": {"enabled": false, "code": "yt", "posts_per_day": 0}
+  },
+  "sub_id_pattern": "{platform}_{niche}_{yyyymm}_{product_id}",
+  "linkpage": {
+    "title": "小資效率實驗室 — 好物清單",
+    "base_url": "https://isaacmolt.github.io/-/shopee-affiliate/linkpage/"
+  },
+  "goals": {
+    "month_1_commission_twd": 500,
+    "month_3_commission_twd": 5000,
+    "month_6_commission_twd": 20000
+  }
+}

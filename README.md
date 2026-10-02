@@ -2,6 +2,11 @@
 
 AI-powered digital product company. We create and sell high-quality Google Sheets & Excel templates.
 
+Two revenue lines:
+
+1. **Templates** — Google Sheets / Excel templates sold on Etsy & Gumroad (this README).
+2. **蝦皮分潤 (Shopee Affiliate)** — Taiwan-market affiliate account on Threads / IG. Planning docs, content templates, link tooling and a tracking workbook live in [`shopee-affiliate/`](shopee-affiliate/README.md). Start with [`shopee-affiliate/起床看這裡-蝦皮分潤.md`](shopee-affiliate/起床看這裡-蝦皮分潤.md).
+
 ## Structure
 
 ```
@@ -16,9 +21,10 @@ AI-powered digital product company. We create and sell high-quality Google Sheet
 │       └── *.xlsx                  # Generated template file
 ├── scripts/
 │   └── requirements.txt      # Python dependencies
-└── marketing/
-    ├── etsy-seo-keywords.md  # SEO keyword database
-    └── pricing-strategy.md   # Pricing tiers & promo calendar
+├── marketing/
+│   ├── etsy-seo-keywords.md  # SEO keyword database
+│   └── pricing-strategy.md   # Pricing tiers & promo calendar
+└── shopee-affiliate/         # 蝦皮分潤 business line (docs, templates, tracker, link page)
 ```
 
 ## Quick Start
@@ -26,6 +32,13 @@ AI-powered digital product company. We create and sell high-quality Google Sheet
 ```bash
 pip install -r scripts/requirements.txt
 python products/01-monthly-budget-tracker/generate_template.py
+```
+
+## Shopee Affiliate quick start
+
+```bash
+cp shopee-affiliate/config.example.json shopee-affiliate/config.json
+make shopee-all   # niche ranking, link batch sheet + link page, 30-day posts, tracker.xlsx, income model
 ```
 
 ## Products

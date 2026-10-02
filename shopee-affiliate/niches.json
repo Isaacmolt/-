@@ -1,0 +1,129 @@
+{
+  "_說明": "利基方向評分表。每項 1-5 分，由 scripts/shopee_niche_scorer.py 加權計算排名。weights 可自行調整。",
+  "weights": {
+    "demand": 0.25,
+    "commission": 0.20,
+    "low_competition": 0.15,
+    "content_ease": 0.15,
+    "repeat_purchase": 0.10,
+    "personal_fit": 0.15
+  },
+  "criteria_labels": {
+    "demand": "市場需求",
+    "commission": "分潤率/加碼",
+    "low_competition": "低競爭",
+    "content_ease": "內容好做",
+    "repeat_purchase": "回購/長尾",
+    "personal_fit": "個人適配"
+  },
+  "niches": [
+    {
+      "id": "home",
+      "name": "小資租屋收納 / 居家好物",
+      "audience": "25-35 歲租屋族、小家庭、剛搬家的人",
+      "price_band": "NT$150-800",
+      "example_products": ["免釘收納架", "伸縮分隔盒", "壁掛洗衣機置物", "床邊收納袋", "真空壓縮袋"],
+      "scores": {"demand": 5, "commission": 3, "low_competition": 3, "content_ease": 5, "repeat_purchase": 3, "personal_fit": 4},
+      "notes": "Threads 上「租屋改造」「收納前後對比」永遠有流量；單價低好轉換，但單筆分潤小，靠量。"
+    },
+    {
+      "id": "desk",
+      "name": "上班族辦公桌 / 3C 配件",
+      "audience": "上班族、遠端工作者、學生",
+      "price_band": "NT$300-2,500",
+      "example_products": ["螢幕增高架", "人體工學滑鼠", "桌面理線盒", "USB-C 多功能擴充", "鍵盤手托"],
+      "scores": {"demand": 4, "commission": 4, "low_competition": 3, "content_ease": 4, "repeat_purchase": 2, "personal_fit": 5},
+      "notes": "3C 配件分潤率高於一般百貨；「桌面改造」照片/短影音視覺性強。與 SheetCraft（效率工具）品牌調性一致。"
+    },
+    {
+      "id": "pet",
+      "name": "寵物保健 / 貓狗用品",
+      "audience": "貓狗飼主，願意花錢且回購頻率高",
+      "price_band": "NT$200-1,500",
+      "example_products": ["凍乾零食", "自動飲水機", "寵物益生菌", "除毛梳", "貓砂盆"],
+      "scores": {"demand": 4, "commission": 3, "low_competition": 4, "content_ease": 3, "repeat_purchase": 5, "personal_fit": 3},
+      "notes": "回購最強的品類之一；飼主社群黏著度高。需要有自己的寵物才好拍實測內容。"
+    },
+    {
+      "id": "camp",
+      "name": "露營 / 登山裝備",
+      "audience": "戶外愛好者、親子露營家庭",
+      "price_band": "NT$500-5,000",
+      "example_products": ["摺疊露營椅", "LED 露營燈", "鈦合金杯", "睡墊", "登山杖"],
+      "scores": {"demand": 3, "commission": 3, "low_competition": 4, "content_ease": 2, "repeat_purchase": 2, "personal_fit": 2},
+      "notes": "高單價、競爭低，但內容需要實際出門拍攝，產出成本高。適合有在露營的人。"
+    },
+    {
+      "id": "beauty",
+      "name": "美妝 / 保養",
+      "audience": "18-35 歲女性",
+      "price_band": "NT$200-2,000",
+      "example_products": ["防曬", "精華液", "面膜", "唇釋", "卸妝油"],
+      "scores": {"demand": 5, "commission": 5, "low_competition": 1, "content_ease": 3, "repeat_purchase": 4, "personal_fit": 2},
+      "notes": "分潤率與加碼最高的品類，但競爭極度激烈，沒有人設很難起來。"
+    },
+    {
+      "id": "baby",
+      "name": "母嬰 / 育兒用品",
+      "audience": "新手爸媽",
+      "price_band": "NT$300-3,000",
+      "example_products": ["奶瓶消毒鍋", "尿布", "副食品工具", "安撫玩具", "外出背巾"],
+      "scores": {"demand": 4, "commission": 3, "low_competition": 2, "content_ease": 2, "repeat_purchase": 5, "personal_fit": 1},
+      "notes": "回購極高、客單高，但信任門檻高，沒有育兒經驗很難取信。"
+    },
+    {
+      "id": "fitness",
+      "name": "居家健身 / 運動器材",
+      "audience": "25-40 歲想在家運動的人",
+      "price_band": "NT$300-3,000",
+      "example_products": ["彈力帶組", "瑜珈墊", "可調式啞鈴", "按摩滾筒", "跳繩"],
+      "scores": {"demand": 3, "commission": 3, "low_competition": 3, "content_ease": 3, "repeat_purchase": 2, "personal_fit": 3},
+      "notes": "新年/夏天前有季節高峰；內容需要示範動作。"
+    },
+    {
+      "id": "kitchen",
+      "name": "廚房小家電 / 料理工具",
+      "audience": "自煮族、小家庭、租屋族",
+      "price_band": "NT$500-4,000",
+      "example_products": ["氣炸鍋", "電煮鍋", "手持攪拌棒", "保鮮盒組", "矽膠鍋鏟組"],
+      "scores": {"demand": 4, "commission": 4, "low_competition": 3, "content_ease": 4, "repeat_purchase": 2, "personal_fit": 3},
+      "notes": "生活家電分潤普遍 6-8%，單筆分潤接近 NT$500 上限最划算；料理短影音易做。"
+    },
+    {
+      "id": "money",
+      "name": "省錢理財 / 記帳文具",
+      "audience": "小資族、剛出社會的人、理財新手",
+      "price_band": "NT$100-1,000",
+      "example_products": ["手帳記帳本", "存錢筒", "信封預算夾", "標籤機", "文具收納"],
+      "scores": {"demand": 3, "commission": 2, "low_competition": 4, "content_ease": 5, "repeat_purchase": 3, "personal_fit": 5},
+      "notes": "與 SheetCraft 預算模板直接聯動，可同時導購 Shopee 商品與自家 Google Sheets 模板。分潤率低是弱點。"
+    },
+    {
+      "id": "sleep",
+      "name": "寢具 / 睡眠好物",
+      "audience": "睡不好的上班族、租屋族",
+      "price_band": "NT$300-3,000",
+      "example_products": ["記憶枕", "涼感被", "遮光眼罩", "白噪音機", "蒸氣眼罩"],
+      "scores": {"demand": 4, "commission": 4, "low_competition": 3, "content_ease": 3, "repeat_purchase": 3, "personal_fit": 3},
+      "notes": "換季（春夏涼感、秋冬保暖）常有加碼活動，可作為季節性副線。"
+    },
+    {
+      "id": "stationery",
+      "name": "學生開學 / 文具",
+      "audience": "國高中生、大學生、家長",
+      "price_band": "NT$50-800",
+      "example_products": ["多功能筆袋", "書架", "螢光筆組", "計時器", "筆記本"],
+      "scores": {"demand": 3, "commission": 2, "low_competition": 3, "content_ease": 4, "repeat_purchase": 3, "personal_fit": 3},
+      "notes": "單價太低，分潤金額微薄；只適合開學季短期衝量。"
+    },
+    {
+      "id": "auto",
+      "name": "汽機車用品",
+      "audience": "通勤族、車主（男性為主）",
+      "price_band": "NT$200-3,000",
+      "example_products": ["手機車架", "行車記錄器", "機車置物袋", "雨衣", "車用吸塵器"],
+      "scores": {"demand": 3, "commission": 3, "low_competition": 4, "content_ease": 3, "repeat_purchase": 2, "personal_fit": 2},
+      "notes": "競爭較低、男性受眾明確，但內容需要拍車，取材受限。"
+    }
+  ]
+}

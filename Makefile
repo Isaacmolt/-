@@ -1,4 +1,4 @@
-.PHONY: all generate check bundle catalog clean images upload-kit upload-gumroad upload-etsy
+.PHONY: all generate check bundle catalog clean images upload-kit upload-gumroad upload-etsy shopee-all shopee-niches shopee-links shopee-posts shopee-tracker shopee-roi
 
 all: generate check bundle catalog
 
@@ -37,3 +37,22 @@ upload-gumroad:
 upload-etsy:
 	@python -c "from playwright.sync_api import sync_playwright" 2>/dev/null || { echo "請先安裝: pip install playwright && playwright install chromium"; exit 1; }
 	python scripts/auto_upload_etsy.py
+
+# ── 蝦皮分潤（shopee-affiliate/）───────────────────────────────────
+shopee-all: shopee-niches shopee-links shopee-posts shopee-tracker shopee-roi
+
+shopee-niches:
+	python scripts/shopee_niche_scorer.py
+
+shopee-links:
+	python scripts/shopee_link_builder.py
+
+shopee-posts:
+	python scripts/shopee_post_generator.py
+
+shopee-tracker:
+	@python -c "import openpyxl" 2>/dev/null || { echo "請先安裝: pip install -r scripts/requirements.txt"; exit 1; }
+	python scripts/shopee_tracker.py
+
+shopee-roi:
+	python scripts/shopee_roi_calc.py
