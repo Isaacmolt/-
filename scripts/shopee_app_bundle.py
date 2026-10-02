@@ -39,6 +39,8 @@ def build(mode):
     parts = [f"<title>{title}</title>", f"<style>\n{css}\n</style>", inner]
     if mode == "artifact":
         parts.append("<script>window.ARTIFACT_BUILD = true;</script>")
+        # artifact 檢視器不允許頁面自行觸發下載，按鈕已隱藏；函式本體也換成提示，避免殘留 download 連結
+        js = re.sub(r"function download\(filename, text\) \{.*?\n\}", "function download() { toast(\"請用「複製全部」\"); }", js, count=1, flags=re.S)
     parts.append(f"<script>\n{data}\n</script>")
     parts.append(f"<script>\n{js}\n</script>")
     content = "\n".join(parts) + "\n"
