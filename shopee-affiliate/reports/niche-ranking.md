@@ -1,5 +1,5 @@
 # 利基方向排名
-_由 scripts/shopee_niche_scorer.py 於 2026-10-02 13:38 產生_
+_由 scripts/shopee_niche_scorer.py 於 2026-10-02 13:52 產生_
 
 ## 權重
 
