@@ -23,8 +23,9 @@ concurrency:
 
 jobs:
   deploy:
-    # 不宣告 environment：github-pages 環境的分支保護規則只允許預設分支，
-    # 從功能分支部署時工作會在開始前就被拒絕。拿掉宣告後由 Pages API 直接部署。
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
