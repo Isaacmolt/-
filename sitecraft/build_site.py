@@ -286,7 +286,7 @@ def art_tiles(palette: dict, seed: str, mset: dict, n: int = 6) -> list[str]:
     rnd = random.Random(seed)
     p, pd, a, bg = palette["p"], palette["pd"], palette["a"], palette["bg"]
     soft, asoft = palette["p_soft"], palette["a_soft"]
-    if _lum(p) < 0.12:  # 近黑主色（如沙龍）：圖樣底改用強調色調過的表面色，避免機械推導出的冷紫
+    if _lum(p) < 0.2:  # 深色主色（如沙龍）：圖樣底改用強調色調過的表面色，避免機械推導出的冷紫
         soft = _mix(a, palette["sf"], 0.14)
     A, B, C = mset["a"], mset.get("b", mset["a"]), mset.get("c", mset["a"])
     stroke = 'fill="none" stroke-linecap="round" stroke-linejoin="round"'
