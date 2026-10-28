@@ -1,0 +1,14 @@
+{
+  "name": "sitecraft-qa",
+  "private": true,
+  "description": "SiteCraft 網站品質閘門：截圖、axe 無障礙、Lighthouse、功能測試、計算樣式斷言",
+  "scripts": {
+    "qa": "node qa.js"
+  },
+  "devDependencies": {
+    "axe-core": "^4.10",
+    "chrome-launcher": "^1.1",
+    "lighthouse": "^12.0",
+    "playwright": "^1.50"
+  }
+}

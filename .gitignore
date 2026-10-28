@@ -11,3 +11,6 @@ sitecraft/data/sent_log.csv
 sitecraft/data/*.tmp
 sitecraft/outbox/
 sitecraft/deliveries/
+sitecraft/qa/node_modules/
+sitecraft/qa/shots/
+sitecraft/qa/package-lock.json
