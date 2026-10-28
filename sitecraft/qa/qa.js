@@ -68,8 +68,19 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
         await page.keyboard.press('Escape'); await page.waitForTimeout(300);
         r.fn.modalFocusTrapped = inside1 && inside2;
         r.fn.factClipped = await page.evaluate(() => [...document.querySelectorAll('.fact > span')].some(sp => sp.scrollWidth > sp.clientWidth + 1 && !sp.classList.contains('num')));
+        // hero CTA row: no orphan control on phones (every control shares a row with another, or spans full width)
+        r.fn.ctaOrphan = await page.evaluate(() => { const els = [...document.querySelectorAll('.hero .cta > *')]; const rows = {}; els.forEach(e => { const b = e.getBoundingClientRect(); const k = Math.round(b.top); (rows[k] = rows[k] || []).push(b.width); }); return Object.values(rows).some(ws => ws.length === 1 && ws[0] < 300); });
+        // no-JS: content still visible
+        const nojs = await browser.newPage({ viewport: vp, javaScriptEnabled: false });
+        await nojs.goto(url, { waitUntil: 'load' });
+        r.fn.visibleWithoutJs = await nojs.evaluate(() => getComputedStyle(document.querySelector('.statement')).opacity === '1' && getComputedStyle(document.querySelector('h1 .w')).opacity === '1');
+        await nojs.close();
       }
       if (name === 'desktop') {
+        // scroll-spy: after scrolling to services, the matching nav link is current
+        await page.evaluate(() => document.getElementById('services').scrollIntoView({ block: 'center' })); await page.waitForTimeout(500);
+        r.scrollSpy = await page.evaluate(() => { const a = document.querySelector('.nav ul a[aria-current="true"]'); return a ? a.getAttribute('href') : null; });
+        await page.evaluate(() => scrollTo(0, 0)); await page.waitForTimeout(300);
         r.computed = await page.evaluate(() => {
           const ff = el => getComputedStyle(el).fontFamily;
           const t = document.querySelector('.tile'), tall = document.querySelector('.tile.tall');
@@ -87,7 +98,7 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
         // dark mode contrast
         const dark = await browser.newPage({ viewport: vp, colorScheme: 'dark' });
         await dark.goto(url, { waitUntil: 'load' }); await dark.waitForTimeout(800);
-        await dark.addStyleTag({ content: '*,*::before,*::after{transition:none!important;animation:none!important;opacity:1}' });
+        await dark.addStyleTag({ content: '*,*::before,*::after{transition:none!important;animation:none!important;opacity:1}h1 .w,.tagline,.hero .cta{opacity:1!important;transform:none!important}' });
         await dark.evaluate(() => document.querySelectorAll('[data-reveal]').forEach(el => el.classList.add('in')));
         await dark.waitForTimeout(200);
         await dark.screenshot({ path: path.join(OUT, `${slug}-desktop-dark.png`), fullPage: true });
@@ -119,12 +130,12 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
   for (const slug of slugs) {
     const v = report[slug], fn = v.fn || {}, c = v.computed || {};
     const ok = fn.fabHiddenAtTop && fn.menuBtnOnTop && fn.menuClosedByTap && fn.galleryCounterAfter2Next === '3' && fn.galleryCounterAfterPrev === '2'
-      && fn.serviceLinksFocusable && fn.titleIndent === 0 && fn.modalFocusTrapped && !fn.factClipped && c.h1DiffersFromBody && c.ogImage
+      && fn.serviceLinksFocusable && fn.titleIndent === 0 && fn.modalFocusTrapped && !fn.factClipped && !fn.ctaOrphan && fn.visibleWithoutJs && v.scrollSpy === '#services' && c.h1DiffersFromBody && c.ogImage
       && Math.abs(c.tileRatio - 1.33) < 0.05 && Math.abs(c.tallRatio - 0.75) < 0.05 && !v.errors.length && !v.smallTargets.length
       && !v.axe.length && !(v.axeDark || []).length && !v.emoji && Object.values(v.heroFit).every(x => x.includes('ok')) && Object.values(v.overflow).every(o => o === 0);
     allOk = allOk && ok;
     console.log(`${slug}: ${ok ? 'PASS' : 'FAIL'}`);
-    if (!ok) console.log(JSON.stringify({ fn, computed: c, axe: v.axe, axeDark: v.axeDark, errors: v.errors, small: v.smallTargets, heroFit: v.heroFit, overflow: v.overflow, emoji: v.emoji }, null, 2));
+    if (!ok) console.log(JSON.stringify({ fn, scrollSpy: v.scrollSpy, computed: c, axe: v.axe, axeDark: v.axeDark, errors: v.errors, small: v.smallTargets, heroFit: v.heroFit, overflow: v.overflow, emoji: v.emoji }, null, 2));
   }
   const lh = report.lighthouse;
   const lhOk = lh && typeof lh === 'object' && ['performance', 'accessibility', 'best-practices', 'seo'].every(k => lh[k] >= 90);

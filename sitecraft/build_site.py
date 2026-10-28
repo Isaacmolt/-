@@ -277,14 +277,14 @@ def art_tiles(palette: dict, seed: str, motif: str = "", n: int = 6) -> list[str
         (asoft, g(80, 30, 1.2, pd, 2.4)),                                   # 1 滿版主圖
         (p, g(-60, -40, 2.6, bg, 1.6, 'opacity=".9"')),                      # 2 特寫（高）
         (asoft, '<circle cx="70" cy="60" r="34" fill="' + a + '" opacity=".9"/>' + g(120, 70, 1.5, pd, 1.8, 'opacity=".9"')),  # 3 大圖騰 + 一點
-        (a, g(150, 90, 2.2, pd, 1.8, 'opacity=".85"')),                      # 4 特寫（右下）
-        (soft, "".join(g(16 + i * 76, 10 + j * 76, .32, p, 5, 'opacity=".55"') for i in range(6) for j in range(5))),  # 5 圖樣（高）
+        (a, g(110, 40, 1.9, pd, 1.8, 'opacity=".85"')),                       # 4 完整圖騰
+        (soft, "".join(g(20 + i * 120, 6 + j * 96, .45, p, 4, 'opacity=".4"') for i in range(3) for j in range(3))),  # 5 織紋（高）
         (pd, g(90, 40, 1.1, a, 2.6)),                                        # 6 深底主圖
     ]
     tiles = []
     for i in range(n):
         ground, art = specs[i % len(specs)]
-        rot = rnd.randint(-6, 6)
+        rot = 0 if i % 6 == 4 else rnd.randint(-6, 6)
         parts = [f'<svg class="art" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true">',
                  f'<rect width="400" height="300" fill="{ground}"/>']
         if i % 6 in (0, 3):
@@ -480,10 +480,15 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, 
     arts = art_tiles(theme["palette"], lead["slug"], motif)
     gallery_items = []
     for i in range(max(len(imgs), 6) if imgs else 6):
+        labels = theme.get("gallery_labels") or ["店面", "服務區", "作品", "環境", "商品", "入口"]
         gallery_items.append({"img": imgs[i] if i < len(imgs) else "", "art": arts[i % len(arts)],
-                              "tall": i % 3 == 1, "type": (not imgs) and i == 1})
+                              "tall": i % 3 == 1, "type": (not imgs) and i == 1, "label": labels[i % len(labels)]})
     mode = FONT_MODES.get(theme.get("mode", "bold"), FONT_MODES["bold"])
     statement, about = statement_from(about, content.get("tagline", ""))
+    statement_name = ""
+    if statement.startswith(name):
+        statement_name = name
+        statement = statement[len(name):].lstrip()
     pre, em, post = split_statement(statement)
     line_url = content.get("line_url", "")
     services = []
@@ -543,7 +548,7 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, 
         "initial": initial, "name_tokens": name_tokens(name), "name_lines": name_lines(name), "address_short": address_short,
         "mode": theme.get("mode", "bold"),
         "fonts_url": mode["url"], "font_display": mode["display"], "font_head": mode["head"], "head_weight": mode["weight"],
-        "statement_pre": pre, "statement_em": em, "statement_post": post,
+        "statement_pre": pre, "statement_em": em, "statement_post": post, "statement_name": statement_name,
         "closing_title": closing_title(lead.get("theme") or "default", name),
         "year": date.today().year,
         "credit": brand["sender_name"] if show_credit else "",
