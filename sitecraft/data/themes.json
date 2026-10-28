@@ -59,7 +59,8 @@
       "咖啡豆",
       "戶外座位"
     ],
-    "hero": "side"
+    "hero": "side",
+    "statement": "一杯咖啡的時間，在{district}慢下來"
   },
   "breakfast": {
     "label": "早午餐",
@@ -122,7 +123,8 @@
       "飲品",
       "外帶區"
     ],
-    "hero": "side"
+    "hero": "side",
+    "statement": "每天早上，現點現做的那一份"
   },
   "restaurant": {
     "label": "餐廳",
@@ -197,7 +199,8 @@
       "吧台",
       "入口"
     ],
-    "hero": "band"
+    "hero": "band",
+    "statement": "家常的味道，用心做好每一道菜"
   },
   "snack": {
     "label": "小吃",
@@ -273,7 +276,8 @@
       "座位區",
       "外帶窗口"
     ],
-    "hero": "band"
+    "hero": "band",
+    "statement": "巷口的老味道，一碗一碗慢慢煮"
   },
   "hotpot": {
     "label": "火鍋",
@@ -337,7 +341,8 @@
       "包廂",
       "入口"
     ],
-    "hero": "band"
+    "hero": "band",
+    "statement": "湯頭熬得夠久，料才吃得出味道"
   },
   "dessert": {
     "label": "甜點烘焙",
@@ -410,7 +415,8 @@
       "飲品",
       "禮盒"
     ],
-    "hero": "band"
+    "hero": "band",
+    "statement": "每天限量手作，甜得剛剛好"
   },
   "hair": {
     "label": "美髮",
@@ -478,7 +484,8 @@
       "染髮",
       "店面"
     ],
-    "hero": "band"
+    "hero": "band",
+    "statement": "先聽你說，再剪出適合你的樣子"
   },
   "beauty": {
     "label": "美容美甲",
@@ -548,7 +555,8 @@
       "產品",
       "店面"
     ],
-    "hero": "side"
+    "hero": "side",
+    "statement": "慢慢做、細細做，把時間留給自己"
   },
   "pet": {
     "label": "寵物",
@@ -616,7 +624,8 @@
       "住宿區",
       "店面"
     ],
-    "hero": "side"
+    "hero": "side",
+    "statement": "不趕不吼，讓毛小孩安心洗香香"
   },
   "clinic": {
     "label": "診所",
@@ -687,7 +696,8 @@
       "衛教",
       "入口"
     ],
-    "hero": "side"
+    "hero": "side",
+    "statement": "看診不急，把每個問題說清楚"
   },
   "gym": {
     "label": "健身運動",
@@ -756,7 +766,8 @@
       "教練區",
       "入口"
     ],
-    "hero": "side"
+    "hero": "side",
+    "statement": "不用很會，從第一堂開始陪你練"
   },
   "florist": {
     "label": "花店",
@@ -822,7 +833,8 @@
       "植栽",
       "店面"
     ],
-    "hero": "side"
+    "hero": "side",
+    "statement": "每一束花，都替你把話說出口"
   },
   "auto": {
     "label": "車輛維修",
@@ -894,7 +906,8 @@
       "零件",
       "店面"
     ],
-    "hero": "band"
+    "hero": "band",
+    "statement": "先講清楚再動工，修車不再提心吊膽"
   },
   "education": {
     "label": "教育補習",
@@ -968,7 +981,8 @@
       "櫃台",
       "入口"
     ],
-    "hero": "band"
+    "hero": "band",
+    "statement": "一個一個教，讓孩子真的聽懂"
   },
   "wellness": {
     "label": "按摩放鬆",
@@ -1035,7 +1049,8 @@
       "用品",
       "入口"
     ],
-    "hero": "band"
+    "hero": "band",
+    "statement": "找到痠痛的源頭，讓身體鬆下來"
   },
   "lodging": {
     "label": "住宿",
@@ -1103,7 +1118,8 @@
       "周邊景點",
       "入口"
     ],
-    "hero": "band"
+    "hero": "band",
+    "statement": "在{district}住一晚，像回到朋友家"
   },
   "default": {
     "label": "在地商家",
@@ -1160,6 +1176,7 @@
       "商品",
       "入口"
     ],
-    "hero": "side"
+    "hero": "side",
+    "statement": "在{district}，認真做好每一件小事"
   }
 }

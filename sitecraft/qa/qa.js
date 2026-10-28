@@ -87,12 +87,21 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
         // two-line title alignment: left edges match (side layout) or centres match (band layout)
         r.fn.bandVisibleMobile = await page.evaluate(() => { const hero = document.querySelector('.hero'); if (hero.dataset.hero !== 'band') return true; const m = document.querySelector('.motif').getBoundingClientRect(); const bar = document.querySelector('.hero-foot').getBoundingClientRect(); return m.bottom <= bar.top + 8 && m.height > 60; });
         await page.evaluate(() => document.getElementById('gallery').scrollIntoView()); await page.waitForTimeout(400);
-        await page.click('.strip .tile:first-child', { position: { x: 40, y: 40 } }); await page.waitForTimeout(300);
-        const lbOpen = await page.evaluate(() => document.getElementById('lb').open);
-        await page.keyboard.press('ArrowRight'); await page.waitForTimeout(150); await page.keyboard.press('ArrowRight'); await page.waitForTimeout(150); await page.keyboard.press('ArrowLeft'); await page.waitForTimeout(150);
-        const lbNow = await page.textContent('#lbNow');
-        await page.keyboard.press('Escape'); await page.waitForTimeout(300);
-        r.fn.lightbox = await page.evaluate(([o, n]) => o && n.trim().startsWith('2') && !document.getElementById('lb').open && document.activeElement === document.querySelector('.strip .tile:first-child'), [lbOpen, lbNow]);
+        // lightbox: only photo tiles open it (drawings are not pretend photos)
+        const photoTiles = await page.evaluate(() => document.querySelectorAll('.strip .tile[role="button"]').length);
+        if (photoTiles) {
+          await page.click('.strip .tile[role="button"]', { position: { x: 40, y: 40 } }); await page.waitForTimeout(500);
+          const lbOpen = await page.evaluate(() => document.getElementById('lb').open);
+          await page.keyboard.press('ArrowRight'); await page.waitForTimeout(150); await page.keyboard.press('ArrowRight'); await page.waitForTimeout(150); await page.keyboard.press('ArrowLeft'); await page.waitForTimeout(150);
+          const lbNow = await page.textContent('#lbNow');
+          await page.keyboard.press('Escape'); await page.waitForTimeout(300);
+          r.fn.lightbox = await page.evaluate(([o, n]) => o && n.trim().startsWith('2') && !document.getElementById('lb').open && document.activeElement === document.querySelector('.strip .tile[role="button"]'), [lbOpen, lbNow]);
+        } else {
+          await page.click('.strip .tile:first-child', { position: { x: 40, y: 40 } }); await page.waitForTimeout(400);
+          r.fn.lightbox = await page.evaluate(() => !document.getElementById('lb').open && !document.querySelector('.strip .tile[tabindex]'));
+        }
+        r.fn.statementUnits = await page.evaluate(() => [...document.querySelectorAll('.statement .un')].every(el => el.getClientRects().length === 1));
+        r.fn.factsLinks = await page.evaluate(() => [...document.querySelectorAll('.hero .fact')].filter(f => /電話|地址/.test(f.querySelector('b').textContent)).every(f => !!f.querySelector('a[href]')));
         r.fn.typeClearMobile = await page.evaluate(() => { const vt = document.querySelector('.tile.type .vtext'), cap = document.querySelector('.tile.type .cap'); if (!vt) return true; document.getElementById('gallery').scrollIntoView(); return vt.getBoundingClientRect().bottom <= cap.getBoundingClientRect().top + 1; });
         r.fn.titleIndent = await page.evaluate(() => { const h = document.querySelector('h1'); const en = h.querySelector('.en'); if (!en) return 0; const zh = [...h.querySelectorAll(':scope > .w')]; const l = Math.min(...zh.map(w => w.getBoundingClientRect().left)), rr = Math.max(...zh.map(w => w.getBoundingClientRect().right)); const eb = en.getBoundingClientRect(); const enText = en.querySelector('.w'); const et = enText.getBoundingClientRect(); const last = en.querySelectorAll('.w'); const er = last[last.length - 1].getBoundingClientRect().right; return getComputedStyle(h).textAlign === 'center' ? Math.round(((et.left + er) / 2) - ((l + rr) / 2)) : Math.round(et.left - l); });
         // modal focus: after opening, focus is inside the overlay and Tab stays inside
@@ -137,6 +146,14 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
         if (r.dragOpensLightbox) await page.keyboard.press('Escape');
         for (let k = 0; k < 8; k++) { await page.click('#nextTile', { force: true }); await page.waitForTimeout(350); }
         r.stripEnd = await page.evaluate(() => ({ now: document.getElementById('tileNow').textContent, total: document.querySelectorAll('.strip .tile').length, nextDisabled: document.getElementById('nextTile').disabled }));
+        { const before = await page.evaluate(() => document.getElementById('strip').scrollLeft); await page.click('#prevTile', { force: true }); await page.waitForTimeout(600);
+          r.stripPrev = await page.evaluate(b => ({ now: document.getElementById('tileNow').textContent, moved: document.getElementById('strip').scrollLeft < b - 20 }), before); }
+        // lightbox sits in the middle of the window
+        if (await page.evaluate(() => !!document.querySelector('.strip .tile[role="button"]'))) {
+          await page.evaluate(() => document.querySelector('.strip .tile[role="button"]').click()); await page.waitForTimeout(700);
+          r.lbCentred = await page.evaluate(() => { const f = document.querySelector('#lb .lb-frame').getBoundingClientRect(); return Math.abs((f.left + f.right) / 2 - innerWidth / 2) <= 2 && Math.abs(f.top - (innerHeight - f.bottom)) <= 4 && f.top >= 0; });
+          await page.keyboard.press('Escape'); await page.waitForTimeout(400);
+        } else r.lbCentred = true;
         await page.evaluate(() => scrollTo(0, 0)); await page.waitForTimeout(300);
         // anchor landing: after clicking a nav link the header is solid and visible, and the facts bar is not under a transparent nav
         await page.click('.nav ul a[href="#about"]'); await page.waitForTimeout(1600);
@@ -219,7 +236,7 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
       && fn.serviceLinksFocusable && Math.abs(fn.titleIndent) <= 2 && fn.modalFocusTrapped && !fn.factClipped && !fn.nbBroken && !fn.ctaOrphan && fn.visibleWithoutJs && v.scrollSpy === '#services' && c.h1DiffersFromBody && c.ogImage
       && v.anchorLanding && v.anchorLanding.solid && !v.anchorLanding.hidden && v.anchorLanding.top === 0
       && fn.overlayHoursSpans && v.heroGeom && (!v.heroGeom.band || v.heroGeom.overlapPct === 0) && v.heroGeom.bandAboveBar && v.factsDrift === 'none'
-      && fn.menuBtnClear && v.nmOneLine && v.motifDrawn && v.weaveMasked && fn.statusInline && !v.dragOpensLightbox && v.stripEnd && v.stripEnd.now === String(v.stripEnd.total) && v.stripEnd.nextDisabled && v.reducedMotion.draw === 'none' && parseFloat(v.reducedMotion.dash) === 0 && v.fontFaces && v.fontFaces.length >= 2 && v.fontFaces.every(s => s !== 'error') && v.fontFaces.includes('loaded')
+      && fn.menuBtnClear && v.nmOneLine && v.motifDrawn && v.weaveMasked && fn.statusInline && !v.dragOpensLightbox && v.stripEnd && v.stripEnd.now === String(v.stripEnd.total) && v.stripEnd.nextDisabled && v.stripPrev && v.stripPrev.moved && v.stripPrev.now === String(v.stripEnd.total - 1) && v.lbCentred && fn.factsLinks && fn.statementUnits && v.reducedMotion.draw === 'none' && parseFloat(v.reducedMotion.dash) === 0 && v.fontFaces && v.fontFaces.length >= 2 && v.fontFaces.every(s => s !== 'error') && v.fontFaces.includes('loaded')
       && v.tiles && v.tiles.hoursMatch && v.tiles.typeClear && fn.bandVisibleMobile && fn.typeClearMobile && fn.lightbox
       && v.closingClear && Object.values(v.closingClear).every(Boolean)
       && v.nameClear && Object.values(v.nameClear).every(x => x.real === 0 && x.long === 0) && v.bandGap && Object.values(v.bandGap).every(g => g >= 24)

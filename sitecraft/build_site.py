@@ -60,6 +60,7 @@ def default_copy(lead: dict, theme: dict) -> dict:
     about = theme["about"].format(**fill)
     return {
         "tagline": theme["taglines"][idx].format(**fill),
+        "statement": theme.get("statement", "").format(**fill),
         "about": [about],
         "highlights": list(theme["highlights"]),
         "services": [dict(s) for s in theme["services"]],
@@ -70,6 +71,7 @@ COPY_SCHEMA = {
     "type": "object",
     "properties": {
         "tagline": {"type": "string", "description": "一句標語，12 個中文字以內，不要用驚嘆號"},
+        "statement": {"type": "string", "description": "關於我們的大標，14～22 個中文字，用一個逗號分成兩段，後段是重點；不要出現店名"},
         "about": {"type": "array", "items": {"type": "string"}, "minItems": 2, "maxItems": 2,
                   "description": "兩段關於我們，每段 60～90 個中文字，口吻像老闆自己說話，不誇大、不編造得獎或年資"},
         "highlights": {"type": "array", "items": {"type": "string"}, "minItems": 3, "maxItems": 3,
@@ -79,22 +81,21 @@ COPY_SCHEMA = {
             "items": {
                 "type": "object",
                 "properties": {
-                    "icon": {"type": "string", "description": "一個 emoji"},
                     "title": {"type": "string", "description": "服務名稱，6 字以內"},
                     "desc": {"type": "string", "description": "一句說明，25 字以內"},
                 },
-                "required": ["icon", "title", "desc"], "additionalProperties": False,
+                "required": ["title", "desc"], "additionalProperties": False,
             },
         },
     },
-    "required": ["tagline", "about", "highlights", "services"],
+    "required": ["tagline", "statement", "about", "highlights", "services"],
     "additionalProperties": False,
 }
 
 AI_SYSTEM = (
     "你是替台灣在地小店寫官網文案的寫手。用繁體中文（台灣用語），語氣真誠、具體、不浮誇，"
     "像老闆親口介紹自己的店。只能根據提供的資料寫，不可以編造得獎、年資、名人推薦或任何無法證實的事。"
-    "不要出現「我們致力於」「極致」「頂級」這類空話。"
+    "不要出現「我們致力於」「極致」「頂級」這類空話。不要使用任何 emoji 或表情符號。"
 )
 
 
@@ -160,6 +161,22 @@ def ai_copy(lead: dict, theme: dict) -> dict | None:
     return data
 
 
+EMOJI_RE = re.compile("[\U0001F000-\U0001FAFF\u2600-\u27BF\u2B00-\u2BFF\u2300-\u23FF\uFE0F\u200D]")
+
+
+def clean_content(content: dict) -> dict:
+    """文案一律不放 emoji：拿掉舊版的 services[].icon，所有字串去掉表情符號。"""
+    def walk(v):
+        if isinstance(v, str):
+            return EMOJI_RE.sub("", v).strip() if EMOJI_RE.search(v) else v
+        if isinstance(v, list):
+            return [walk(x) for x in v]
+        if isinstance(v, dict):
+            return {k: walk(x) for k, x in v.items() if k != "icon"}
+        return v
+    return walk(content)
+
+
 def load_or_make_content(lead: dict, theme: dict, site_dir: Path, use_ai: bool, refresh: bool) -> dict:
     """content.json 是唯一真相；沒有就用 Claude 或主題預設建立一份。"""
     cj = site_dir / "content.json"
@@ -170,13 +187,17 @@ def load_or_make_content(lead: dict, theme: dict, site_dir: Path, use_ai: bool, 
             print(f"    ! {cj} 不是合法 JSON，將重建")
             content = {}
         if content:
-            return content
+            cleaned = clean_content(content)
+            if cleaned != content:
+                cj.write_text(json.dumps(cleaned, ensure_ascii=False, indent=2), encoding="utf-8")
+            return cleaned
 
-    copy = (ai_copy(lead, theme) if use_ai else None) or default_copy(lead, theme)
+    copy = clean_content((ai_copy(lead, theme) if use_ai else None) or default_copy(lead, theme))
     content = {
         "_說明": "改這個檔案再執行 build_site.py --slug <slug> --rebuild 就會更新網站。gallery 放 img/ 裡的檔名。",
         "name": lead["name"],
         "tagline": copy["tagline"],
+        "statement": copy.get("statement", ""),
         "about": copy["about"],
         "highlights": copy["highlights"],
         "services": copy["services"],
@@ -215,15 +236,26 @@ FONT_MODES = {
 ADDR_NO = re.compile(r"(\d+(?:之\d+)?號(?:\d+樓)?(?:之\d+)?)")
 
 
+ADDR_PREFIX = re.compile(r"^\s*\d{3,6}\s*(台灣|臺灣)?\s*")
+
+
+def address_display(address: str) -> str:
+    """畫面上的地址不放郵遞區號與「台灣」（複製地址仍用完整版）。"""
+    return ADDR_PREFIX.sub("", address or "").strip() or (address or "")
+
+
 def address_html(address: str, city: str, district: str):
-    """地址：區之後允許換行（<wbr>），門牌號與樓層不拆（.nb）。"""
+    """地址：只在「市」「區」之後允許換行（<wbr>，搭配 keep-all），門牌號與樓層不拆（.nb）。"""
     from markupsafe import Markup, escape
-    head = f"{city}{district}"
+    address = address_display(address)
     out = ""
     rest = address
-    if head and head in address:
-        pre, _, rest = address.partition(head)
-        out += str(escape(pre + head)) + "<wbr>"
+    if city and district and f"{city}{district}" in address:
+        pre, _, rest = address.partition(f"{city}{district}")
+        out += str(escape(pre + city)) + "<wbr>" + str(escape(district)) + "<wbr>"
+    elif district and district in address:
+        pre, _, rest = address.partition(district)
+        out += str(escape(pre + district)) + "<wbr>"
     out += ADDR_NO.sub(lambda m: f'<span class="nb">{escape(m.group(1))}</span>', str(escape(rest)))
     return Markup(out)
 
@@ -289,10 +321,10 @@ def split_statement(text: str) -> tuple[str, str, str]:
     return "", text, ""
 
 
-def art_tiles(palette: dict, seed: str, mset: dict, n: int = 6) -> list[str]:
+def art_tiles(palette: dict, seed: str, mset: dict, n: int = 3) -> list[str]:
     """
-    示意圖是一套系統：同一類別的三個圖騰（a 主圖、b 圖樣、c 對比底）在六格裡輪流擔綱，
-    中間穿插兩張文字磚（標語直排、營業資訊）。同一家店每次產生都一樣。
+    示意圖是一套系統：同一類別的三個圖騰（a 主圖、b 圖樣、c 對比底）組成三張圖：
+    場景、織紋、雙色拼接。同一家店每次產生都一樣。
     """
     from markupsafe import Markup
     rnd = random.Random(seed)
@@ -313,22 +345,54 @@ def art_tiles(palette: dict, seed: str, mset: dict, n: int = 6) -> list[str]:
          f'<circle class="ac" cx="{rnd.randint(280, 330)}" cy="{rnd.randint(50, 100)}" r="{rnd.randint(70, 100)}" fill="{a}" opacity=".55"/>'
          f'<path class="k" d="M40 252H360" stroke="{pd}" stroke-width="2" opacity=".35"/>'
          + g(A, 70, 20, 1.15, pd, 2.4) + g(C, 290, 180, .38, pd, 5, 'opacity=".7"')),               # 0 主圖騰 + 地平線 + 小圖騰
-        "",                                                                                       # 1 標語直排（HTML）
         f'<rect class="g2" width="400" height="300" fill="{soft}"/>'
         + "".join(g(B, 14 + i * 118 + (60 if j % 2 else 0), -4 + j * 86, .42, p, 4, f'opacity="{".32" if (i + j) % 2 else ".52"}"') for i in range(4) for j in range(4)),  # 2 織紋（錯位）
         f'<rect class="g" width="200" height="300" fill="{asoft}"/><rect class="g2" x="200" width="200" height="300" fill="{soft}"/>'
         + g(C, 100, 50, 1.0, pd, 2.6) + g(B, 20, 215, .32, pd, 5, 'opacity=".55"'),                 # 3 雙色底 + 兩個圖騰
-        "",                                                                                       # 4 營業資訊（HTML）
-        "",                                                                                       # 5 菜單／價目（HTML）
     ]
-    tiles = []
-    for i in range(n):
-        body = specs[i % len(specs)]
-        if not body:
-            tiles.append(Markup(""))
-            continue
-        tiles.append(Markup(f'<svg class="art" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g class="v">{body}</g></svg>'))
-    return tiles
+    return [Markup(f'<svg class="art" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g class="v">{body}</g></svg>')
+            for body in specs[:n]]
+
+
+def map_art(seed: str) -> str:
+    """地圖卡的示意街廓：幾條主要道路、巷弄與街區，圖釘在中央（每家店不同、每次一樣）。"""
+    from markupsafe import Markup
+    rnd = random.Random(seed + "map")
+    roads, lanes, blocks = [], [], []
+    for y in (rnd.randint(60, 90), rnd.randint(170, 200)):
+        tilt = rnd.randint(-14, 14)
+        roads.append(f'<path d="M-20 {y - tilt}L420 {y + tilt}"/>')
+    for x in (rnd.randint(70, 110), rnd.randint(250, 300)):
+        tilt = rnd.randint(-18, 18)
+        roads.append(f'<path d="M{x - tilt} -20L{x + tilt} 320"/>')
+    for _ in range(5):
+        x, y = rnd.randint(0, 400), rnd.randint(0, 300)
+        lanes.append(f'<path d="M{x} {y}l{rnd.choice((-1, 1)) * rnd.randint(40, 90)} {rnd.randint(-30, 30)}"/>')
+    for _ in range(4):
+        x, y = rnd.randint(20, 340), rnd.randint(20, 240)
+        blocks.append(f'<rect x="{x}" y="{y}" width="{rnd.randint(30, 60)}" height="{rnd.randint(22, 44)}" rx="4"/>')
+    return Markup(
+        '<svg class="mapart" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true">'
+        f'<g class="mb">{"".join(blocks)}</g><g class="ml">{"".join(lanes)}</g><g class="mr">{"".join(roads)}</g></svg>')
+
+
+def vertical_columns(text: str) -> list[str]:
+    """直排標語按標點分欄（標點留在前一欄）；沒有標點就整句一欄，交給前端斷詞平衡。"""
+    cols, buf = [], ""
+    for ch in text.strip().rstrip("。"):
+        buf += ch
+        if ch in "，、；：！？":
+            cols.append(buf)
+            buf = ""
+    if buf:
+        cols.append(buf)
+    return cols[:3] or [text]
+
+
+def scene_markup(motif_idle: str) -> str:
+    """hero 圖騰改成一個小場景：一塊實心強調色圓、主圖騰、一條細地平線（兩種線寬）。"""
+    return ('<circle class="disc" cx="134" cy="76" r="58"/>'
+            '<path class="gl" pathLength="1" style="--i:9" d="M-4 190H214"/>' + motif_idle)
 
 
 MOTIFS_FILE = TEMPLATES_DIR.parent / "data" / "motifs.json"
@@ -398,6 +462,12 @@ def statement_from(about: list[str], tagline: str) -> tuple[str, list[str]]:
         return tagline, about
     paras = ([rest] if rest.strip() else []) + about[1:]
     return head, paras
+
+
+def closing_closed(theme_key: str) -> str:
+    """休息中時，結尾大標不要說「今天」「今晚」。"""
+    return {"cafe": "下次，來喝一杯", "restaurant": "下次，來這裡吃飯", "hotpot": "下次，來吃鍋",
+            "gym": "下次來，從那天開始動"}.get(theme_key, "")
 
 
 def closing_title(theme_key: str, name: str) -> str:
@@ -551,27 +621,29 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, 
     motifs = load_motifs()
     mset = motifs.get(lead.get("theme") or "default") or motifs["default"]
     motif = mset["a"]
-    imgs = [g for g in content.get("gallery", []) if g]
+    # gallery 可以只寫檔名（放在 sites/<slug>/img/），也可以寫相對路徑或網址
+    imgs = [g if ("/" in g or g.startswith("data:")) else f"img/{g}" for g in content.get("gallery", []) if g]
     arts = art_tiles(theme["palette"], lead["slug"], mset)
+    labels = theme.get("gallery_labels") or ["店面", "服務區", "作品", "環境", "商品", "入口"]
     gallery_items = []
-    art_only = [x for x in arts if x]
-    for i in range(max(len(imgs), 6) if imgs else 6):
-        labels = theme.get("gallery_labels") or ["店面", "服務區", "作品", "環境", "商品", "入口"]
-        if imgs:
-            gallery_items.append({"img": imgs[i] if i < len(imgs) else "", "art": arts[i % len(arts)],
-                                  "tall": i % 3 == 1, "type": False, "info": False, "menu": False,
+    if imgs:
+        for i, src in enumerate(imgs):
+            gallery_items.append({"img": src, "art": "", "tall": i % 3 == 1, "type": False,
                                   "label": labels[i % len(labels)]})
-        else:
-            # 沒有照片：先放文字磚（標語直排、營業資訊、菜單），再放三張線條示意圖
-            gallery_items.append({"img": "", "art": art_only[(i - 3) % len(art_only)] if i >= 3 else "",
-                                  "tall": i % 3 == 0, "type": i == 0, "info": i == 1, "menu": i == 2,
-                                  "label": labels[i % len(labels)]})
+    else:
+        # 沒有照片：標語直排一張、三張線條示意圖（不加圖說，不假裝是照片）
+        gallery_items.append({"img": "", "art": "", "tall": True, "type": True, "label": ""})
+        for i, art in enumerate(arts):
+            gallery_items.append({"img": "", "art": art, "tall": i == 2, "type": False, "label": ""})
     mode = FONT_MODES.get(theme.get("mode", "bold"), FONT_MODES["bold"])
-    statement, about = statement_from(about, content.get("tagline", ""))
+    fill = {"name": name, "city": lead.get("city", ""), "district": lead.get("district", "") or "在地"}
+    statement = (content.get("statement") or theme.get("statement", "").format(**fill)).strip()
     statement_name = ""
-    if statement.startswith(name):
-        statement_name = name
-        statement = statement[len(name):].lstrip()
+    if not statement:
+        statement, about = statement_from(about, content.get("tagline", ""))
+        if statement.startswith(name):
+            statement_name = name
+            statement = statement[len(name):].lstrip()
     pre, em, post = split_statement(statement)
     line_url = content.get("line_url", "")
     services = []
@@ -611,6 +683,8 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, 
         contact_href = brand["contact_line"]
 
     show_credit = demo or brand.get("show_credit_on_final_site", True)
+    first_line = name_lines(name)[0] if name_lines(name) else {"kind": "en", "tokens": [name]}
+    name_zh = "".join(first_line["tokens"]) if first_line["kind"] != "en" else name
     b = {
         "name": name, "slug": lead["slug"], "url": url,
         "category": lead.get("category") or theme["label"],
@@ -633,6 +707,15 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, 
         "ink2": _mix(theme["palette"]["a"], theme["palette"]["tx"], 0.55) if _lum(theme["palette"]["p"]) < 0.2 else theme["palette"]["p"],
         "name_len": name_len_units(name),
         "has_photos": bool(imgs),
+        "gallery_name": "店內環境" if imgs else "店的樣子",
+        "gallery_title": (f"走進{name_zh}" if imgs
+                          else (f"{lead.get('district')}的一個角落" if lead.get("district") else "我們的角落")),
+        "name_zh": name_zh,
+        "vcols": vertical_columns(content.get("tagline", "")),
+        "vlen": max((len(c) for c in vertical_columns(content.get("tagline", ""))), default=6),
+        "map_art": map_art(lead["slug"]),
+        "address_disp": address_display(address),
+        "closing_closed": closing_closed(lead.get("theme") or "default"),
         "scrim": _lum(theme["palette"]["p"]) > 0.2,
         "initial": initial, "name_tokens": name_tokens(name), "name_lines": name_lines(name), "address_short": address_short,
         "address_html": address_html(address, lead.get("city", ""), lead.get("district", "")),
@@ -641,6 +724,8 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, 
         "font_head": next((f["family"] for f in (fonts or []) if f.get("kind") == "head"), mode["head"]),
         "head_weight": mode["weight"],
         "statement_pre": pre, "statement_em": em, "statement_post": post, "statement_name": statement_name,
+        # 兩段都短（一行放得下）就各自不拆，只在逗號換行；斷詞器不認得的詞（毛小孩）也不會被切開
+        "statement_units": bool(pre) and len(pre) <= 11 and len(em) <= 11 and not post,
         "closing_title": closing_title(lead.get("theme") or "default", name),
         "year": date.today().year,
         "credit": brand["sender_name"] if show_credit else "",
@@ -653,8 +738,10 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, 
     band = "".join(f'<g transform="translate({x} 0) rotate({r} 100 100)">{drawable(mset.get(k, motif))}</g>'
                    for x, r, k in ((0, -8, "a"), (300, 6, "b"), (600, -5, "c")))
     idle = mset.get("idle") or {"kind": "float", "shapes": [0]}
+    band = '<circle class="disc" cx="400" cy="92" r="64"/>' + band
     return minify_css(tpl.render(b=b, t={**theme["palette"], "word": theme.get("word", "LOCAL"), "motif": Markup(motif),
                                          "motif_draw": Markup(drawable(motif)), "motif_idle": Markup(idle_classes(drawable(motif), idle)),
+                                         "motif_scene": Markup(scene_markup(idle_classes(drawable(motif), idle))),
                                          "motif_b": Markup(mset.get("b", motif)), "motif_band": Markup(band)}, demo=demo))
 
 

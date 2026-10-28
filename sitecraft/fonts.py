@@ -32,7 +32,7 @@ SOURCES = {
 
 # 每種字型語氣要切哪些檔：family 是 @font-face 用的名稱（標題子集另取名字，
 # 缺字時才會順著 font-family 清單退到同字重的內文字型，而不是退到系統字型）
-#   kind: latin 只用拉丁字元集；head 只用標題用字、單一字重、先抓（首屏）；body 用整頁字元集、不先抓
+#   kind: latin 只用拉丁字元集；head 單一字重、先抓（首屏）；body 多字重、不先抓（兩者都含整頁用字）
 #   wght: 保留的字重範圍（變數軸縮小，檔案跟著變小）；axes: 其他軸固定值
 MODE_FILES = {
     "editorial": [
@@ -63,9 +63,6 @@ MODE_FILES = {
     ],
 }
 
-# 用標題字型（--cjk-head）的元素：這些裡面的字進標題子集
-HEAD_TAGS = {"h1", "h2", "h3"}
-HEAD_CLASSES = {"display", "statement", "tagline", "vtext", "overlay"}
 
 # 不管頁面有沒有出現都保留：JS 動態字串（營業狀態）、常用標點、數字
 BASE_CHARS = set(
@@ -120,39 +117,6 @@ def charset_from_html(html: str) -> set[str]:
     return {c for c in body if not c.isspace()} | BASE_CHARS
 
 
-def head_charset_from_html(html: str) -> set[str]:
-    """只收標題元素（h1/h2/h3、.statement、.tagline、.vtext、.overlay…）裡的字。"""
-    from html.parser import HTMLParser
-
-    class P(HTMLParser):
-        def __init__(self):
-            super().__init__()
-            self.stack: list[bool] = []
-            self.chars: set[str] = set()
-            self.skip = 0
-
-        def handle_starttag(self, tag, attrs):
-            if tag in ("br", "wbr", "img", "meta", "link", "input", "hr", "path", "circle", "rect", "ellipse", "stop", "use"):
-                return
-            if tag in ("style", "script", "svg"):
-                self.skip += 1
-            classes = set((dict(attrs).get("class") or "").split())
-            self.stack.append(tag in HEAD_TAGS or bool(classes & HEAD_CLASSES))
-
-        def handle_endtag(self, tag):
-            if tag in ("style", "script", "svg"):
-                self.skip = max(0, self.skip - 1)
-            if self.stack and tag not in ("br", "wbr", "img", "meta", "link", "input", "hr", "path", "circle", "rect", "ellipse", "stop", "use"):
-                self.stack.pop()
-
-        def handle_data(self, data):
-            if not self.skip and any(self.stack):
-                self.chars |= {c for c in data if not c.isspace()}
-
-    p = P()
-    p.feed(html)
-    return p.chars | BASE_CHARS
-
 
 
 def _subset(src: Path, out: Path, chars: set[str], wght: tuple[int, int], axes: dict) -> None:
@@ -190,7 +154,6 @@ def build_fonts(mode: str, html: str, site_dir: Path, log=print) -> list[dict] |
         return None
     chars = charset_from_html(html)
     latin = {c for c in chars if ord(c) < 0x2E80} | LATIN_BASE
-    head = head_charset_from_html(html) | set("0123456789")
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
     out_dir = site_dir / "fonts"
     out_dir.mkdir(exist_ok=True)
@@ -198,7 +161,8 @@ def build_fonts(mode: str, html: str, site_dir: Path, log=print) -> list[dict] |
         old.unlink()
     result = []
     for f in files:
-        use = {"latin": latin, "head": head, "body": chars}[f["kind"]]
+        # 標題子集也用整頁字元：哪個元素用標題字型由 CSS 決定，抓不準就會缺字退回系統字型
+        use = latin if f["kind"] == "latin" else chars
         key = hashlib.sha1(("|".join([f["src"], str(f["wght"]), repr(sorted(f["axes"].items())), "".join(sorted(use))])).encode()).hexdigest()[:16]
         cached = CACHE_DIR / f"{f['out']}-{key}.woff2"
         if not cached.exists():
