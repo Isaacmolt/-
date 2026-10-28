@@ -276,9 +276,7 @@ def art_tiles(palette: dict, seed: str, motif: str = "", n: int = 6) -> list[str
         # (ground colour, motif placement)
         (asoft, g(80, 30, 1.2, pd, 2.4)),                                   # 1 滿版主圖
         (p, g(-60, -40, 2.6, bg, 1.6, 'opacity=".9"')),                      # 2 特寫（高）
-        (soft, '<rect x="36" y="30" width="328" height="240" rx="14" fill="none" stroke="' + pd + '" stroke-width="2" stroke-dasharray="8 8" opacity=".55"/>'
-               + '<path d="M36 30L364 270M364 30L36 270" stroke="' + pd + '" stroke-width="1" opacity=".18"/>'
-               + g(160, 110, .4, pd, 4, 'opacity=".75"')),                    # 3 相框
+        (asoft, '<circle cx="70" cy="60" r="34" fill="' + a + '" opacity=".9"/>' + g(120, 70, 1.5, pd, 1.8, 'opacity=".9"')),  # 3 大圖騰 + 一點
         (a, g(150, 90, 2.2, pd, 1.8, 'opacity=".85"')),                      # 4 特寫（右下）
         (soft, "".join(g(16 + i * 76, 10 + j * 76, .32, p, 5, 'opacity=".55"') for i in range(6) for j in range(5))),  # 5 圖樣（高）
         (pd, g(90, 40, 1.1, a, 2.6)),                                        # 6 深底主圖
