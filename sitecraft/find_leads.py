@@ -79,13 +79,13 @@ def _post_with_retry(headers: dict, body: dict) -> dict | None:
         try:
             resp = requests.post(API_URL, headers=headers, json=body, timeout=30)
         except requests.RequestException as exc:
-            print(f"    ⚠ 連線錯誤（第 {attempt} 次）：{exc}")
+            print(f"    ! 連線錯誤（第 {attempt} 次）：{exc}")
             time.sleep(2 ** attempt)
             continue
         if resp.status_code == 200:
             return resp.json()
         if resp.status_code in (429, 500, 502, 503, 504):
-            print(f"    ⚠ HTTP {resp.status_code}，{2 ** attempt}s 後重試")
+            print(f"    ! HTTP {resp.status_code}，{2 ** attempt}s 後重試")
             time.sleep(2 ** attempt)
             continue
         # 400/403：金鑰、API 未啟用、欄位錯誤——直接說清楚，不重試
@@ -93,7 +93,7 @@ def _post_with_retry(headers: dict, body: dict) -> dict | None:
             msg = resp.json().get("error", {}).get("message", resp.text)
         except ValueError:
             msg = resp.text
-        print(f"    ✗ HTTP {resp.status_code}：{msg}")
+        print(f"    x HTTP {resp.status_code}：{msg}")
         if resp.status_code == 403:
             print("      → 請到 Google Cloud Console 確認已啟用「Places API (New)」且金鑰沒有限制來源。")
         return None
@@ -225,7 +225,7 @@ def main() -> None:
     pages = min(max(args.pages or cfg["search"].get("pages_per_query", 3), 1), 3)
     queries = build_queries(args, cfg)
 
-    print(f"🔎 共 {len(queries)} 組關鍵字 × 最多 {pages} 頁 = 最多 {len(queries) * pages} 次 API 請求")
+    print(f"[search] 共 {len(queries)} 組關鍵字 × 最多 {pages} 頁 = 最多 {len(queries) * pages} 次 API 請求")
     if args.dry_run:
         for q in queries:
             print("   ·", q)
@@ -262,7 +262,7 @@ def main() -> None:
     social = [r for r in targets if r["website_status"] == "social"]
     print()
     print("=" * 60)
-    print(f"✅ 寫入 {out_path}（新增 {added}、更新 {updated}）")
+    print(f"[ok] 寫入 {out_path}（新增 {added}、更新 {updated}）")
     print(f"   本次掃到 {len(fresh)} 家 → 沒有官網的目標 {len(targets)} 家"
           f"（其中只有 FB/IG/LINE 的 {len(social)} 家）")
     print(f"   已有官網 {sum(1 for r in fresh if r['status'] == 'has_website')} 家、"

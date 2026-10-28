@@ -222,12 +222,12 @@ def main() -> None:
             r["status"] = "opted_out"
             r["notes"] = (r.get("notes", "") + f" [{today()} 要求停止聯絡]").strip()
         write_leads(rows, LEADS_FILE)
-        print(f"✅ 已將 {len(hits)} 家店標記為 opted_out，永不再寄：{', '.join(r['name'] for r in hits)}")
+        print(f"[ok] 已將 {len(hits)} 家店標記為 opted_out，永不再寄：{', '.join(r['name'] for r in hits)}")
         return
 
     mailer = Mailer(cfg)
     if not mailer.sender_email:
-        print("⚠ 尚未設定 SMTP_USER / SENDER_EMAIL（.env），預覽信的寄件人會是空的；真的寄送前請先設定。")
+        print("! 尚未設定 SMTP_USER / SENDER_EMAIL（.env），預覽信的寄件人會是空的；真的寄送前請先設定。")
 
     if args.test:
         mailer.check()
@@ -240,7 +240,7 @@ def main() -> None:
         msg = mailer.compose(args.test, "", f"[測試] {subject}", body)
         mailer.send(msg)
         mailer.close()
-        print(f"✅ 測試信已寄到 {args.test}，去收信看看格式。")
+        print(f"[ok] 測試信已寄到 {args.test}，去收信看看格式。")
         return
 
     if not args.stage:
@@ -268,7 +268,7 @@ def main() -> None:
     else:
         OUTBOX_DIR.mkdir(parents=True, exist_ok=True)
 
-    print(f"{'📨 寄出' if args.send else '👀 預覽'} {len(targets)} 封「{args.stage}」信"
+    print(f"{'[send] 寄出' if args.send else '[preview] 預覽'} {len(targets)} 封「{args.stage}」信"
           f"{f'（今日已寄 {already}/{cap}）' if args.send else ''}")
     print("-" * 60)
 
@@ -284,7 +284,7 @@ def main() -> None:
                 mailer.close()
                 sys.exit("SMTP 登入失敗：Gmail 請確認已開兩步驟驗證並使用 16 碼「應用程式密碼」。")
             except smtplib.SMTPException as exc:
-                print(f"  ✗ {lead['name']} 寄送失敗：{exc}")
+                print(f"  x {lead['name']} 寄送失敗：{exc}")
                 continue
             stamp = now()
             if after:
@@ -295,7 +295,7 @@ def main() -> None:
                     lead["followup_count"] = str(int(lead.get("followup_count") or 0) + 1)
                 lead["next_action_at"] = days_from_today(int(out_cfg.get(days_key, 4))) if days_key else ""
             lead["last_contact_at"] = stamp
-            print(f"  ✓ [{i}/{len(targets)}] {lead['name']} <{lead['email']}>  {subject}")
+            print(f"  + [{i}/{len(targets)}] {lead['name']} <{lead['email']}>  {subject}")
         else:
             path = OUTBOX_DIR / f"{lead['slug']}-{args.stage}.eml"
             path.write_bytes(bytes(msg))
@@ -307,14 +307,14 @@ def main() -> None:
         sent += 1
         if args.send and i < len(targets) and not args.no_wait:
             wait = random.randint(lo, hi)
-            print(f"      ⏳ 等 {wait}s…")
+            print(f"      [wait] 等 {wait}s…")
             time.sleep(wait)
 
     mailer.close()
     if args.send:
         write_leads(rows, LEADS_FILE)
         print("-" * 60)
-        print(f"✅ 已寄 {sent} 封並更新名單。有人回信 → python sitecraft/crm.py replied <slug>")
+        print(f"[ok] 已寄 {sent} 封並更新名單。有人回信 → python sitecraft/crm.py replied <slug>")
     else:
         print("-" * 60)
         print(f"預覽 {sent} 封已存到 sitecraft/outbox/。確認沒問題後加 --send 真的寄出。")

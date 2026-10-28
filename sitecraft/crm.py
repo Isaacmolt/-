@@ -66,7 +66,7 @@ def cmd_stats(args, rows, cfg):
     targets = sum(counts[s] for s in FUNNEL)
     emailed = sum(counts[s] for s in ("contacted", "followup_1", "followup_2", "replied", "won", "delivered"))
     won = counts["won"] + counts["delivered"]
-    print(f"📊 名單總數 {total}　目標店家 {targets}　已寄信 {emailed}　成交 {won}　營收 NT${won * price:,}")
+    print(f"[stats] 名單總數 {total}　目標店家 {targets}　已寄信 {emailed}　成交 {won}　營收 NT${won * price:,}")
     print()
     for s in FUNNEL + ["lost", "opted_out", "has_website", "skipped"]:
         bar = "█" * min(counts.get(s, 0), 60)
@@ -77,7 +77,7 @@ def cmd_stats(args, rows, cfg):
               f"　成交率 {won}/{emailed} = {won / emailed:.0%}")
     need_email = sum(1 for r in rows if r["status"] == "demo_ready" and not r.get("email"))
     if need_email:
-        print(f"\n  ⚠ {need_email} 家示範站做好了但還沒有 email → crm.py due")
+        print(f"\n  ! {need_email} 家示範站做好了但還沒有 email → crm.py due")
 
 
 def cmd_due(args, rows, cfg):
@@ -91,15 +91,15 @@ def cmd_due(args, rows, cfg):
     replied = [r for r in rows if r["status"] == "replied"]
     won = [r for r in rows if r["status"] == "won"]
 
-    print(f"📅 {t.isoformat()} 今天的待辦")
-    _section("🔍 示範站做好了、還缺 email（去 FB 粉專「關於」、IG 簡介、店家名片找；找不到就改走 LINE / 電話）", need_email,
+    print(f"[due] {t.isoformat()} 今天的待辦")
+    _section("[email?] 示範站做好了、還缺 email（去 FB 粉專「關於」、IG 簡介、店家名片找；找不到就改走 LINE / 電話）", need_email,
              "demo_url")
-    _section(f"📨 可以寄第一封信（python sitecraft/send_outreach.py --stage first --send）", ready, "email")
-    _section("🔁 該寄第一次追蹤信（--stage followup1）", f1, "last_contact_at")
-    _section("🔁 該寄最後一封追蹤信（--stage followup2）", f2, "last_contact_at")
-    _section("🗂  三封都寄了沒回 → crm.py sweep 結案", close, "last_contact_at")
-    _section("💬 有回覆、洽談中（記得回信！）", replied, "notes")
-    _section("💰 已付款，等照片文字 → 完成後 crm.py publish <slug>", won, "paid_at")
+    _section(f"[send] 可以寄第一封信（python sitecraft/send_outreach.py --stage first --send）", ready, "email")
+    _section("[follow] 該寄第一次追蹤信（--stage followup1）", f1, "last_contact_at")
+    _section("[follow] 該寄最後一封追蹤信（--stage followup2）", f2, "last_contact_at")
+    _section("[close]  三封都寄了沒回 → crm.py sweep 結案", close, "last_contact_at")
+    _section("[reply] 有回覆、洽談中（記得回信！）", replied, "notes")
+    _section("[paid] 已付款，等照片文字 → 完成後 crm.py publish <slug>", won, "paid_at")
 
 
 def _older(r: dict, days) -> bool:
@@ -149,7 +149,7 @@ def cmd_set(args, rows, cfg):
     if args.note:
         lead["notes"] = (lead.get("notes", "") + f" [{today()}] {args.note}").strip()
     write_leads(rows, LEADS_FILE)
-    print(f"✓ {lead['name']} → {args.status}")
+    print(f"+ {lead['name']} → {args.status}")
 
 
 def cmd_email(args, rows, cfg):
@@ -158,7 +158,7 @@ def cmd_email(args, rows, cfg):
         sys.exit("這看起來不像 email。")
     lead["email"] = args.email.strip()
     write_leads(rows, LEADS_FILE)
-    print(f"✓ {lead['name']} email = {lead['email']}")
+    print(f"+ {lead['name']} email = {lead['email']}")
     if lead["status"] == "demo_ready":
         print("  可以寄第一封信了：python sitecraft/send_outreach.py --stage first --slug", lead["slug"])
 
@@ -170,7 +170,7 @@ def cmd_contact(args, rows, cfg):
             lead[field] = val.strip()
     write_leads(rows, LEADS_FILE)
     _sync_content(lead)
-    print(f"✓ {lead['name']} 聯絡方式已更新（重新 build 後網站會顯示）")
+    print(f"+ {lead['name']} 聯絡方式已更新（重新 build 後網站會顯示）")
 
 
 def _sync_content(lead: dict) -> None:
@@ -193,7 +193,7 @@ def cmd_note(args, rows, cfg):
     lead = _need(rows, args.slug)
     lead["notes"] = (lead.get("notes", "") + f" [{today()}] {args.text}").strip()
     write_leads(rows, LEADS_FILE)
-    print(f"✓ 已記錄：{lead['notes']}")
+    print(f"+ 已記錄：{lead['notes']}")
 
 
 def cmd_replied(args, rows, cfg):
@@ -203,7 +203,7 @@ def cmd_replied(args, rows, cfg):
     if args.note:
         lead["notes"] = (lead.get("notes", "") + f" [{today()}] {args.note}").strip()
     write_leads(rows, LEADS_FILE)
-    print(f"✓ {lead['name']} → replied。記得 24 小時內回覆！")
+    print(f"+ {lead['name']} → replied。記得 24 小時內回覆！")
 
 
 def cmd_won(args, rows, cfg):
@@ -212,7 +212,7 @@ def cmd_won(args, rows, cfg):
     lead["paid_at"] = today()
     write_leads(rows, LEADS_FILE)
     price = cfg["brand"].get("price_twd", 860)
-    print(f"🎉 {lead['name']} 成交 NT${price}！")
+    print(f"[won] {lead['name']} 成交 NT${price}！")
     print(f"   寄資料需求信：python sitecraft/send_outreach.py --stage after_payment --slug {lead['slug']} --send")
     print(f"   收到照片後：把圖放到 {SITES_DIR / lead['slug'] / 'img'}，在 content.json 的 gallery 列出檔名、改文案")
     print(f"   然後：python sitecraft/crm.py publish {lead['slug']}")
@@ -227,7 +227,7 @@ def cmd_publish(args, rows, cfg):
     out = build_one(lead, cfg, themes, demo=False)
     build_index(cfg, themes)
     write_leads(rows, LEADS_FILE)
-    print(f"✅ {lead['name']} 正式版已產生：{out}")
+    print(f"[ok] {lead['name']} 正式版已產生：{out}")
     print(f"   git add/commit/push 後即上線：{lead['delivered_url']}")
     print(f"   寄上線通知：python sitecraft/send_outreach.py --stage delivered --slug {lead['slug']} --send")
 
@@ -251,7 +251,7 @@ def cmd_package(args, rows, cfg):
         f"\n網站製作：{cfg['brand']['sender_name']}\n", encoding="utf-8")
     zip_path = shutil.make_archive(str(DELIVERIES_DIR / f"{lead['slug']}-website"), "zip", stage)
     shutil.rmtree(stage)
-    print(f"📦 已打包：{zip_path}")
+    print(f"[zip] 已打包：{zip_path}")
 
 
 def cmd_lost(args, rows, cfg):
@@ -260,7 +260,7 @@ def cmd_lost(args, rows, cfg):
     if args.note:
         lead["notes"] = (lead.get("notes", "") + f" [{today()}] {args.note}").strip()
     write_leads(rows, LEADS_FILE)
-    print(f"✓ {lead['name']} → lost（示範站可保留，日後想再談隨時 crm.py set <slug> replied）")
+    print(f"+ {lead['name']} → lost（示範站可保留，日後想再談隨時 crm.py set <slug> replied）")
 
 
 def cmd_optout(args, rows, cfg):
@@ -268,7 +268,7 @@ def cmd_optout(args, rows, cfg):
     lead["status"] = "opted_out"
     lead["notes"] = (lead.get("notes", "") + f" [{today()} 要求停止聯絡]").strip()
     write_leads(rows, LEADS_FILE)
-    print(f"✓ {lead['name']} → opted_out，永不再寄")
+    print(f"+ {lead['name']} → opted_out，永不再寄")
 
 
 def cmd_sweep(args, rows, cfg):
@@ -280,7 +280,7 @@ def cmd_sweep(args, rows, cfg):
             r["notes"] = (r.get("notes", "") + f" [{today()} 三封未回自動結案]").strip()
             n += 1
     write_leads(rows, LEADS_FILE)
-    print(f"✓ 結案 {n} 家（最後一封超過 {days} 天未回）")
+    print(f"+ 結案 {n} 家（最後一封超過 {days} 天未回）")
 
 
 # ---------------------------------------------------------------------------

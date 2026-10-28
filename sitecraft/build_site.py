@@ -23,6 +23,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import random
 import re
 import sys
 from datetime import date
@@ -99,10 +100,10 @@ def ai_copy(lead: dict, theme: dict) -> dict | None:
     try:
         import anthropic
     except ImportError:
-        print("    ⚠ 未安裝 anthropic 套件（pip install anthropic），改用預設文案")
+        print("    ! 未安裝 anthropic 套件（pip install anthropic），改用預設文案")
         return None
     if not env("ANTHROPIC_API_KEY") and not env("ANTHROPIC_AUTH_TOKEN"):
-        print("    ⚠ 沒有 ANTHROPIC_API_KEY，改用預設文案")
+        print("    ! 沒有 ANTHROPIC_API_KEY，改用預設文案")
         return None
 
     hours = ""
@@ -135,23 +136,23 @@ def ai_copy(lead: dict, theme: dict) -> dict | None:
         except (TypeError, anthropic.BadRequestError):
             resp = client.messages.create(**kwargs)
     except anthropic.RateLimitError:
-        print("    ⚠ Claude 流量限制，改用預設文案")
+        print("    ! Claude 流量限制，改用預設文案")
         return None
     except anthropic.APIStatusError as exc:
-        print(f"    ⚠ Claude API 錯誤 {exc.status_code}，改用預設文案")
+        print(f"    ! Claude API 錯誤 {exc.status_code}，改用預設文案")
         return None
     except anthropic.APIConnectionError:
-        print("    ⚠ 無法連線 Claude API，改用預設文案")
+        print("    ! 無法連線 Claude API，改用預設文案")
         return None
 
     if resp.stop_reason == "refusal":
-        print("    ⚠ Claude 拒絕此請求，改用預設文案")
+        print("    ! Claude 拒絕此請求，改用預設文案")
         return None
     text = next((b.text for b in resp.content if b.type == "text"), "")
     try:
         data = json.loads(text)
     except ValueError:
-        print("    ⚠ Claude 回傳不是合法 JSON，改用預設文案")
+        print("    ! Claude 回傳不是合法 JSON，改用預設文案")
         return None
     return data
 
@@ -163,7 +164,7 @@ def load_or_make_content(lead: dict, theme: dict, site_dir: Path, use_ai: bool, 
         try:
             content = json.loads(cj.read_text(encoding="utf-8"))
         except ValueError:
-            print(f"    ⚠ {cj} 不是合法 JSON，將重建")
+            print(f"    ! {cj} 不是合法 JSON，將重建")
             content = {}
         if content:
             return content
@@ -185,6 +186,113 @@ def load_or_make_content(lead: dict, theme: dict, site_dir: Path, use_ai: bool, 
     site_dir.mkdir(parents=True, exist_ok=True)
     cj.write_text(json.dumps(content, ensure_ascii=False, indent=2), encoding="utf-8")
     return content
+
+
+
+# ---------------------------------------------------------------------------
+# 版面素材：字型、名稱拆字、抽象圖、標語強調
+# ---------------------------------------------------------------------------
+FONT_MODES = {
+    # 編輯感：襯線中文 + Fraunces；粗獷感：黑體 900 + Syne
+    "editorial": {
+        "url": "https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Noto+Serif+TC:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap",
+        "display": '"Fraunces"', "head": '"Noto Serif TC"', "weight": "600",
+    },
+    "bold": {
+        "url": "https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=Noto+Sans+TC:wght@400;500;600;700;900&display=swap",
+        "display": '"Syne"', "head": '"Noto Sans TC"', "weight": "800",
+    },
+}
+
+CJK = re.compile(r"[\u3400-\u9fff\uf900-\ufaff]")
+
+
+def name_tokens(name: str) -> list[str]:
+    """中文逐字、拉丁逐詞，給 hero 標題做進場動畫。"""
+    tokens: list[str] = []
+    buf = ""
+
+    def flush() -> None:
+        nonlocal buf
+        if buf:
+            tokens.append(buf)
+            buf = ""
+
+    for ch in name:
+        if CJK.match(ch):
+            flush()
+            tokens.append(ch)
+        elif ch.isspace():
+            flush()
+            if tokens and tokens[-1] != " ":
+                tokens.append(" ")
+        else:
+            buf += ch
+    flush()
+    while tokens and tokens[-1] == " ":
+        tokens.pop()
+    return tokens
+
+
+def split_statement(text: str) -> tuple[str, str, str]:
+    """把標語裡的最後一個短句標成強調色（用標點切）。"""
+    text = text.strip().rstrip("。")
+    for sep in ("，", "、", "：", " "):
+        if sep in text:
+            pre, _, em = text.rpartition(sep)
+            return pre + sep, em, ""
+    return "", text, ""
+
+
+def art_tiles(palette: dict, seed: str, n: int = 6) -> list[str]:
+    """每家店不同、但同一家店每次都一樣的抽象圖（取代照片的示意圖）。"""
+    from markupsafe import Markup
+    rnd = random.Random(seed)
+    p, pd, a, bg, sf = palette["p"], palette["pd"], palette["a"], palette["bg"], palette["sf"]
+    soft, asoft = palette["p_soft"], palette["a_soft"]
+    tiles = []
+    for i in range(n):
+        kind = i % 6
+        gid = f"g{i}"
+        cx, cy = rnd.randint(55, 75), rnd.randint(50, 70)
+        rot = rnd.randint(-18, 18)
+        parts = [f'<svg class="art" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true">',
+                 f'<defs><linearGradient id="{gid}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="{soft}"/><stop offset="1" stop-color="{asoft}"/></linearGradient></defs>',
+                 f'<rect width="400" height="300" fill="url(#{gid})"/>']
+        if kind == 0:
+            parts.append(f'<circle cx="{cx * 4}" cy="{cy * 3}" r="150" fill="{a}" opacity=".75"/>')
+            parts.append(f'<circle cx="{cx * 4 - 120}" cy="{cy * 3 - 110}" r="54" fill="none" stroke="{pd}" stroke-width="10"/>')
+        elif kind == 1:
+            parts.append(f'<rect x="-60" y="120" width="560" height="90" fill="{p}" opacity=".85" transform="rotate({rot} 200 150)"/>')
+            parts.append(f'<circle cx="{cx * 4 - 160}" cy="{cy * 3 - 120}" r="26" fill="{a}"/>')
+        elif kind == 2:
+            for r, w in ((150, 14), (105, 10), (62, 8)):
+                parts.append(f'<circle cx="{cx * 4}" cy="{cy * 3}" r="{r}" fill="none" stroke="{pd}" stroke-width="{w}" opacity=".8" stroke-dasharray="{r * 3.6} {r * 2.7}" transform="rotate({rot * 3} {cx * 4} {cy * 3})"/>')
+        elif kind == 3:
+            parts.append(f'<path d="M0 0H400V130C300 210 100 210 0 130Z" fill="{a}" opacity=".8"/>')
+            parts.append(f'<rect x="{cx * 4 - 150}" y="150" width="120" height="120" rx="18" fill="{p}" transform="rotate({rot} {cx * 4 - 90} 210)"/>')
+        elif kind == 4:
+            parts.append('<pattern id="d' + gid + '" width="22" height="22" patternUnits="userSpaceOnUse"><circle cx="4" cy="4" r="3" fill="' + pd + '" opacity=".35"/></pattern>')
+            parts.append(f'<rect width="400" height="300" fill="url(#d{gid})"/>')
+            x0, y0 = cx * 4 - 200, cy * 3 - 150
+            parts.append(f'<path d="M{x0} {y0 + 115}A115 115 0 0 1 {x0 + 115} {y0}H{x0 + 230}V{y0 + 115}A115 115 0 0 1 {x0 + 115} {y0 + 230}H{x0}Z" fill="{p}" opacity=".9"/>')
+        else:
+            parts.append(f'<ellipse cx="{cx * 4 - 80}" cy="{cy * 3}" rx="150" ry="100" fill="{p}" opacity=".7" transform="rotate({rot} {cx * 4 - 80} {cy * 3})"/>')
+            parts.append(f'<ellipse cx="{cx * 4 + 10}" cy="{cy * 3 - 60}" rx="130" ry="90" fill="{a}" opacity=".7" style="mix-blend-mode:multiply"/>')
+        parts.append("</svg>")
+        tiles.append(Markup("".join(parts)))
+    return tiles
+
+
+def closing_title(theme_key: str, name: str) -> str:
+    return {
+        "cafe": "今天，來喝一杯", "breakfast": "明天早餐，來這裡", "restaurant": "今晚，來這裡吃飯",
+        "snack": "肚子餓了，就來", "hotpot": "今晚，吃鍋", "dessert": "給自己一點甜",
+        "hair": "預約你的下一個樣子", "beauty": "把時間留給自己", "pet": "毛小孩，交給我們",
+        "clinic": "預約看診", "gym": "從今天開始動", "florist": "把心意做成一束花",
+        "auto": "車子有狀況，先打給我們", "education": "預約一堂免費試上", "wellness": "給身體一小時",
+        "lodging": "下一趟，住這裡",
+    }.get(theme_key, f"歡迎來到 {name}")
 
 
 # ---------------------------------------------------------------------------
@@ -226,10 +334,10 @@ def opening_hours_spec(periods: list[dict]) -> list[dict]:
 # ---------------------------------------------------------------------------
 # 組裝 + 渲染
 # ---------------------------------------------------------------------------
-def favicon_svg(color: str, icon: str) -> str:
+def favicon_svg(color: str, initial: str) -> str:
     svg = (f"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'>"
            f"<rect width='64' height='64' rx='14' fill='{color}'/>"
-           f"<text x='32' y='44' font-size='34' text-anchor='middle'>{icon}</text></svg>")
+           f"<text x='32' y='43' font-size='32' font-weight='700' font-family='Georgia,serif' fill='white' text-anchor='middle'>{initial}</text></svg>")
     return quote(svg, safe="")
 
 
@@ -248,10 +356,18 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool) 
     if isinstance(about, str):
         about = [about]
 
-    gallery_items = []
     imgs = [g for g in content.get("gallery", []) if g]
-    for i, icon in enumerate(theme["gallery_icons"]):
-        gallery_items.append({"img": imgs[i] if i < len(imgs) else "", "icon": icon})
+    arts = art_tiles(theme["palette"], lead["slug"])
+    gallery_items = []
+    for i in range(max(len(imgs), 6) if imgs else 6):
+        gallery_items.append({"img": imgs[i] if i < len(imgs) else "", "art": arts[i % len(arts)], "tall": i % 3 == 1})
+    mode = FONT_MODES.get(theme.get("mode", "bold"), FONT_MODES["bold"])
+    pre, em, post = split_statement(content.get("tagline", ""))
+    initial = next((ch for ch in name if ch.strip()), "S")
+    city_district = f"{lead.get('city', '')}{lead.get('district', '')}"
+    address_short = address
+    if city_district and city_district in address:
+        address_short = address.split(city_district, 1)[1] or address
 
     jsonld = {
         "@context": "https://schema.org",
@@ -293,7 +409,11 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool) 
         "highlights": content.get("highlights", []), "services": content.get("services", []),
         "gallery_items": gallery_items,
         "weekday_hours": weekday_hours, "periods": periods, "today_hours": today_hours,
-        "jsonld": jsonld, "favicon_svg": favicon_svg(theme["palette"]["p"], theme["icon"]),
+        "jsonld": jsonld, "favicon_svg": favicon_svg(theme["palette"]["pd"], initial),
+        "initial": initial, "name_tokens": name_tokens(name), "address_short": address_short,
+        "fonts_url": mode["url"], "font_display": mode["display"], "font_head": mode["head"], "head_weight": mode["weight"],
+        "statement_pre": pre, "statement_em": em, "statement_post": post,
+        "closing_title": closing_title(lead.get("theme") or "default", name),
         "year": date.today().year,
         "credit": brand["sender_name"] if show_credit else "",
         "credit_url": (brand.get("demo_base_url") or "") + "/",
@@ -301,7 +421,20 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool) 
         "price_twd": brand.get("price_twd", 860),
     }
     tpl = _env.get_template("onepage.html.j2")
-    return tpl.render(b=b, t={**theme["palette"], "icon": theme["icon"], "gallery_icons": theme["gallery_icons"]}, demo=demo)
+    return minify_css(tpl.render(b=b, t={**theme["palette"], "word": theme.get("word", "LOCAL")}, demo=demo))
+
+
+CSS_COMMENT = re.compile(r"/\*.*?\*/", re.S)
+
+
+def minify_css(html: str) -> str:
+    """只壓縮 <style> 區塊：拿掉註解與行首縮排、合併換行（字串內的空白不動）。"""
+    def _min(m: re.Match) -> str:
+        css = CSS_COMMENT.sub("", m.group(2))
+        css = "\n".join(line.strip() for line in css.splitlines() if line.strip())
+        css = css.replace("{\n", "{").replace("\n}", "}").replace(";\n", ";").replace("}\n", "}")
+        return m.group(1) + css + m.group(3)
+    return re.sub(r"(<style>)(.*?)(</style>)", _min, html, flags=re.S)
 
 
 def build_one(lead: dict, cfg: dict, themes: dict, *, demo: bool = True, use_ai: bool = False,
@@ -327,7 +460,7 @@ def build_index(cfg: dict, themes: dict) -> Path:
         seen.add(r["slug"])
         theme = themes.get(r.get("theme") or "default", themes["default"])
         sites.append({"slug": r["slug"], "name": r["name"], "category": r.get("category") or theme["label"],
-                      "city": r.get("city", ""), "district": r.get("district", ""), "icon": theme["icon"],
+                      "city": r.get("city", ""), "district": r.get("district", ""), "word": theme.get("word", "LOCAL"),
                       "p": theme["palette"]["p"], "pd": theme["palette"]["pd"],
                       "live": r.get("status") == "delivered"})
     sites.sort(key=lambda s: (not s["live"], s["name"]))
@@ -360,7 +493,7 @@ def main() -> None:
     themes = load_themes()
 
     if args.index:
-        print("📇 作品集 →", build_index(cfg, themes))
+        print("[index] 作品集 →", build_index(cfg, themes))
         return
 
     leads_path = SAMPLE_LEADS_FILE if args.sample else LEADS_FILE
@@ -372,7 +505,7 @@ def main() -> None:
         targets = [r for r in rows if r["slug"] in set(args.slug)]
         missing = set(args.slug) - {r["slug"] for r in targets}
         if missing:
-            print("⚠ 找不到 slug：", ", ".join(sorted(missing)))
+            print("! 找不到 slug：", ", ".join(sorted(missing)))
     elif args.rebuild:
         targets = [r for r in rows if r["status"] in ACTIVE_STATUSES or args.sample]
     else:
@@ -382,7 +515,7 @@ def main() -> None:
         print("沒有需要產生的店家（status=new）。用 --rebuild 重做既有網站、或 --slug 指定。")
         return
 
-    print(f"🏗  產生 {len(targets)} 個網站{'（Claude 文案）' if args.ai_copy else ''}…")
+    print(f"[build]  產生 {len(targets)} 個網站{'（Claude 文案）' if args.ai_copy else ''}…")
     changed = False
     for lead in targets:
         if not lead.get("slug"):
@@ -395,13 +528,13 @@ def main() -> None:
         if not lead.get("demo_url"):
             lead["demo_url"] = demo_url_for(lead["slug"], cfg)
             changed = True
-        print(f"  ✓ {lead['name']:<16} {lead.get('theme', ''):<10} → {out.relative_to(SITES_DIR.parent)}")
+        print(f"  + {lead['name']:<16} {lead.get('theme', ''):<10} → {out.relative_to(SITES_DIR.parent)}")
 
     if changed and not args.sample:
         write_leads(rows, leads_path)
     build_index(cfg, themes)
     print()
-    print(f"✅ 完成。推上 GitHub 後網址為 {cfg['brand']['demo_base_url']}/<slug>/")
+    print(f"[ok] 完成。推上 GitHub 後網址為 {cfg['brand']['demo_base_url']}/<slug>/")
     if not args.sample:
         print("下一步：python sitecraft/crm.py due              # 看哪些店家還缺 email")
         print("        python sitecraft/send_outreach.py --stage first   # 預覽第一封信")

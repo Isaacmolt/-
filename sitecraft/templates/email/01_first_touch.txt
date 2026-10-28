@@ -4,7 +4,7 @@ Subject: {{ name }} 的網站草稿已經做好了（免費預覽）
 
 我是 {{ sender_name }}{% if sender_person %}的 {{ sender_person }}{% endif %}。前幾天在 Google 地圖找{{ district }}的{{ category }}時看到 {{ name }}{% if rating %}（{{ rating }} 顆星、{{ review_count }} 則評論，很受肯定）{% endif %}，但發現店家資訊裡還沒有官網連結，所以先自作主張幫您做了一個：
 
-👉 {{ demo_url }}
+{{ demo_url }}
 
 手機、電腦都能直接看。裡面已經放好營業時間、地址地圖、一鍵撥號{% if line_url %}與 LINE 聯絡{% endif %}，客人在 Google 搜到您之後點進去，30 秒內就知道怎麼找到您、怎麼聯絡您。
 

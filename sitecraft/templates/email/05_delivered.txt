@@ -1,4 +1,4 @@
-Subject: {{ name }} 的網站正式上線了 🎉
+Subject: {{ name }} 的網站正式上線了
 
 {{ name }} 老闆／闆娘您好，
 

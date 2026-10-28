@@ -250,4 +250,4 @@ def stars(rating: str) -> str:
     except (TypeError, ValueError):
         return ""
     full = int(round(r))
-    return "★" * full + "☆" * (5 - full)
+    return "" * full + "" * (5 - full)
