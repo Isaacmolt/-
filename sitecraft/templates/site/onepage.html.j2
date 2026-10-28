@@ -296,7 +296,7 @@ body[data-mode="mono"] .btn{border-radius:12px}
 .closing::before{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(50% 60% at 15% 100%,color-mix(in oklab,var(--p) 70%,transparent),transparent 70%)}
 .closing .wrap{display:grid;grid-template-columns:minmax(0,1fr) min(40vw,560px);gap:40px;align-items:end}
 @media (max-width:880px){.closing .wrap{grid-template-columns:1fr}}
-.closing h2{font-size:clamp(2.2rem,5.5vw,4.6rem);margin-bottom:14px}
+.closing h2{font-size:clamp(2.2rem,4.4vw,4rem);margin-bottom:14px}
 .closing p{opacity:.85;max-width:40ch}
 .closing .big{font-family:var(--display);font-weight:500;font-size:clamp(1.8rem,4vw,3.4rem);letter-spacing:-.03em;line-height:1.2;display:inline-block;margin-top:22px;border-bottom:2px solid var(--a);padding:8px 0 6px;min-height:48px;transition:color .3s}
 .closing .big:hover{color:var(--a)}
@@ -606,7 +606,7 @@ body.demo .fab{bottom:78px}
   var hs=d.getElementById('heroHours');if(hs&&state){var nxt=state.text.split('　')[1]||'';var a1=state.open?'營業中':(todayClosed?'今日公休':'休息中'),a2=state.open?li.children[1].textContent:nxt.replace(' 開始營業',' 開門');hs.innerHTML='';var s1=d.createElement('span');s1.textContent=a1;hs.appendChild(s1);if(a2){var s2=d.createElement('span');s2.className='nb';s2.textContent=a2;hs.appendChild(s2)}}
   if(closing&&'IntersectionObserver' in window){new IntersectionObserver(function(es){es.forEach(function(e){fab.classList.toggle('hold',e.isIntersecting);if(e.isIntersecting)closing.classList.add('in')})},{threshold:.35}).observe(closing)}
   /* 中文斷詞：標題級文字只在詞的邊界換行 */
-  if(window.Intl&&Intl.Segmenter){try{var seg=new Intl.Segmenter('zh-Hant',{granularity:'word'});d.querySelectorAll('h2.statement,.tile.type .vtext,.tagline').forEach(function(el){var w=d.createTreeWalker(el,NodeFilter.SHOW_TEXT),nodes=[];while(w.nextNode())nodes.push(w.currentNode);nodes.forEach(function(n){var parts=[];for(var it=seg.segment(n.nodeValue)[Symbol.iterator](),r=it.next();!r.done;r=it.next())parts.push(r.value.segment);if(parts.length<2)return;var f=d.createDocumentFragment();parts.forEach(function(tx,i){if(i)f.appendChild(d.createElement('wbr'));f.appendChild(d.createTextNode(tx))});n.parentNode.replaceChild(f,n)});el.classList.add('seg')})}catch(e){}}
+  if(window.Intl&&Intl.Segmenter){try{var seg=new Intl.Segmenter('zh-Hant',{granularity:'word'});d.querySelectorAll('h2.statement,.tile.type .vtext,.tagline,.closing h2').forEach(function(el){var w=d.createTreeWalker(el,NodeFilter.SHOW_TEXT),nodes=[];while(w.nextNode())nodes.push(w.currentNode);nodes.forEach(function(n){var parts=[];for(var it=seg.segment(n.nodeValue)[Symbol.iterator](),r=it.next();!r.done;r=it.next())parts.push(r.value.segment);if(parts.length<2)return;var f=d.createDocumentFragment();parts.forEach(function(tx,i){if(i)f.appendChild(d.createElement('wbr'));f.appendChild(d.createTextNode(tx))});n.parentNode.replaceChild(f,n)});el.classList.add('seg')})}catch(e){}}
   /* reveal + counters */
   function count(el){var to=parseFloat(el.dataset.count),dec=+el.dataset.dec||0,t0=null;function step(ts){if(!t0)t0=ts;var p=Math.min((ts-t0)/1100,1),e=1-Math.pow(1-p,3);el.textContent=(to*e).toFixed(dec);if(p<1)requestAnimationFrame(step)}requestAnimationFrame(step)}
   if(!reduce)d.querySelectorAll('[data-count]').forEach(count);
