@@ -348,6 +348,18 @@ def drawable(markup: str) -> str:
     return SHAPE_TAG.sub(tag, markup)
 
 
+def idle_classes(markup: str, idle: dict) -> str:
+    """把指定序號的形狀加上閒置微動 class（蒸氣飄、刀刃開合、腳掌脈動）。"""
+    kind, shapes = idle.get("kind", "float"), set(idle.get("shapes", []))
+    n = -1
+
+    def tag(mm: re.Match) -> str:
+        nonlocal n
+        n += 1
+        return mm.group(0) + (f' class="idle idle-{kind}"' if n in shapes else "")
+    return re.sub(r'<(?:path|circle|ellipse|rect) pathLength="1" style="--i:\d+"', tag, markup)
+
+
 def _lum(c: str) -> float:
     r, g, bb = (int(c.lstrip("#")[i:i + 2], 16) / 255 for i in (0, 2, 4))
     return 0.2126 * r + 0.7152 * g + 0.0722 * bb
@@ -625,8 +637,10 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, 
     from markupsafe import Markup
     band = "".join(f'<g transform="translate({x} 0) rotate({r} 100 100)">{drawable(mset.get(k, motif))}</g>'
                    for x, r, k in ((0, -8, "a"), (300, 6, "b"), (600, -5, "c")))
+    idle = mset.get("idle") or {"kind": "float", "shapes": [0]}
     return minify_css(tpl.render(b=b, t={**theme["palette"], "word": theme.get("word", "LOCAL"), "motif": Markup(motif),
-                                         "motif_draw": Markup(drawable(motif)), "motif_band": Markup(band)}, demo=demo))
+                                         "motif_draw": Markup(drawable(motif)), "motif_idle": Markup(idle_classes(drawable(motif), idle)),
+                                         "motif_b": Markup(mset.get("b", motif)), "motif_band": Markup(band)}, demo=demo))
 
 
 CSS_COMMENT = re.compile(r"/\*.*?\*/", re.S)

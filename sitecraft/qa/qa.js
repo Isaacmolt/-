@@ -22,7 +22,7 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
     const url = `http://127.0.0.1:${PORT}/${slug}/`;
     const r = { errors: [], overflow: {}, smallTargets: [], axe: [], emoji: false };
     r.heroFit = {};
-    for (const [n, vp] of [['1280x720', {width:1280,height:720}], ['1280x800', {width:1280,height:800}], ['1366x768', {width:1366,height:768}], ['1440x900', {width:1440,height:900}], ['1920x1080', {width:1920,height:1080}], ['390x844', {width:390,height:844}]]) {
+    for (const [n, vp] of [['700x900', {width:700,height:900}], ['820x1180', {width:820,height:1180}], ['1280x720', {width:1280,height:720}], ['1280x800', {width:1280,height:800}], ['1366x768', {width:1366,height:768}], ['1440x900', {width:1440,height:900}], ['1920x1080', {width:1920,height:1080}], ['390x844', {width:390,height:844}]]) {
       const pg = await browser.newPage({ viewport: vp }); await pg.goto(url, { waitUntil: 'load' }); await pg.evaluate(() => document.fonts.ready); await pg.waitForTimeout(2200);
       if (n === '1366x768') await pg.screenshot({ path: path.join(OUT, `${slug}-laptop-hero.png`) });  // capture before the probes below touch the DOM
       if (n !== '390x844') {
@@ -31,6 +31,10 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
         r.closingClear[n] = await pg.evaluate(() => { const btns = [...document.querySelectorAll('.closing .btn, .closing .big')].map(b => b.getBoundingClientRect()); const shapes = [...document.querySelectorAll('.cl-motif :is(path,circle,ellipse,rect)')].map(s => s.getBoundingClientRect()); const hit = (a, b) => a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom; return !btns.some(b => shapes.some(s => hit(b, s))); });
         await pg.evaluate(() => scrollTo(0, 0)); await pg.waitForTimeout(200);
       }
+      // no line may start with closing punctuation in display text (kinsoku), checked after the idle segmenter ran
+      r.kinsoku = r.kinsoku || {};
+      await pg.waitForTimeout(1500);
+      r.kinsoku[n] = await pg.evaluate(() => { let bad = 0; document.querySelectorAll('h2.statement,.tagline,.closing h2,.about p,.lead').forEach(el => { const range = document.createRange(); const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT); let prev = null; while (walker.nextNode()) { const node = walker.currentNode; for (let i = 0; i < node.nodeValue.length; i++) { const ch = node.nodeValue[i]; if (!ch.trim()) continue; range.setStart(node, i); range.setEnd(node, i + 1); const rc = range.getClientRects()[0]; if (!rc) continue; if (prev && rc.top > prev.top + 2 && /[，。、！？：；」』）]/.test(ch)) bad++; prev = rc; } } }); return bad; });
       // the name must never run under the motif: test the real name and a long 9-character name
       r.nameClear = r.nameClear || {};
       r.nameClear[n] = await pg.evaluate(() => {
@@ -200,12 +204,13 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
       && v.tiles && v.tiles.hoursMatch && v.tiles.typeClear && fn.bandVisibleMobile && fn.typeClearMobile && fn.lightbox
       && v.closingClear && Object.values(v.closingClear).every(Boolean)
       && v.nameClear && Object.values(v.nameClear).every(x => x.real === 0 && x.long === 0) && v.bandGap && Object.values(v.bandGap).every(g => g >= 24)
+      && v.kinsoku && Object.values(v.kinsoku).every(k => k === 0)
       && v.reducedMotion && v.reducedMotion.h1 === 'none' && v.reducedMotion.revealOpacity === '1' && v.focusRing && v.focusRing.ok
       && Math.abs(c.tileRatio - 1.33) < 0.05 && Math.abs(c.tallRatio - 0.75) < 0.05 && !v.errors.length && !v.smallTargets.length
       && !v.axe.length && !(v.axeDark || []).length && !v.emoji && Object.values(v.heroFit).every(x => x.includes('ok')) && Object.values(v.overflow).every(o => o === 0);
     allOk = allOk && ok;
     console.log(`${slug}: ${ok ? 'PASS' : 'FAIL'}`);
-    if (!ok) console.log(JSON.stringify({ fn, scrollSpy: v.scrollSpy, heroGeom: v.heroGeom, tiles: v.tiles, closingClear: v.closingClear, nameClear: v.nameClear, bandGap: v.bandGap, factsDrift: v.factsDrift, anchorLanding: v.anchorLanding, reducedMotion: v.reducedMotion, focusRing: v.focusRing, computed: c, axe: v.axe, axeDark: v.axeDark, errors: v.errors, small: v.smallTargets, heroFit: v.heroFit, overflow: v.overflow, emoji: v.emoji }, null, 2));
+    if (!ok) console.log(JSON.stringify({ fn, scrollSpy: v.scrollSpy, heroGeom: v.heroGeom, tiles: v.tiles, closingClear: v.closingClear, nameClear: v.nameClear, bandGap: v.bandGap, kinsoku: v.kinsoku, factsDrift: v.factsDrift, anchorLanding: v.anchorLanding, reducedMotion: v.reducedMotion, focusRing: v.focusRing, computed: c, axe: v.axe, axeDark: v.axeDark, errors: v.errors, small: v.smallTargets, heroFit: v.heroFit, overflow: v.overflow, emoji: v.emoji }, null, 2));
   }
   const lh = report.lighthouse;
   const lhOk = lh && typeof lh === 'object' && ['performance', 'accessibility', 'best-practices', 'seo'].every(k => lh[k] >= 90);
