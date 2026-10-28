@@ -196,11 +196,11 @@ FONT_MODES = {
     # 編輯感：襯線中文 + Fraunces；粗獷感：黑體 900 + Syne
     "editorial": {
         "url": "https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Noto+Serif+TC:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap",
-        "display": '"Fraunces"', "head": '"Noto Serif TC"', "weight": "600",
+        "display": "Fraunces", "head": "Noto Serif TC", "weight": "600",
     },
     "bold": {
         "url": "https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=Noto+Sans+TC:wght@400;500;600;700;900&display=swap",
-        "display": '"Syne"', "head": '"Noto Sans TC"', "weight": "800",
+        "display": "Syne", "head": "Noto Sans TC", "weight": "800",
     },
 }
 
@@ -386,7 +386,82 @@ def favicon_svg(color: str, initial: str) -> str:
     return quote(svg, safe="")
 
 
-def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool) -> str:
+# ---------------------------------------------------------------------------
+# og:image（LINE / Facebook 分享卡）：1200x630 PNG，需要一個系統中文字型
+# ---------------------------------------------------------------------------
+CJK_FONT_CANDIDATES = [
+    "/System/Library/Fonts/PingFang.ttc", "/System/Library/Fonts/STHeiti Medium.ttc",
+    "C:/Windows/Fonts/msjh.ttc", "C:/Windows/Fonts/msjhbd.ttc",
+    "/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc", "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+    "/usr/share/fonts/truetype/noto/NotoSansCJK-Bold.ttc", "/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc",
+]
+
+
+def find_cjk_font() -> str:
+    for c in CJK_FONT_CANDIDATES:
+        if Path(c).exists():
+            return c
+    try:
+        import subprocess
+        out = subprocess.run(["fc-list", ":lang=zh", "file"], capture_output=True, text=True, timeout=5).stdout
+        for line in out.splitlines():
+            f = line.split(":")[0].strip()
+            if f.lower().endswith((".ttf", ".ttc", ".otf")):
+                return f
+    except (OSError, subprocess.SubprocessError):
+        pass
+    return ""
+
+
+def _hex(c: str) -> tuple[int, int, int]:
+    c = c.lstrip("#")
+    return int(c[0:2], 16), int(c[2:4], 16), int(c[4:6], 16)
+
+
+def og_image(lead: dict, content: dict, theme: dict, out: Path) -> bool:
+    try:
+        from PIL import Image, ImageDraw, ImageFont
+    except ImportError:
+        return False
+    font_file = find_cjk_font()
+    if not font_file:
+        return False
+    pal = theme["palette"]
+    W, H = 1200, 630
+    img = Image.new("RGB", (W, H), _hex(pal["pd"]))
+    px = img.load()
+    c0, c1 = _hex(pal["p"]), _hex(pal["pd"])
+    for y in range(H):
+        f = y / H
+        row = tuple(int(c0[i] * (1 - f) + c1[i] * f) for i in range(3))
+        for x in range(W):
+            px[x, y] = row
+    overlay = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    od = ImageDraw.Draw(overlay)
+    ac = _hex(pal["a"])
+    od.ellipse((780, -140, 1380, 460), fill=ac + (70,))
+    od.ellipse((900, 300, 1500, 900), fill=ac + (40,))
+    img = Image.alpha_composite(img.convert("RGBA"), overlay)
+    d = ImageDraw.Draw(img)
+    name = content.get("name") or lead["name"]
+    size = 96 if len(name) <= 10 else 72 if len(name) <= 16 else 56
+    big = ImageFont.truetype(font_file, size)
+    mid = ImageFont.truetype(font_file, 34)
+    small = ImageFont.truetype(font_file, 28)
+    d.text((80, 96), f"{lead.get('category') or theme['label']}　{lead.get('city', '')}{lead.get('district', '')}", font=mid, fill=(255, 255, 255, 215))
+    d.text((80, 170), name, font=big, fill=(255, 255, 255, 255))
+    d.text((80, 170 + size + 28), content.get("tagline", ""), font=mid, fill=(255, 255, 255, 230))
+    y = 500
+    if lead.get("rating"):
+        d.text((80, y), f"Google 評分 {fmt_rating(lead['rating'])}　{lead.get('review_count', '')} 則評論", font=small, fill=(255, 255, 255, 205))
+        y += 42
+    d.text((80, y), lead.get("address", ""), font=small, fill=(255, 255, 255, 180))
+    out.parent.mkdir(parents=True, exist_ok=True)
+    img.convert("RGB").save(out, "PNG", optimize=True)
+    return True
+
+
+def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, og_png: bool = False) -> str:
     theme = themes.get(lead.get("theme") or "default", themes["default"])
     brand = cfg["brand"]
     weekday_hours, periods = parse_hours(lead.get("hours_json", ""))
@@ -407,7 +482,8 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool) 
     arts = art_tiles(theme["palette"], lead["slug"], motif)
     gallery_items = []
     for i in range(max(len(imgs), 6) if imgs else 6):
-        gallery_items.append({"img": imgs[i] if i < len(imgs) else "", "art": arts[i % len(arts)], "tall": i % 3 == 1})
+        gallery_items.append({"img": imgs[i] if i < len(imgs) else "", "art": arts[i % len(arts)],
+                              "tall": i % 3 == 1, "type": (not imgs) and i == 1})
     mode = FONT_MODES.get(theme.get("mode", "bold"), FONT_MODES["bold"])
     statement, about = statement_from(about, content.get("tagline", ""))
     pre, em, post = split_statement(statement)
@@ -417,8 +493,6 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool) 
         s_ = dict(s_)
         s_["href"] = service_href(s_.get("title", ""), line_url, phone_href(phone))
         services.append(s_)
-    marquee = [lead.get("category") or theme["label"], f"{lead.get('city', '')}{lead.get('district', '')}" or lead.get("address", "")]
-    marquee += [s_["title"] for s_ in services] + list(content.get("highlights", []))
     initial = next((ch for ch in name if ch.strip()), "S")
     city_district = f"{lead.get('city', '')}{lead.get('district', '')}"
     address_short = address
@@ -463,7 +537,8 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool) 
         "embed_url": f"https://www.google.com/maps?q={quote(name + ' ' + address)}&hl=zh-TW&z=16&output=embed",
         "tagline": content.get("tagline", ""), "about_paragraphs": about,
         "highlights": content.get("highlights", []), "services": services,
-        "services_linked": any(s_["href"] for s_ in services), "marquee": marquee,
+        "services_linked": any(s_["href"] for s_ in services),
+        "og_image": (url.rstrip("/") + "/og.png") if og_png else "",
         "gallery_items": gallery_items,
         "weekday_hours": weekday_hours, "periods": periods, "today_hours": today_hours,
         "jsonld": jsonld, "favicon_svg": favicon_svg(theme["palette"]["pd"], initial),
@@ -502,7 +577,8 @@ def build_one(lead: dict, cfg: dict, themes: dict, *, demo: bool = True, use_ai:
     site_dir.mkdir(parents=True, exist_ok=True)
     theme = themes.get(lead.get("theme") or "default", themes["default"])
     content = load_or_make_content(lead, theme, site_dir, use_ai, refresh_copy)
-    html = render_site(lead, content, cfg, themes, demo=demo)
+    og_ok = og_image(lead, content, theme, site_dir / "og.png")
+    html = render_site(lead, content, cfg, themes, demo=demo, og_png=og_ok)
     (site_dir / "index.html").write_text(html, encoding="utf-8")
     return site_dir / "index.html"
 

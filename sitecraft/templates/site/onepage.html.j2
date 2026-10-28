@@ -11,6 +11,9 @@
 <meta property="og:description" content="{{ b.tagline }}｜{{ b.address }}">
 <meta property="og:url" content="{{ b.url }}">
 <meta property="og:locale" content="zh_TW">
+{% if b.og_image %}<meta property="og:image" content="{{ b.og_image }}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">{% endif %}
 <link rel="canonical" href="{{ b.url }}">
 <link rel="icon" href="data:image/svg+xml,{{ b.favicon_svg }}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,7 +25,7 @@
 :root{
   --p:{{ t.p }};--pd:{{ t.pd }};--a:{{ t.a }};--bg:{{ t.bg }};--sf:{{ t.sf }};
   --tx:{{ t.tx }};--mu:{{ t.mu }};--line:{{ t.line }};--p-soft:{{ t.p_soft }};--a-soft:{{ t.a_soft }};
-  --display:{{ b.font_display }};--cjk-head:{{ b.font_head }};--body:"PingFang TC","Noto Sans TC","Microsoft JhengHei",system-ui,-apple-system,sans-serif;
+  --display:"{{ b.font_display }}";--cjk-head:"{{ b.font_head }}";--body:"PingFang TC","Noto Sans TC","Microsoft JhengHei",system-ui,-apple-system,sans-serif;
   --head-weight:{{ b.head_weight }};
   --ink:var(--pd);--ink2:var(--p);--ease:cubic-bezier(.22,1,.36,1);--r:22px;
   --noise:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
@@ -72,7 +75,7 @@ h1,h2,.display{font-family:var(--display),var(--cjk-head),var(--body);font-weigh
 .nav .call{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 20px;border-radius:999px;border:1.5px solid currentColor;font-weight:600;font-size:.92rem;transition:background .25s,color .25s}
 .nav .call:hover{background:var(--a);border-color:var(--a);color:var(--tx)}
 .menu-btn{display:none;width:48px;height:48px;align-items:center;justify-content:center;border-radius:12px;border:1.5px solid currentColor;position:fixed;top:10px;right:18px;z-index:120;color:#fff;transition:color .3s}
-.menu-btn.solid{color:var(--tx)}
+.menu-btn.solid{color:var(--tx);background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-color:var(--line)}
 .menu-btn[aria-expanded="true"]{color:#fff}
 .menu-btn span{display:block;width:20px;height:1.8px;background:currentColor;position:absolute;transition:transform .35s var(--ease),opacity .2s}
 .menu-btn span:first-child{transform:translateY(-4px)}
@@ -81,7 +84,7 @@ h1,h2,.display{font-family:var(--display),var(--cjk-head),var(--body);font-weigh
 .menu-btn[aria-expanded="true"] span:last-child{transform:rotate(-45deg)}
 .overlay{position:fixed;inset:0;background:var(--pd);color:#fff;z-index:110;display:flex;flex-direction:column;justify-content:center;padding:0 36px;clip-path:circle(0 at calc(100% - 42px) 34px);transition:clip-path .6s var(--ease),visibility 0s linear .6s;visibility:hidden}
 .overlay.open{clip-path:circle(150% at calc(100% - 42px) 34px);visibility:visible;transition:clip-path .6s var(--ease),visibility 0s}
-.overlay>a:not(.btn){font-family:var(--display),var(--cjk-head);font-size:clamp(2rem,9vw,3.2rem);font-weight:var(--head-weight);line-height:1.35;display:block;padding:6px 0;opacity:0;transform:translateY(18px);transition:opacity .5s var(--ease),transform .5s var(--ease)}
+.overlay>a:not(.btn){font-family:var(--display),var(--cjk-head);font-size:clamp(2rem,9vw,3.2rem);font-weight:var(--head-weight);line-height:1.35;display:block;padding:6px 0;opacity:0;transform:translateY(18px);transition:opacity .5s var(--ease),transform .5s var(--ease);transition-delay:calc(.12s + var(--i,0)*70ms)}
 .overlay.open>a{opacity:1;transform:none}
 .overlay small{display:block;margin-top:28px;opacity:.8;font-size:.9rem;letter-spacing:.06em}
 .overlay .acts{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px;opacity:0;transition:opacity .5s var(--ease) .3s}
@@ -101,7 +104,7 @@ h1,h2,.display{font-family:var(--display),var(--cjk-head),var(--body);font-weigh
 .hero .wrap{position:relative;padding:clamp(96px,13vh,140px) 0 0}
 .eyebrow{display:inline-flex;align-items:center;gap:12px;font-size:.82rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;opacity:.85}
 .eyebrow::before{content:"";width:34px;height:1px;background:currentColor}
-h1{font-size:clamp(2.6rem,6.8vw,6.2rem);margin:18px 0 14px;letter-spacing:-.02em;line-height:1.04;max-width:12ch}
+h1{font-size:clamp(2.75rem,2rem + 4.5vw,6.2rem);margin:18px 0 14px;letter-spacing:-.02em;line-height:1.04;max-width:12ch}
 h1 .w{display:inline-block;opacity:0;transform:translateY(.6em) rotate(2deg);animation:rise .9s var(--ease) forwards;animation-delay:calc(.08s + var(--i)*.045s)}
 h1 .en{display:block;font-size:.72em;font-weight:500;letter-spacing:0;line-height:1.15;margin-top:.08em}
 body[data-mode="editorial"] h1 .en{font-style:italic;font-weight:400}
@@ -136,17 +139,9 @@ body[data-mode="editorial"] h1 .en{font-style:italic;font-weight:400}
 .status i{width:8px;height:8px;border-radius:50%;background:#6ee7a0;box-shadow:0 0 0 0 rgba(110,231,160,.7);animation:pulse 2s infinite}
 .status.off i{background:#fb7185;animation:none}
 @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(110,231,160,.6)}70%{box-shadow:0 0 0 10px rgba(110,231,160,0)}100%{box-shadow:0 0 0 0 rgba(110,231,160,0)}}
-@media (max-width:880px){.hero .wrap{padding-top:96px}.hero-foot{margin-top:28px}.facts{grid-template-columns:1fr 1fr}.fact{padding:13px 0 13px 18px}.fact>span{font-size:.95rem}.fact:first-child>span{white-space:normal;overflow:visible;line-height:1.45}.fact:nth-child(odd){border-left:0;padding-left:0}.fact:nth-child(n+3){border-top:1px solid rgba(255,255,255,.14)}}
-@media (max-width:880px){.motif{top:72px;right:-30px;width:52vw;opacity:.22}}
+@media (max-width:880px){.hero .wrap{padding-top:96px}.hero-foot{margin-top:28px}.facts{grid-template-columns:1fr 1fr}.fact{padding:13px 0 13px 18px}.fact>span:not(.num){font-size:.95rem;white-space:normal;overflow:visible;line-height:1.45}.status{flex-wrap:wrap;row-gap:2px}.fact:nth-child(odd){border-left:0;padding-left:0}.fact:nth-child(n+3){border-top:1px solid rgba(255,255,255,.14)}}
+@media (max-width:880px){.motif{top:40px;right:-16vw;width:68vw;opacity:.24}}
 @media (max-width:480px){h1{max-width:none}}
-
-/* ---------- marquee ---------- */
-.marquee{overflow:hidden;border-bottom:1px solid var(--line);background:var(--bg);padding:18px 0;font-family:var(--display),var(--cjk-head);font-size:1.15rem;letter-spacing:.03em;white-space:nowrap}
-.marquee .track{display:inline-flex;gap:0;animation:scroll 32s linear infinite}
-.marquee:hover .track{animation-play-state:paused}
-.marquee span{display:inline-flex;align-items:center;gap:26px;padding-right:26px}
-.marquee span::after{content:"";width:7px;height:7px;background:var(--a);transform:rotate(45deg);display:inline-block}
-@keyframes scroll{to{transform:translateX(-50%)}}
 
 /* ---------- sections ---------- */
 section:not(.hero){padding:clamp(80px,10vw,140px) 0}
@@ -186,11 +181,14 @@ h2.statement{font-size:clamp(1.8rem,3.8vw,3rem);line-height:1.3;margin-bottom:34
 .gallery .count{font-family:var(--display);font-size:1.1rem;color:var(--mu);white-space:nowrap;display:flex;gap:16px;align-items:center}
 .gallery .count button{width:44px;height:44px;border-radius:50%;border:1.5px solid var(--line);display:grid;place-items:center;transition:background .3s,color .3s}
 .gallery .count button:hover{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-.strip{--gut:calc((100vw - min(1180px,100vw - 48px))/2);display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x proximity;scroll-padding-inline:var(--gut);padding:4px var(--gut) 24px;margin-left:calc(-1*var(--gut));width:100vw;scrollbar-width:none;-webkit-overflow-scrolling:touch;cursor:grab;user-select:none;-webkit-user-select:none}
+.strip{--gut:calc((100vw - min(1180px,100vw - 48px))/2);display:flex;align-items:flex-start;gap:16px;overflow-x:auto;scroll-snap-type:x proximity;scroll-padding-inline:var(--gut);padding:4px var(--gut) 24px;margin-left:calc(-1*var(--gut));width:100vw;scrollbar-width:none;-webkit-overflow-scrolling:touch;cursor:grab;user-select:none;-webkit-user-select:none}
 .strip::-webkit-scrollbar{display:none}
 .strip:active{cursor:grabbing}
 .tile{position:relative;flex:0 0 min(78vw,520px);aspect-ratio:4/3;border-radius:var(--r);overflow:hidden;scroll-snap-align:start;background:var(--sf);border:1px solid var(--line)}
 .tile.tall{flex-basis:min(62vw,380px);aspect-ratio:3/4}
+.tile.type{display:grid;place-items:center;background:linear-gradient(165deg,var(--a-soft),var(--p-soft))}
+.tile.type .vtext{writing-mode:vertical-rl;text-orientation:upright;font-family:var(--cjk-head),var(--display),var(--body);font-weight:var(--head-weight);font-size:clamp(1.5rem,2.6vw,2.2rem);letter-spacing:.22em;line-height:1.25;color:var(--pd);max-height:82%;text-wrap:balance}
+.tile.type::before{content:"";position:absolute;left:22px;top:22px;bottom:22px;width:1px;background:var(--pd);opacity:.35}
 .tile::after{content:"";position:absolute;inset:0;background:var(--noise) 0 0/160px 160px;opacity:.14;mix-blend-mode:soft-light;pointer-events:none}
 .tile svg.art,.tile img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 1.2s var(--ease)}
 .tile:hover svg.art,.tile:hover img{transform:scale(1.04)}
@@ -243,6 +241,7 @@ footer small a{text-decoration:underline;display:inline-block;padding:12px 0}
 .fab{position:fixed;right:16px;bottom:16px;z-index:90;display:none;border-radius:999px;background:var(--pd);color:#fff;box-shadow:0 16px 36px rgba(0,0,0,.28);overflow:hidden;transform:translateY(140%);opacity:0;transition:transform .45s var(--ease),opacity .3s}
 body.demo .fab{bottom:78px}
 .fab.show{transform:none;opacity:1}
+.fab.show.hold{transform:translateY(140%);opacity:0}
 .fab a{display:inline-flex;align-items:center;gap:8px;min-height:54px;padding:0 20px;font-weight:700;font-size:.95rem}
 .fab a+a{border-left:1px solid rgba(255,255,255,.25);background:#06C755;color:#06200f}
 .fab .ico{font-size:1.2rem}
@@ -254,7 +253,7 @@ body.demo .fab{bottom:78px}
 @media (prefers-reduced-motion:reduce){
   [data-reveal]{opacity:1;transform:none;transition:none}
   h1 .w,.tagline,.cta{animation:none;opacity:1;transform:none}
-  .motif,.marquee .track,.status i{animation:none}
+  .motif,.status i{animation:none}
   html{scroll-behavior:auto}
 }
 {% if demo %}
@@ -297,14 +296,14 @@ body.demo .fab{bottom:78px}
     {% if b.phone_href %}<a class="call" href="{{ b.phone_href }}"><svg class="ico"><use href="#i-phone"/></svg>{{ b.phone }}</a>{% endif %}
   </div>
 </header>
-<div class="overlay" id="overlay" aria-hidden="true">
+<div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-label="選單" aria-hidden="true">
   <span class="ov-brand">{{ b.name }}</span>
   <svg class="ov-motif" viewBox="0 0 200 200" aria-hidden="true">{{ t.motif }}</svg>
-  <a href="#about">關於我們</a>
-  <a href="#services">服務項目</a>
-  <a href="#gallery">環境照片</a>
-  <a href="#info">營業資訊</a>
-  <small>{% if b.today_hours %}今日 {{ b.today_hours }}　{% endif %}{{ b.address_short }}</small>
+  <a href="#about" style="--i:0">關於我們</a>
+  <a href="#services" style="--i:1">服務項目</a>
+  <a href="#gallery" style="--i:2">環境照片</a>
+  <a href="#info" style="--i:3">營業資訊</a>
+  <small><span id="ovHours">{% if b.today_hours %}今日 {{ b.today_hours }}{% endif %}</span>　{{ b.address_short }}</small>
   <div class="acts">
     {% if b.phone_href %}<a class="btn btn-solid" href="{{ b.phone_href }}"><svg class="ico"><use href="#i-phone"/></svg>撥打電話</a>{% endif %}
     {% if b.line_url %}<a class="btn btn-line" href="{{ b.line_url }}" target="_blank" rel="noopener"><svg class="ico"><use href="#i-chat"/></svg>LINE</a>{% endif %}
@@ -340,11 +339,6 @@ body.demo .fab{bottom:78px}
   </div>
 </section>
 
-<div class="marquee" aria-hidden="true">
-  <div class="track">
-    {% for _ in range(2) %}{% for m in b.marquee %}<span>{{ m }}</span>{% endfor %}{% endfor %}
-  </div>
-</div>
 
 <section class="about" id="about">
   <div class="wrap">
@@ -384,7 +378,6 @@ body.demo .fab{bottom:78px}
       <div>
         <div class="label" data-reveal><b>03</b>環境</div>
         <h2 data-reveal style="--i:1;margin-bottom:0">{% if demo %}店內環境{% else %}走進 {{ b.name }}{% endif %}</h2>
-        {% if demo %}<p class="lead" data-reveal style="--i:2;margin-top:10px">示意圖，正式上線時換成您的實拍照片。</p>{% endif %}
       </div>
       <div class="count" data-reveal style="--i:2">
         <button type="button" id="prevTile" aria-label="上一張"><svg class="ico" style="transform:rotate(180deg)"><use href="#i-arrow"/></svg></button>
@@ -396,9 +389,9 @@ body.demo .fab{bottom:78px}
   <div class="wrap">
     <div class="strip" id="strip" data-reveal style="--i:2" tabindex="0" aria-label="環境照片，可左右捲動">
       {% for g in b.gallery_items %}
-      <figure class="tile{% if g.tall %} tall{% endif %}">
-        {% if g.img %}<img src="{{ g.img }}" alt="{{ b.name }} 環境照片 {{ loop.index }}" loading="lazy">{% else %}{{ g.art }}{% endif %}
-        <figcaption class="cap">{% if g.img %}{{ b.name }}{% else %}示意圖 {{ loop.index }}{% endif %}</figcaption>
+      <figure class="tile{% if g.tall %} tall{% endif %}{% if g.type %} type{% endif %}">
+        {% if g.img %}<img src="{{ g.img }}" alt="{{ b.name }} 環境照片 {{ loop.index }}" loading="lazy">{% elif g.type %}<span class="vtext">{{ b.tagline }}</span>{% else %}{{ g.art }}{% endif %}
+        <figcaption class="cap">{% if g.img %}{{ b.name }}{% elif g.type %}{{ b.name }}{% else %}示意圖 {{ loop.index }}{% endif %}</figcaption>
       </figure>
       {% endfor %}
     </div>
@@ -485,9 +478,12 @@ body.demo .fab{bottom:78px}
     last=y;ticking=false;
   }
   addEventListener('scroll',function(){if(!ticking){ticking=true;requestAnimationFrame(onScroll)}},{passive:true});
+  addEventListener('hashchange',function(){nav.classList.remove('hide');last=scrollY});
   addEventListener('resize',function(){measure();onScroll()},{passive:true});addEventListener('load',function(){requestAnimationFrame(measure)});measure();onScroll();
   /* mobile overlay menu */
-  function setMenu(open){overlay.classList.toggle('open',open);overlay.setAttribute('aria-hidden',!open);btn.setAttribute('aria-expanded',open);btn.setAttribute('aria-label',open?'關閉選單':'開啟選單');d.body.style.overflow=open?'hidden':''}
+  function setMenu(open){overlay.classList.toggle('open',open);overlay.setAttribute('aria-hidden',!open);btn.setAttribute('aria-expanded',open);btn.setAttribute('aria-label',open?'關閉選單':'開啟選單');d.body.style.overflow=open?'hidden':'';
+    d.querySelectorAll('main,header,.fab,.demo-bar,footer').forEach(function(el){el.inert=open});
+    if(open){var ov=d.getElementById('ovHours'),hh=d.getElementById('heroHours');if(ov&&hh&&hh.textContent)ov.textContent=hh.textContent;setTimeout(function(){overlay.querySelector('a').focus()},60)}else{btn.focus()}}
   btn.addEventListener('click',function(){setMenu(!overlay.classList.contains('open'))});
   overlay.addEventListener('click',function(e){if(e.target===overlay)setMenu(false)});
   overlay.querySelectorAll('a').forEach(function(a){a.addEventListener('click',function(){setMenu(false)})});
@@ -511,6 +507,7 @@ body.demo .fab{bottom:78px}
   ['heroStatus','infoStatus'].forEach(function(id){var el=d.getElementById(id);if(!el)return;if(!state){el.querySelector('i').style.display='none';return}el.classList.toggle('off',!state.open)});
   var ist=d.getElementById('infoStatusText');if(ist&&state)ist.textContent=state.text;
   var hs=d.getElementById('heroHours');if(hs&&state){var nxt=state.text.split('　')[1]||'';hs.textContent=state.open?('營業中　'+li.children[1].textContent):(todayClosed?'今日公休':'休息中')+(nxt?'　'+nxt.replace(' 開始營業',' 開門'):'')}
+  var closing=d.querySelector('.closing');if(closing&&'IntersectionObserver' in window){new IntersectionObserver(function(es){es.forEach(function(e){fab.classList.toggle('hold',e.isIntersecting)})},{threshold:.2}).observe(closing)}
   /* reveal + counters */
   function count(el){var to=parseFloat(el.dataset.count),dec=+el.dataset.dec||0,t0=null;function step(ts){if(!t0)t0=ts;var p=Math.min((ts-t0)/1100,1),e=1-Math.pow(1-p,3);el.textContent=(to*e).toFixed(dec);if(p<1)requestAnimationFrame(step)}requestAnimationFrame(step)}
   if(!reduce)d.querySelectorAll('[data-count]').forEach(count);
