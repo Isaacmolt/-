@@ -234,6 +234,19 @@ def name_tokens(name: str) -> list[str]:
     return tokens
 
 
+def name_lines(name: str) -> list[dict]:
+    """店名拆成中文行（逐字）與拉丁行（逐詞），hero 標題各佔一行。"""
+    lines: list[dict] = []
+    for tok in name_tokens(name):
+        if not tok.strip():
+            continue
+        kind = "zh" if CJK.match(tok) else "en"
+        if not lines or lines[-1]["kind"] != kind:
+            lines.append({"kind": kind, "tokens": []})
+        lines[-1]["tokens"].append(tok)
+    return lines
+
+
 def split_statement(text: str) -> tuple[str, str, str]:
     """把標語裡的最後一個短句標成強調色（用標點切）。"""
     text = text.strip().rstrip("。")
@@ -245,40 +258,40 @@ def split_statement(text: str) -> tuple[str, str, str]:
 
 
 def art_tiles(palette: dict, seed: str, motif: str = "", n: int = 6) -> list[str]:
-    """每家店不同、但同一家店每次都一樣的抽象圖（取代照片的示意圖）。"""
+    """
+    示意圖是一套系統而不是隨機圖案：雙色底 + 該類別圖騰的三種尺度（滿版、特寫、重複圖樣），
+    外加一張「相框」告訴老闆這裡會換成照片。同一家店每次產生都一樣。
+    """
     from markupsafe import Markup
     rnd = random.Random(seed)
-    p, pd, a, bg, sf = palette["p"], palette["pd"], palette["a"], palette["bg"], palette["sf"]
+    p, pd, a, bg = palette["p"], palette["pd"], palette["a"], palette["bg"]
     soft, asoft = palette["p_soft"], palette["a_soft"]
+    stroke = 'fill="none" stroke-linecap="round" stroke-linejoin="round"'
+
+    def g(tx, ty, sc, color, width, extra=""):
+        return (f'<g transform="translate({tx} {ty}) scale({sc})" {stroke} stroke="{color}" '
+                f'stroke-width="{width}" {extra}>{motif}</g>')
+
+    specs = [
+        # (ground colour, motif placement)
+        (asoft, g(80, 30, 1.2, pd, 2.4)),                                   # 1 滿版主圖
+        (p, g(-60, -40, 2.6, bg, 1.6, 'opacity=".9"')),                      # 2 特寫（高）
+        (soft, '<rect x="36" y="30" width="328" height="240" rx="14" fill="none" stroke="' + pd + '" stroke-width="2" stroke-dasharray="8 8" opacity=".55"/>'
+               + '<path d="M36 30L364 270M364 30L36 270" stroke="' + pd + '" stroke-width="1" opacity=".18"/>'
+               + g(160, 110, .4, pd, 4, 'opacity=".75"')),                    # 3 相框
+        (a, g(150, 90, 2.2, pd, 1.8, 'opacity=".85"')),                      # 4 特寫（右下）
+        (soft, "".join(g(16 + i * 76, 10 + j * 76, .32, p, 5, 'opacity=".55"') for i in range(6) for j in range(5))),  # 5 圖樣（高）
+        (pd, g(90, 40, 1.1, a, 2.6)),                                        # 6 深底主圖
+    ]
     tiles = []
     for i in range(n):
-        kind = i % 6
-        gid = f"g{i}"
-        cx, cy = rnd.randint(55, 75), rnd.randint(50, 70)
-        rot = rnd.randint(-18, 18)
+        ground, art = specs[i % len(specs)]
+        rot = rnd.randint(-6, 6)
         parts = [f'<svg class="art" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true">',
-                 f'<defs><linearGradient id="{gid}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="{soft}"/><stop offset="1" stop-color="{asoft}"/></linearGradient></defs>',
-                 f'<rect width="400" height="300" fill="url(#{gid})"/>']
-        if kind == 0:
-            parts.append(f'<circle cx="{cx * 4}" cy="{cy * 3}" r="150" fill="{a}" opacity=".75"/>')
-            parts.append(f'<g transform="translate({cx * 4 - 130} {cy * 3 - 130}) scale(1.3)" fill="none" stroke="{pd}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">{motif}</g>')
-        elif kind == 1:
-            parts.append(f'<rect x="-60" y="120" width="560" height="90" fill="{p}" opacity=".85" transform="rotate({rot} 200 150)"/>')
-            parts.append(f'<circle cx="{cx * 4 - 160}" cy="{cy * 3 - 120}" r="26" fill="{a}"/>')
-        elif kind == 2:
-            parts.append(f'<g transform="translate(40 -40) scale(1.9) rotate({rot // 2} 100 100)" fill="none" stroke="{p}" stroke-width="2.2" opacity=".9" stroke-linecap="round" stroke-linejoin="round">{motif}</g>')
-        elif kind == 3:
-            parts.append(f'<path d="M0 0H400V130C300 210 100 210 0 130Z" fill="{a}" opacity=".8"/>')
-            parts.append(f'<rect x="{cx * 4 - 150}" y="150" width="120" height="120" rx="18" fill="{p}" transform="rotate({rot} {cx * 4 - 90} 210)"/>')
-        elif kind == 4:
-            parts.append('<pattern id="d' + gid + '" width="22" height="22" patternUnits="userSpaceOnUse"><circle cx="4" cy="4" r="3" fill="' + pd + '" opacity=".35"/></pattern>')
-            parts.append(f'<rect width="400" height="300" fill="url(#d{gid})"/>')
-            x0, y0 = cx * 4 - 200, cy * 3 - 150
-            parts.append(f'<path d="M{x0} {y0 + 115}A115 115 0 0 1 {x0 + 115} {y0}H{x0 + 230}V{y0 + 115}A115 115 0 0 1 {x0 + 115} {y0 + 230}H{x0}Z" fill="{p}" opacity=".9"/>')
-        else:
-            parts.append(f'<ellipse cx="{cx * 4 - 80}" cy="{cy * 3}" rx="150" ry="100" fill="{p}" opacity=".7" transform="rotate({rot} {cx * 4 - 80} {cy * 3})"/>')
-            parts.append(f'<ellipse cx="{cx * 4 + 10}" cy="{cy * 3 - 60}" rx="130" ry="90" fill="{a}" opacity=".7" style="mix-blend-mode:multiply"/>')
-            parts.append(f'<g transform="translate(250 170) scale(.6)" fill="none" stroke="{bg}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">{motif}</g>')
+                 f'<rect width="400" height="300" fill="{ground}"/>']
+        if i % 6 in (0, 3):
+            parts.append(f'<circle cx="{rnd.randint(260, 330)}" cy="{rnd.randint(60, 120)}" r="{rnd.randint(70, 110)}" fill="{a if i % 6 == 0 else asoft}" opacity=".55"/>')
+        parts.append(f'<g transform="rotate({rot} 200 150)">{art}</g>')
         parts.append("</svg>")
         tiles.append(Markup("".join(parts)))
     return tiles
@@ -405,11 +418,7 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool) 
         s_["href"] = service_href(s_.get("title", ""), line_url, phone_href(phone))
         services.append(s_)
     marquee = [lead.get("category") or theme["label"], f"{lead.get('city', '')}{lead.get('district', '')}" or lead.get("address", "")]
-    if lead.get("rating"):
-        marquee.append(f"Google 評分 {fmt_rating(lead['rating'])}　{lead.get('review_count', '')} 則評論")
-    if today_hours:
-        marquee.append(f"今日 {today_hours}")
-    marquee += [s_["title"] for s_ in services]
+    marquee += [s_["title"] for s_ in services] + list(content.get("highlights", []))
     initial = next((ch for ch in name if ch.strip()), "S")
     city_district = f"{lead.get('city', '')}{lead.get('district', '')}"
     address_short = address
@@ -458,7 +467,8 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool) 
         "gallery_items": gallery_items,
         "weekday_hours": weekday_hours, "periods": periods, "today_hours": today_hours,
         "jsonld": jsonld, "favicon_svg": favicon_svg(theme["palette"]["pd"], initial),
-        "initial": initial, "name_tokens": name_tokens(name), "address_short": address_short,
+        "initial": initial, "name_tokens": name_tokens(name), "name_lines": name_lines(name), "address_short": address_short,
+        "mode": theme.get("mode", "bold"),
         "fonts_url": mode["url"], "font_display": mode["display"], "font_head": mode["head"], "head_weight": mode["weight"],
         "statement_pre": pre, "statement_em": em, "statement_post": post,
         "closing_title": closing_title(lead.get("theme") or "default", name),
