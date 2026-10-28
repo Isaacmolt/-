@@ -1,0 +1,40 @@
+{
+  "_說明": "改這個檔案再執行 build_site.py --slug <slug> --rebuild 就會更新網站。gallery 放 img/ 裡的檔名。",
+  "name": "範例髮型 Demo Hair",
+  "tagline": "剪一個適合你的樣子",
+  "about": [
+    "範例髮型 Demo Hair 位於台北市大安區，是一間重視溝通的髮型沙龍。設計師會先了解您的生活習慣與喜好，再給出適合的建議，而不是只套用流行。剪、染、燙、護髮，我們都用對頭皮友善的產品，讓您安心。"
+  ],
+  "highlights": [
+    "設計師一對一溝通",
+    "使用頭皮友善產品",
+    "可線上 / LINE 預約"
+  ],
+  "services": [
+    {
+      "icon": "✂️",
+      "title": "精緻剪髮",
+      "desc": "依臉型與生活習慣設計，好整理最重要。"
+    },
+    {
+      "icon": "🎨",
+      "title": "染髮",
+      "desc": "低傷害染劑，從自然棕到個性色都能做。"
+    },
+    {
+      "icon": "🌀",
+      "title": "燙髮",
+      "desc": "溫塑、冷燙、縮毛矯正，蓬鬆或柔順自選。"
+    },
+    {
+      "icon": "💆",
+      "title": "頭皮護理",
+      "desc": "深層清潔與護髮，改善出油與乾澀。"
+    }
+  ],
+  "phone": "02 2777 8888",
+  "line_url": "https://lin.ee/demoHair",
+  "facebook_url": "",
+  "instagram_url": "https://www.instagram.com/demo.hair",
+  "gallery": []
+}

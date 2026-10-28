@@ -1,0 +1,22 @@
+Subject: {{ name }} 的網站正式上線了 🎉
+
+{{ name }} 老闆／闆娘您好，
+
+網站已經正式上線：{{ delivered_url or demo_url }}
+
+請花 2 分鐘把網址加進 Google 商家檔案，地圖上就會出現「網站」按鈕：
+1. 用店家的 Google 帳號打開 Google 地圖，搜尋 {{ name }}，點「編輯商家檔案」
+2. 點「商家資訊」→ 找到「網站」欄位
+3. 貼上 {{ delivered_url or demo_url }} → 儲存（通常幾分鐘到一天內生效）
+
+也建議把網址放進 Facebook 粉專、Instagram 簡介與 LINE 官方帳號的「網站」欄位。
+
+之後想換照片、改營業時間或價格，直接傳給我，第一年內小幅修改免費。{{ hosting_years_included }} 年後若要續用，主機維護費每年 NT$600，到期前我會先提醒您。
+
+如果網站對您有幫助，也歡迎介紹附近還沒有網站的店家給我，成功上線後會送您一次免費內容更新。
+
+謝謝您的信任！
+{% if sender_person %}
+{{ sender_person }}
+{% endif %}
+{{ sender_name }}{% if contact_line %}｜LINE：{{ contact_line }}{% endif %}{% if contact_phone %}｜{{ contact_phone }}{% endif %}

@@ -1,4 +1,4 @@
-.PHONY: all generate check bundle catalog clean images upload-kit upload-gumroad upload-etsy
+.PHONY: all generate check bundle catalog clean images upload-kit upload-gumroad upload-etsy sitecraft-leads sitecraft-sites sitecraft-sample sitecraft-preview sitecraft-send sitecraft-due sitecraft-stats
 
 all: generate check bundle catalog
 
@@ -37,3 +37,32 @@ upload-gumroad:
 upload-etsy:
 	@python -c "from playwright.sync_api import sync_playwright" 2>/dev/null || { echo "請先安裝: pip install playwright && playwright install chromium"; exit 1; }
 	python scripts/auto_upload_etsy.py
+
+# ---------------------------------------------------------------------------
+# SiteCraft — 在地商家官網代工（說明見 sitecraft/README.md）
+#   make sitecraft-leads CITY=台中市 DISTRICT=西區 TYPE=咖啡廳
+# ---------------------------------------------------------------------------
+CITY ?= 台中市
+DISTRICT ?=
+TYPE ?=
+
+sitecraft-leads:
+	python sitecraft/find_leads.py --city "$(CITY)" $(if $(DISTRICT),--district "$(DISTRICT)") $(if $(TYPE),--type "$(TYPE)")
+
+sitecraft-sites:
+	python sitecraft/build_site.py
+
+sitecraft-sample:
+	python sitecraft/build_site.py --sample
+
+sitecraft-preview:
+	python sitecraft/send_outreach.py --stage first
+
+sitecraft-send:
+	python sitecraft/send_outreach.py --stage first --send
+
+sitecraft-due:
+	python sitecraft/crm.py due
+
+sitecraft-stats:
+	python sitecraft/crm.py stats

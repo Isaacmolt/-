@@ -1,0 +1,40 @@
+{
+  "_說明": "改這個檔案再執行 build_site.py --slug <slug> --rebuild 就會更新網站。gallery 放 img/ 裡的檔名。",
+  "name": "範例寵物美容 Demo Pets",
+  "tagline": "溫柔對待，讓它不害怕",
+  "about": [
+    "範例寵物美容 Demo Pets 位於高雄市左營區，提供寵物美容與照護服務。我們用最溫柔的方式對待每一隻毛小孩，過程不趕、不吼，讓它們放鬆地完成洗澡與修剪。家長可以隨時詢問狀況，我們也會主動回報。"
+  ],
+  "highlights": [
+    "溫柔不趕、過程安心",
+    "一對一服務",
+    "完成後主動回報照片"
+  ],
+  "services": [
+    {
+      "icon": "🛁",
+      "title": "洗澡 SPA",
+      "desc": "依毛質挑選洗劑，吹乾梳理一次到位。"
+    },
+    {
+      "icon": "✂️",
+      "title": "造型修剪",
+      "desc": "依品種與家長需求設計造型。"
+    },
+    {
+      "icon": "🦷",
+      "title": "基礎護理",
+      "desc": "剪指甲、清耳朵、擠肛門腺。"
+    },
+    {
+      "icon": "🏠",
+      "title": "寵物住宿",
+      "desc": "短期寄宿，每天回報吃喝與活動。"
+    }
+  ],
+  "phone": "07 555 6666",
+  "line_url": "https://lin.ee/demoPets",
+  "facebook_url": "https://www.facebook.com/demo.pets",
+  "instagram_url": "",
+  "gallery": []
+}

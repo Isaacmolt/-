@@ -4,3 +4,10 @@ __pycache__/
 .DS_Store
 venv/
 *.egg-info/
+
+# SiteCraft：真實名單、寄信紀錄、預覽信與交付包不上傳
+sitecraft/data/leads.csv
+sitecraft/data/sent_log.csv
+sitecraft/data/*.tmp
+sitecraft/outbox/
+sitecraft/deliveries/

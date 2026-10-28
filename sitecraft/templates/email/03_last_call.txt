@@ -1,0 +1,17 @@
+Subject: {{ name }} 的網站草稿將於 7 天後下架
+
+{{ name }} 老闆／闆娘您好，
+
+這是最後一封信，之後不會再打擾您。
+
+為您做的網站草稿（{{ demo_url }}）會在 7 天後下架。如果您想保留，隨時回信或{% if contact_line %}加 LINE {{ contact_line }} {% endif %}跟我說一聲，NT${{ price_twd }} 就能正式上線，照片文字我來處理。
+
+如果現在不需要，也完全沒問題，謝謝您花時間看完。祝 {{ name }} 生意越來越好。
+
+{% if sender_person %}
+{{ sender_person }}
+{% endif %}
+{{ sender_name }}
+
+—
+若不希望再收到我們的來信，回覆「不用了」即可，我們會立即停止寄送。

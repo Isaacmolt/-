@@ -1,0 +1,22 @@
+Subject: Re: {{ name }} 的網站草稿（補充一點）
+
+{{ name }} 老闆／闆娘您好，
+
+幾天前寄給您的網站草稿還在這裡：{{ demo_url }}
+
+補充一個很多店家不知道的小事：客人在 Google 搜店名時，有「網站」按鈕的店家看起來就是比較正式、比較讓人放心，而且網站上的 LINE 和電話按鈕，客人點一下就直接聯絡，不用再從粉專裡找。
+
+{% if rating %}{{ name }} 已經有 {{ review_count }} 則評論、{{ rating }} 顆星的好口碑，差的只是讓新客人更快找到您。{% endif %}
+
+正式上線一次 NT${{ price_twd }}，照片文字寄給我就好，{{ turnaround_days }} 個工作天內完成。
+
+如果這陣子比較忙，回個「晚點再說」我就先不打擾；如果不需要，回「不用了」我就把草稿撤下。
+
+謝謝您
+{% if sender_person %}
+{{ sender_person }}
+{% endif %}
+{{ sender_name }}{% if contact_line %}｜LINE：{{ contact_line }}{% endif %}{% if contact_phone %}｜{{ contact_phone }}{% endif %}
+
+—
+若不希望再收到我們的來信，回覆「不用了」即可，我們會立即停止寄送。

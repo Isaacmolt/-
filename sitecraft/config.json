@@ -1,0 +1,224 @@
+{
+  "brand": {
+    "name": "SiteCraft",
+    "sender_name": "SiteCraft 小站工作室",
+    "sender_person": "",
+    "contact_line": "",
+    "contact_phone": "",
+    "contact_email": "",
+    "demo_base_url": "https://isaacmolt.github.io/-/sites",
+    "price_twd": 860,
+    "hosting_years_included": 1,
+    "turnaround_days": 3,
+    "show_credit_on_final_site": true
+  },
+  "upsells": [
+    {
+      "name": "專屬網域（例如 yourshop.tw）",
+      "price_twd": 500,
+      "unit": "年",
+      "note": "含 DNS 設定與 HTTPS"
+    },
+    {
+      "name": "第二年起主機與維護",
+      "price_twd": 600,
+      "unit": "年",
+      "note": "每年可免費更新內容 2 次"
+    },
+    {
+      "name": "菜單 / 價目表頁面",
+      "price_twd": 300,
+      "unit": "次",
+      "note": "最多 30 個品項，含照片"
+    },
+    {
+      "name": "LINE 官方帳號申請與串接",
+      "price_twd": 300,
+      "unit": "次",
+      "note": "網站上一鍵加好友"
+    },
+    {
+      "name": "Google 商家檔案優化",
+      "price_twd": 400,
+      "unit": "次",
+      "note": "分類、照片、營業時間、Q&A、貼文"
+    }
+  ],
+  "search": {
+    "language": "zh-TW",
+    "region": "TW",
+    "pages_per_query": 3,
+    "min_reviews": 3,
+    "treat_social_as_no_website": true,
+    "social_domains": [
+      "facebook.com",
+      "fb.com",
+      "fb.me",
+      "m.me",
+      "instagram.com",
+      "threads.net",
+      "line.me",
+      "lin.ee",
+      "liff.line.me",
+      "linktr.ee",
+      "lit.link",
+      "portaly.cc",
+      "bio.site",
+      "shopee.tw",
+      "shopee.com",
+      "ruten.com.tw",
+      "pchome.com.tw",
+      "momoshop.com.tw",
+      "ubereats.com",
+      "foodpanda",
+      "inline.app",
+      "eztable.com",
+      "simplybook",
+      "beauty.tw",
+      "business.site",
+      "goo.gl",
+      "g.page",
+      "google.com",
+      "youtube.com",
+      "tiktok.com"
+    ]
+  },
+  "outreach": {
+    "followup1_days": 4,
+    "followup2_days": 5,
+    "close_after_days": 7,
+    "daily_cap": 30,
+    "min_interval_seconds": 60,
+    "max_interval_seconds": 150
+  },
+  "cities": {
+    "台中市": [
+      "中區",
+      "東區",
+      "南區",
+      "西區",
+      "北區",
+      "西屯區",
+      "南屯區",
+      "北屯區",
+      "豐原區",
+      "大里區",
+      "太平區",
+      "烏日區",
+      "沙鹿區",
+      "清水區",
+      "大甲區"
+    ],
+    "台北市": [
+      "中正區",
+      "大同區",
+      "中山區",
+      "松山區",
+      "大安區",
+      "萬華區",
+      "信義區",
+      "士林區",
+      "北投區",
+      "內湖區",
+      "南港區",
+      "文山區"
+    ],
+    "新北市": [
+      "板橋區",
+      "新莊區",
+      "中和區",
+      "永和區",
+      "三重區",
+      "土城區",
+      "蘆洲區",
+      "新店區",
+      "汐止區",
+      "樹林區",
+      "淡水區",
+      "林口區"
+    ],
+    "桃園市": [
+      "桃園區",
+      "中壢區",
+      "平鎮區",
+      "八德區",
+      "楊梅區",
+      "蘆竹區",
+      "龜山區",
+      "大溪區"
+    ],
+    "台南市": [
+      "中西區",
+      "東區",
+      "南區",
+      "北區",
+      "安平區",
+      "安南區",
+      "永康區",
+      "仁德區",
+      "新營區"
+    ],
+    "高雄市": [
+      "新興區",
+      "前金區",
+      "苓雅區",
+      "鹽埕區",
+      "鼓山區",
+      "三民區",
+      "左營區",
+      "楠梓區",
+      "前鎮區",
+      "鳳山區",
+      "小港區"
+    ],
+    "新竹市": [
+      "東區",
+      "北區",
+      "香山區"
+    ],
+    "彰化縣": [
+      "彰化市",
+      "員林市",
+      "鹿港鎮",
+      "和美鎮"
+    ],
+    "嘉義市": [
+      "東區",
+      "西區"
+    ]
+  },
+  "types": [
+    "咖啡廳",
+    "早午餐",
+    "小吃店",
+    "麵店",
+    "便當店",
+    "火鍋店",
+    "甜點店",
+    "麵包店",
+    "手搖飲料店",
+    "美髮沙龍",
+    "美甲店",
+    "美容美體",
+    "按摩店",
+    "寵物美容",
+    "動物醫院",
+    "牙醫診所",
+    "中醫診所",
+    "物理治療所",
+    "健身房",
+    "瑜珈教室",
+    "花店",
+    "洗衣店",
+    "機車行",
+    "汽車美容",
+    "修車廠",
+    "補習班",
+    "音樂教室",
+    "才藝教室",
+    "民宿",
+    "眼鏡行",
+    "鎖店",
+    "水電行"
+  ]
+}

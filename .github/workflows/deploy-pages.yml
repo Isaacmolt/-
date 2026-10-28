@@ -2,10 +2,11 @@ name: Deploy Website to GitHub Pages
 
 on:
   push:
-    branches: [claude/ai-ceo-business-ops-LKFzy, main]
+    branches: [claude/ai-ceo-business-ops-LKFzy, claude/eloquent-newton-y8oe3m, main]
     paths:
       - 'website/**'
       - 'index.html'
+      - 'sitecraft/sites/**'
       - '.github/workflows/deploy-pages.yml'
   workflow_dispatch:
 
@@ -53,6 +54,12 @@ jobs:
           # Copy bundle zips
           mkdir -p _site/downloads/bundles
           cp bundles/*.zip _site/downloads/bundles/ 2>/dev/null || true
+          # SiteCraft demo / delivered business sites → /sites/<slug>/
+          if [ -d sitecraft/sites ]; then
+            mkdir -p _site/sites
+            cp -r sitecraft/sites/. _site/sites/
+            find _site/sites -name content.json -delete
+          fi
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

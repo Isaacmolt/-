@@ -1,0 +1,40 @@
+{
+  "_說明": "改這個檔案再執行 build_site.py --slug <slug> --rebuild 就會更新網站。gallery 放 img/ 裡的檔名。",
+  "name": "範例咖啡 Demo Café",
+  "tagline": "坐下來，讓咖啡慢慢說話",
+  "about": [
+    "範例咖啡 Demo Café 位於台中市西區，是一間用心對待每一杯咖啡的小店。我們挑選新鮮烘焙的豆子，搭配手作甜點與輕食，給您一個可以放慢腳步、好好喘口氣的地方。不論是一個人的早晨，或是和朋友的午後，都歡迎來坐坐。"
+  ],
+  "highlights": [
+    "新鮮烘焙咖啡豆",
+    "手作甜點與輕食",
+    "安靜舒適、適合久坐"
+  ],
+  "services": [
+    {
+      "icon": "☕",
+      "title": "手沖單品",
+      "desc": "每日精選產區豆，現點現沖，風味層次清楚。"
+    },
+    {
+      "icon": "🥛",
+      "title": "義式咖啡",
+      "desc": "拿鐵、卡布、Dirty，奶泡綿密，比例剛好。"
+    },
+    {
+      "icon": "🍰",
+      "title": "手作甜點",
+      "desc": "每日限量蛋糕與司康，搭配咖啡剛剛好。"
+    },
+    {
+      "icon": "🥪",
+      "title": "輕食早午餐",
+      "desc": "三明治、沙拉、帕尼尼，簡單但認真。"
+    }
+  ],
+  "phone": "04 2222 3333",
+  "line_url": "https://line.me/R/ti/p/@demo-cafe",
+  "facebook_url": "https://www.facebook.com/demo.cafe",
+  "instagram_url": "https://www.instagram.com/demo.cafe",
+  "gallery": []
+}

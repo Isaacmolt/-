@@ -1,0 +1,20 @@
+Subject: 收到款項，{{ name }} 的網站準備上線 — 需要您提供幾樣東西
+
+{{ name }} 老闆／闆娘您好，
+
+已收到 NT${{ price_twd }}，謝謝您！接下來請提供以下資料（直接回這封信或 LINE 傳給我都可以）：
+
+1. 店內 / 商品照片 5～10 張（手機拍的就可以，橫的直的都行）
+2. 想放在網站上的介紹文字（沒有也沒關係，我用現在草稿的文字幫您修）
+3. 服務或品項與價格（如果想放）
+4. LINE 官方帳號 / 個人 LINE ID、Facebook、Instagram 連結（有的話）
+5. 希望顯示的聯絡電話與營業時間（如果和 Google 上的不同）
+
+收到資料後 {{ turnaround_days }} 個工作天內完成，上線前會先傳預覽給您確認，有要改的地方免費調整到您滿意。
+
+上線後我也會傳一份簡單的步驤，教您把網址加進 Google 商家檔案（約 2 分鐘），讓地圖上多一個「網站」按鈕。
+
+{% if sender_person %}
+{{ sender_person }}
+{% endif %}
+{{ sender_name }}{% if contact_line %}｜LINE：{{ contact_line }}{% endif %}{% if contact_phone %}｜{{ contact_phone }}{% endif %}
