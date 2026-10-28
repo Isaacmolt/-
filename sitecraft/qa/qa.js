@@ -147,7 +147,7 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
                    tileRatio: +(rb.width / rb.height).toFixed(2), tallRatio: +(tb.width / tb.height).toFixed(2),
                    ogImage: !!document.querySelector('meta[property="og:image"]'), fontsLoaded: document.fonts.check('600 20px "Noto Serif TC"') || document.fonts.check('800 20px "Noto Sans TC"') };
         });
-        await page.addStyleTag({ content: '*,*::before,*::after{transition:none!important;animation:none!important;opacity:1}.motif svg *,.cl-motif *{stroke-dashoffset:0!important}' });
+        await page.addStyleTag({ content: '*,*::before,*::after{transition:none!important;animation:none!important;opacity:1}h1 .w,.tagline,.hero .cta,.hero .eyebrow,.hero-foot .fact,.strip .tile{opacity:1!important;transform:none!important}.motif svg *,.cl-motif *{stroke-dashoffset:0!important}' });
         await page.waitForTimeout(200);
         await page.addScriptTag({ content: axeSource });
         const res = await page.evaluate(async () => await axe.run(document, { runOnly: ['wcag2a', 'wcag2aa', 'best-practice'] }));
@@ -156,7 +156,7 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
         // dark mode contrast
         const dark = await browser.newPage({ viewport: vp, colorScheme: 'dark' });
         await dark.goto(url, { waitUntil: 'load' }); await dark.waitForTimeout(800);
-        await dark.addStyleTag({ content: '*,*::before,*::after{transition:none!important;animation:none!important;opacity:1}h1 .w,.tagline,.hero .cta{opacity:1!important;transform:none!important}.motif svg *,.cl-motif *{stroke-dashoffset:0!important}' });
+        await dark.addStyleTag({ content: '*,*::before,*::after{transition:none!important;animation:none!important;opacity:1}h1 .w,.tagline,.hero .cta,.hero .eyebrow,.hero-foot .fact,.strip .tile{opacity:1!important;transform:none!important}.motif svg *,.cl-motif *{stroke-dashoffset:0!important}' });
         await dark.evaluate(() => document.querySelectorAll('[data-reveal]').forEach(el => el.classList.add('in')));
         await dark.waitForTimeout(200);
         await dark.screenshot({ path: path.join(OUT, `${slug}-desktop-dark.png`), fullPage: true });
