@@ -24,6 +24,7 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
     r.heroFit = {};
     for (const [n, vp] of [['1280x720', {width:1280,height:720}], ['1280x800', {width:1280,height:800}], ['1366x768', {width:1366,height:768}], ['1440x900', {width:1440,height:900}], ['1920x1080', {width:1920,height:1080}], ['390x844', {width:390,height:844}]]) {
       const pg = await browser.newPage({ viewport: vp }); await pg.goto(url, { waitUntil: 'load' }); await pg.evaluate(() => document.fonts.ready); await pg.waitForTimeout(2200);
+      if (n === '1366x768') await pg.screenshot({ path: path.join(OUT, `${slug}-laptop-hero.png`) });  // capture before the probes below touch the DOM
       if (n !== '390x844') {
         r.closingClear = r.closingClear || {};
         await pg.evaluate(() => document.querySelector('.closing').scrollIntoView()); await pg.waitForTimeout(300);
@@ -45,7 +46,6 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
       r.bandGap = r.bandGap || {};
       r.bandGap[n] = await pg.evaluate(() => { const hero = document.querySelector('.hero'); if (hero.dataset.hero !== 'band') return 99; const cta = document.querySelector('.hero .cta').getBoundingClientRect(); const tops = [...document.querySelectorAll('.hero-foot .motif :is(path,circle,ellipse,rect)')].map(s => s.getBoundingClientRect().top); return Math.round(Math.min(...tops) - cta.bottom); });
       r.heroFit[n] = await pg.evaluate(() => { const h = document.querySelector('.hero').getBoundingClientRect(); const bar = document.getElementById('demoBar'); const limit = innerHeight - (bar ? bar.getBoundingClientRect().height : 0); return Math.round(h.bottom) + '/' + Math.round(limit) + (h.bottom <= limit + 1 ? ' ok' : ' OVER'); });
-      if (n === '1366x768') await pg.screenshot({ path: path.join(OUT, `${slug}-laptop-hero.png`) });
       await pg.close();
     }
     for (const [name, vp] of [['desktop', { width: 1440, height: 900 }], ['mobile', { width: 390, height: 844 }]]) {
