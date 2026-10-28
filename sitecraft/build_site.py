@@ -286,6 +286,8 @@ def art_tiles(palette: dict, seed: str, mset: dict, n: int = 6) -> list[str]:
     rnd = random.Random(seed)
     p, pd, a, bg = palette["p"], palette["pd"], palette["a"], palette["bg"]
     soft, asoft = palette["p_soft"], palette["a_soft"]
+    if _lum(p) < 0.12:  # 近黑主色（如沙龍）：圖樣底改用強調色調過的表面色，避免機械推導出的冷紫
+        soft = _mix(a, palette["sf"], 0.14)
     A, B, C = mset["a"], mset.get("b", mset["a"]), mset.get("c", mset["a"])
     stroke = 'fill="none" stroke-linecap="round" stroke-linejoin="round"'
 
@@ -326,8 +328,25 @@ SHAPE_TAG = re.compile(r"<(path|circle|ellipse|rect)\b")
 
 
 def drawable(markup: str) -> str:
-    """每個形狀加 pathLength=1，CSS 就能用 dasharray 做「畫出來」的動畫。"""
-    return SHAPE_TAG.sub(r'<\1 pathLength="1"', markup)
+    """每個形狀加 pathLength=1 與序號 --i，CSS 就能用 dasharray 做「依序畫出來」的動畫。"""
+    n = 0
+
+    def tag(mm: re.Match) -> str:
+        nonlocal n
+        n += 1
+        return f'<{mm.group(1)} pathLength="1" style="--i:{n - 1}"'
+    return SHAPE_TAG.sub(tag, markup)
+
+
+def _lum(c: str) -> float:
+    r, g, bb = (int(c.lstrip("#")[i:i + 2], 16) / 255 for i in (0, 2, 4))
+    return 0.2126 * r + 0.7152 * g + 0.0722 * bb
+
+
+def _mix(c1: str, c2: str, w: float) -> str:
+    a = [int(c1.lstrip("#")[i:i + 2], 16) for i in (0, 2, 4)]
+    b_ = [int(c2.lstrip("#")[i:i + 2], 16) for i in (0, 2, 4)]
+    return "#%02x%02x%02x" % tuple(round(a[i] * w + b_[i] * (1 - w)) for i in range(3))
 
 
 LINE_OA = re.compile(r"line\.me/R/ti/p/(@[\w.-]+)")

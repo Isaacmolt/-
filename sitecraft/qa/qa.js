@@ -60,6 +60,8 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
         r.fn.galleryCounterAfterPrev = await page.textContent('#tileNow');
         r.fn.serviceLinksFocusable = await page.evaluate(() => [...document.querySelectorAll('.svc li > a')].every(a => { a.focus(); return document.activeElement === a; }));
         // two-line title alignment: left edges match (side layout) or centres match (band layout)
+        r.fn.bandVisibleMobile = await page.evaluate(() => { const hero = document.querySelector('.hero'); if (hero.dataset.hero !== 'band') return true; const m = document.querySelector('.motif').getBoundingClientRect(); const bar = document.querySelector('.hero-foot').getBoundingClientRect(); return m.bottom <= bar.top + 8 && m.height > 60; });
+        r.fn.typeClearMobile = await page.evaluate(() => { const vt = document.querySelector('.tile.type .vtext'), cap = document.querySelector('.tile.type .cap'); if (!vt) return true; document.getElementById('gallery').scrollIntoView(); return vt.getBoundingClientRect().bottom <= cap.getBoundingClientRect().top + 1; });
         r.fn.titleIndent = await page.evaluate(() => { const h = document.querySelector('h1'); const en = h.querySelector('.en'); if (!en) return 0; const zh = [...h.querySelectorAll(':scope > .w')]; const l = Math.min(...zh.map(w => w.getBoundingClientRect().left)), rr = Math.max(...zh.map(w => w.getBoundingClientRect().right)); const eb = en.getBoundingClientRect(); const enText = en.querySelector('.w'); const et = enText.getBoundingClientRect(); const last = en.querySelectorAll('.w'); const er = last[last.length - 1].getBoundingClientRect().right; return getComputedStyle(h).textAlign === 'center' ? Math.round(((et.left + er) / 2) - ((l + rr) / 2)) : Math.round(et.left - l); });
         // modal focus: after opening, focus is inside the overlay and Tab stays inside
         await page.click('#menuBtn'); await page.waitForTimeout(500);
@@ -99,7 +101,8 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
         await page.keyboard.press('Shift'); await page.waitForTimeout(100);
         r.focusRing = await page.evaluate(() => { const a = document.querySelector('.svc li > a'); const fv = a.matches(':focus-visible'); const oc = getComputedStyle(a).outlineColor; const ink = getComputedStyle(document.documentElement).getPropertyValue('--pd').trim(); const h = ink.replace('#',''); const rgb = `rgb(${parseInt(h.slice(0,2),16)}, ${parseInt(h.slice(2,4),16)}, ${parseInt(h.slice(4,6),16)})`; a.blur(); return { focusVisible: fv, outline: oc, ink: rgb, ok: fv && oc === rgb }; });
         // band hero: motif never overlaps the title box; parallax never moves the facts bar
-        r.heroGeom = await page.evaluate(() => { const h = document.querySelector('h1').getBoundingClientRect(); const m = document.querySelector('.motif').getBoundingClientRect(); const band = document.querySelector('.hero').dataset.hero === 'band'; const ox = Math.max(0, Math.min(h.right, m.right) - Math.max(h.left, m.left)); const oy = Math.max(0, Math.min(h.bottom, m.bottom) - Math.max(h.top, m.top)); return { band, overlapPct: Math.round(100 * ox * oy / (h.width * h.height)) }; });
+        r.heroGeom = await page.evaluate(() => { const h = document.querySelector('h1').getBoundingClientRect(); const m = document.querySelector('.motif').getBoundingClientRect(); const band = document.querySelector('.hero').dataset.hero === 'band'; const bar = document.querySelector('.hero-foot').getBoundingClientRect(); const ox = Math.max(0, Math.min(h.right, m.right) - Math.max(h.left, m.left)); const oy = Math.max(0, Math.min(h.bottom, m.bottom) - Math.max(h.top, m.top)); return { band, overlapPct: Math.round(100 * ox * oy / (h.width * h.height)), bandAboveBar: !band || Math.round(m.bottom) <= Math.round(bar.top) + 8 }; });
+        r.tiles = await page.evaluate(() => { const th = document.getElementById('tileHours'), hh = document.getElementById('heroHours'); const vt = document.querySelector('.tile.type .vtext'), cap = document.querySelector('.tile.type .cap'); const today = document.querySelector('#hours li.today'); return { hoursMatch: !th || !today || th.textContent.trim() === today.children[1].textContent.trim(), typeClear: !vt || vt.getBoundingClientRect().bottom <= cap.getBoundingClientRect().top + 1 }; });
         await page.mouse.move(20, 300); await page.waitForTimeout(1000);
         r.factsDrift = await page.evaluate(() => getComputedStyle(document.querySelector('.facts')).transform);
         await page.mouse.move(700, 450);
@@ -115,7 +118,7 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
                    tileRatio: +(rb.width / rb.height).toFixed(2), tallRatio: +(tb.width / tb.height).toFixed(2),
                    ogImage: !!document.querySelector('meta[property="og:image"]'), fontsLoaded: document.fonts.check('600 20px "Noto Serif TC"') || document.fonts.check('800 20px "Noto Sans TC"') };
         });
-        await page.addStyleTag({ content: '*,*::before,*::after{transition:none!important;animation:none!important;opacity:1}' });
+        await page.addStyleTag({ content: '*,*::before,*::after{transition:none!important;animation:none!important;opacity:1}.motif svg *,.cl-motif *{stroke-dashoffset:0!important}' });
         await page.waitForTimeout(200);
         await page.addScriptTag({ content: axeSource });
         const res = await page.evaluate(async () => await axe.run(document, { runOnly: ['wcag2a', 'wcag2aa', 'best-practice'] }));
@@ -124,7 +127,7 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
         // dark mode contrast
         const dark = await browser.newPage({ viewport: vp, colorScheme: 'dark' });
         await dark.goto(url, { waitUntil: 'load' }); await dark.waitForTimeout(800);
-        await dark.addStyleTag({ content: '*,*::before,*::after{transition:none!important;animation:none!important;opacity:1}h1 .w,.tagline,.hero .cta{opacity:1!important;transform:none!important}' });
+        await dark.addStyleTag({ content: '*,*::before,*::after{transition:none!important;animation:none!important;opacity:1}h1 .w,.tagline,.hero .cta{opacity:1!important;transform:none!important}.motif svg *,.cl-motif *{stroke-dashoffset:0!important}' });
         await dark.evaluate(() => document.querySelectorAll('[data-reveal]').forEach(el => el.classList.add('in')));
         await dark.waitForTimeout(200);
         await dark.screenshot({ path: path.join(OUT, `${slug}-desktop-dark.png`), fullPage: true });
@@ -163,13 +166,14 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
     const ok = fn.fabHiddenAtTop && fn.menuBtnOnTop && fn.menuClosedByTap && fn.galleryCounterAfter2Next === '3' && fn.galleryCounterAfterPrev === '2'
       && fn.serviceLinksFocusable && Math.abs(fn.titleIndent) <= 2 && fn.modalFocusTrapped && !fn.factClipped && !fn.nbBroken && !fn.ctaOrphan && fn.visibleWithoutJs && v.scrollSpy === '#services' && c.h1DiffersFromBody && c.ogImage
       && v.anchorLanding && v.anchorLanding.solid && !v.anchorLanding.hidden && v.anchorLanding.top === 0
-      && fn.overlayHoursSpans && v.heroGeom && (!v.heroGeom.band || v.heroGeom.overlapPct === 0) && v.factsDrift === 'none'
+      && fn.overlayHoursSpans && v.heroGeom && (!v.heroGeom.band || v.heroGeom.overlapPct === 0) && v.heroGeom.bandAboveBar && v.factsDrift === 'none'
+      && v.tiles && v.tiles.hoursMatch && v.tiles.typeClear && fn.bandVisibleMobile && fn.typeClearMobile
       && v.reducedMotion && v.reducedMotion.h1 === 'none' && v.reducedMotion.revealOpacity === '1' && v.focusRing && v.focusRing.ok
       && Math.abs(c.tileRatio - 1.33) < 0.05 && Math.abs(c.tallRatio - 0.75) < 0.05 && !v.errors.length && !v.smallTargets.length
       && !v.axe.length && !(v.axeDark || []).length && !v.emoji && Object.values(v.heroFit).every(x => x.includes('ok')) && Object.values(v.overflow).every(o => o === 0);
     allOk = allOk && ok;
     console.log(`${slug}: ${ok ? 'PASS' : 'FAIL'}`);
-    if (!ok) console.log(JSON.stringify({ fn, scrollSpy: v.scrollSpy, heroGeom: v.heroGeom, factsDrift: v.factsDrift, anchorLanding: v.anchorLanding, reducedMotion: v.reducedMotion, focusRing: v.focusRing, computed: c, axe: v.axe, axeDark: v.axeDark, errors: v.errors, small: v.smallTargets, heroFit: v.heroFit, overflow: v.overflow, emoji: v.emoji }, null, 2));
+    if (!ok) console.log(JSON.stringify({ fn, scrollSpy: v.scrollSpy, heroGeom: v.heroGeom, tiles: v.tiles, factsDrift: v.factsDrift, anchorLanding: v.anchorLanding, reducedMotion: v.reducedMotion, focusRing: v.focusRing, computed: c, axe: v.axe, axeDark: v.axeDark, errors: v.errors, small: v.smallTargets, heroFit: v.heroFit, overflow: v.overflow, emoji: v.emoji }, null, 2));
   }
   const lh = report.lighthouse;
   const lhOk = lh && typeof lh === 'object' && ['performance', 'accessibility', 'best-practices', 'seo'].every(k => lh[k] >= 90);
