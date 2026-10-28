@@ -1,3 +1,5 @@
 requests>=2.31
 Jinja2>=3.1
+fonttools>=4.50  # 自架字型：依頁面用字切出 woff2
+brotli>=1.1
 anthropic>=2.0   # 選用：--ai-copy 用 Claude 寫網站文案

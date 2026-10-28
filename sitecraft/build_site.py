@@ -11,7 +11,7 @@ SiteCraft — 第 2 步：為每家店產生一頁式網站（示範版 / 正式
     python sitecraft/build_site.py --index               # 只重做 sites/index.html 作品集頁
 
 每個網站資料夾：
-    sites/<slug>/index.html     單一檔案、無外部依賴（字型除外），可直接交付
+    sites/<slug>/index.html     單一檔案、無外部依賴，字型切好放在 sites/<slug>/fonts/，可直接交付
     sites/<slug>/content.json   可手動編輯的文案與聯絡資訊；店家付款後把真實內容填進去再 rebuild 即可
     sites/<slug>/img/           店家照片放這裡，並在 content.json 的 gallery 列出檔名
 
@@ -23,6 +23,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import shutil
 import random
 import re
 import sys
@@ -31,6 +32,8 @@ from pathlib import Path
 from urllib.parse import quote
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
+
+import fonts as fontkit
 
 from common import (
     LEADS_FILE, SAMPLE_LEADS_FILE, SITES_DIR, TEMPLATES_DIR, demo_url_for, env, fmt_rating,
@@ -528,7 +531,8 @@ def og_image(lead: dict, content: dict, theme: dict, out: Path) -> bool:
     return True
 
 
-def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, og_png: bool = False) -> str:
+def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, og_png: bool = False,
+                fonts: list[dict] | None = None) -> str:
     theme = themes.get(lead.get("theme") or "default", themes["default"])
     brand = cfg["brand"]
     weekday_hours, periods = parse_hours(lead.get("hours_json", ""))
@@ -624,7 +628,9 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, 
         "initial": initial, "name_tokens": name_tokens(name), "name_lines": name_lines(name), "address_short": address_short,
         "address_html": address_html(address, lead.get("city", ""), lead.get("district", "")),
         "mode": theme.get("mode", "bold"), "hero_layout": theme.get("hero", "side"),
-        "fonts_url": mode["url"], "font_display": mode["display"], "font_head": mode["head"], "head_weight": mode["weight"],
+        "fonts_url": mode["url"], "fonts": fonts or [], "font_display": mode["display"],
+        "font_head": next((f["family"] for f in (fonts or []) if f.get("kind") == "head"), mode["head"]),
+        "head_weight": mode["weight"],
         "statement_pre": pre, "statement_em": em, "statement_post": post, "statement_name": statement_name,
         "closing_title": closing_title(lead.get("theme") or "default", name),
         "year": date.today().year,
@@ -657,13 +663,23 @@ def minify_css(html: str) -> str:
 
 
 def build_one(lead: dict, cfg: dict, themes: dict, *, demo: bool = True, use_ai: bool = False,
-              refresh_copy: bool = False) -> Path:
+              refresh_copy: bool = False, self_host_fonts: bool = True) -> Path:
     site_dir = SITES_DIR / lead["slug"]
     site_dir.mkdir(parents=True, exist_ok=True)
     theme = themes.get(lead.get("theme") or "default", themes["default"])
     content = load_or_make_content(lead, theme, site_dir, use_ai, refresh_copy)
     og_ok = og_image(lead, content, theme, site_dir / "og.png")
     html = render_site(lead, content, cfg, themes, demo=demo, og_png=og_ok)
+    fonts = None
+    if self_host_fonts:
+        # 先算出這一頁用到的字，切出自架字型，再重畫一次
+        fonts = fontkit.build_fonts(theme.get("mode", "bold"), html, site_dir)
+        if fonts:
+            html = render_site(lead, content, cfg, themes, demo=demo, og_png=og_ok, fonts=fonts)
+    if not fonts:
+        shutil.rmtree(site_dir / "fonts", ignore_errors=True)
+        if self_host_fonts:
+            print("  ! 無法切字型（缺 fonttools/brotli 或下載失敗），改用 Google Fonts 連結")
     (site_dir / "index.html").write_text(html, encoding="utf-8")
     return site_dir / "index.html"
 
@@ -706,6 +722,7 @@ def main() -> None:
     ap.add_argument("--refresh-copy", action="store_true", help="忽略既有 content.json、重新產生文案")
     ap.add_argument("--sample", action="store_true", help="用 data/leads.sample.csv 產生範例站")
     ap.add_argument("--index", action="store_true", help="只重做作品集頁 sites/index.html")
+    ap.add_argument("--google-fonts", action="store_true", help="不自架字型，改用 Google Fonts 連結（離線或沒裝 fonttools 時）")
     args = ap.parse_args()
 
     load_env()
@@ -741,7 +758,8 @@ def main() -> None:
         if not lead.get("slug"):
             continue
         demo = lead["status"] != "delivered"
-        out = build_one(lead, cfg, themes, demo=demo, use_ai=args.ai_copy, refresh_copy=args.refresh_copy)
+        out = build_one(lead, cfg, themes, demo=demo, use_ai=args.ai_copy, refresh_copy=args.refresh_copy,
+                        self_host_fonts=not args.google_fonts)
         if lead["status"] == "new":
             lead["status"] = "demo_ready"
             changed = True

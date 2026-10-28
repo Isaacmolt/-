@@ -93,7 +93,7 @@ find_leads ─→ build_site ─→ push ─→ 找 email ─→ send first ─�
 3. **不要冒充**：不要說「Google 合作夥伴」「Google 通知您」；寄件人就是你自己的工作室名。
 4. **寄信量**：Gmail 個人帳號 500 封/天是技術上限，不是目標。冷信維持每天 ≤ 30、每封個人化，被標垃圾信一次要修很久。
 5. **著作權**：正式版只放老闆自己提供或授權的照片；文案由我們寫、交付後歸店家。
-6. **字型**：模板用 Google Fonts 的 Noto Sans TC（開源授權），可商用。
+6. **字型**：Noto Sans TC / Noto Serif TC / Fraunces / Syne / Space Grotesk 都是 SIL Open Font License，可商用、可切子集再散布；建站時會切好放在每個站的 `fonts/` 裡，交付包不用另外處理。
 
 ## 6. 每週檢視的數字
 

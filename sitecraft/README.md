@@ -104,6 +104,7 @@ sitecraft/
 
 每個網站都有：
 - 三種字型語氣 × 兩種首屏構圖，16 個類別分散配置，避免看起來像同一頁換色：編輯感（Fraunces + Noto Serif TC）、粗獷感（Syne + Noto Sans TC 900）、清爽感（Space Grotesk + Noto Sans TC 600）；圖騰在右（side）或圖騰橫幅居中（band），由 `themes.json` 的 `mode` 與 `hero` 決定
+- 字型自架：建站時用 fontTools 依該頁實際用到的字，從開源變數字型切出 3～4 個 woff2（標題子集約 30 KB、內文約 110 KB、英文約 40 KB），放在 `sites/<slug>/fonts/`，首屏標題字型 preload；不再連 Google Fonts，手機上少掉上百個字型子集造成的反覆重排。原始字型第一次會下載到 `sitecraft/.fonts/`（不進 git）；沒裝 fonttools 或離線時加 `--google-fonts` 退回 Google Fonts 連結
 - 全屏 hero：逐字進場的店名、該類別專屬的線條圖騰（咖啡杯、剪刀、貓掌、牙科十字等 17 種，在 `data/motifs.json`）會跟著游標產生視差、單一主要行動（LINE 為主、電話其次、地圖為文字連結）
 - 首屏資訊列：今日營業（即時判斷營業中／休息中／今日公休與下次開門時間）、Google 評分與評論數、地址、電話
 - 跑馬燈帶資訊：類別、區域、評分、今日時段、服務名稱

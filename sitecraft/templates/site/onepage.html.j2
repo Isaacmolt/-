@@ -18,16 +18,18 @@
 <meta property="og:image:height" content="630">{% endif %}
 <link rel="canonical" href="{{ b.url }}">
 <link rel="icon" href="data:image/svg+xml,{{ b.favicon_svg }}">
-<link rel="preconnect" href="https://fonts.googleapis.com">
+{% if b.fonts %}{% for f in b.fonts if f.preload %}<link rel="preload" as="font" type="font/woff2" href="{{ f.file }}" crossorigin>
+{% endfor %}{% else %}<link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" as="style" href="{{ b.fonts_url }}" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="{{ b.fonts_url }}"></noscript>
-<script type="application/ld+json">{{ b.jsonld | tojson }}</script>
+{% endif %}<script type="application/ld+json">{{ b.jsonld | tojson }}</script>
 <style>
-:root{
+{% for f in b.fonts %}@font-face{font-family:"{{ f.family }}";src:url({{ f.file }}) format("woff2");font-weight:{{ f.weight }};font-style:{{ f.style }};font-display:swap}
+{% endfor %}:root{
   --p:{{ t.p }};--pd:{{ t.pd }};--a:{{ t.a }};--bg:{{ t.bg }};--sf:{{ t.sf }};
   --tx:{{ t.tx }};--mu:{{ t.mu }};--line:{{ t.line }};--p-soft:{{ t.p_soft }};--a-soft:{{ t.a_soft }};
-  --display:"{{ b.font_display }}";--cjk-head:"{{ b.font_head }}";--body:"PingFang TC","Noto Sans TC","Microsoft JhengHei",system-ui,-apple-system,sans-serif;
+  --display:"{{ b.font_display }}";--cjk-head:"{{ b.font_head }}";--tag-cjk:{% if b.mode == "editorial" %}"{{ b.font_head }}"{% else %}"Noto Sans TC"{% endif %};--body:"PingFang TC","Noto Sans TC","Microsoft JhengHei",system-ui,-apple-system,sans-serif;
   --head-weight:{{ b.head_weight }};
   --ink:var(--pd);--ink2:{{ b.ink2 }};--ease:cubic-bezier(.22,1,.36,1);--r:22px;
   --noise:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
@@ -147,7 +149,7 @@ h1 .w{display:inline-block}
 h1 .en{display:block;font-size:.72em;font-weight:500;letter-spacing:0;line-height:1.15;margin-top:.08em}
 body[data-mode="editorial"] h1 .en{font-style:italic;font-weight:400}
 @keyframes rise{to{opacity:1;transform:none}}
-.tagline{font-family:var(--display),var(--cjk-head),var(--body);font-weight:400;font-size:clamp(1.25rem,2.4vw,1.9rem);line-height:1.5;max-width:28ch}
+.tagline{font-family:var(--display),var(--tag-cjk),var(--body);font-weight:400;font-size:clamp(1.25rem,2.4vw,1.9rem);line-height:1.5;max-width:28ch}
 .js .tagline{opacity:0;animation:fade 1s var(--ease) .55s forwards}
 @keyframes fade{to{opacity:.95}}
 .cta{display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px;margin:30px 0 0}
