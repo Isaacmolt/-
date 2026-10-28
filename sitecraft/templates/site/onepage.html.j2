@@ -115,7 +115,7 @@ h1 .w{display:inline-block;white-space:pre;opacity:0;transform:translateY(.6em) 
 .btn-line{background:#06C755;color:#06200f}
 .btn-line::before{background:#2ee07a}
 .btn-line:hover{color:#06200f}
-.hero-foot{position:relative;margin-top:clamp(28px,5vh,56px);border-top:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.14);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.hero-foot{position:relative;margin-top:clamp(28px,5vh,56px);border-top:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.16)}
 .facts{display:grid;grid-template-columns:repeat(4,1fr);gap:0}
 .fact{padding:22px 24px 22px 0;border-left:1px solid rgba(255,255,255,.18);padding-left:22px;min-width:0}
 .fact:first-child{border-left:0;padding-left:0}
@@ -450,7 +450,7 @@ footer small a{text-decoration:underline;display:inline-block;padding:12px 0}
   </div>
 </footer>
 
-{% if b.phone_href or b.line_url %}<nav class="fab" aria-label="快速聯絡">{% if b.phone_href %}<a href="{{ b.phone_href }}" aria-label="撥打電話 {{ b.phone }}"><svg class="ico"><use href="#i-phone"/></svg>電話</a>{% endif %}{% if b.line_url %}<a href="{{ b.line_url }}" target="_blank" rel="noopener"><svg class="ico"><use href="#i-chat"/></svg>LINE</a>{% endif %}</nav>{% endif %}
+{% if b.phone_href or b.line_url %}<nav class="fab" aria-label="快速聯絡">{% if b.phone_href %}<a href="{{ b.phone_href }}"><svg class="ico"><use href="#i-phone"/></svg>電話</a>{% endif %}{% if b.line_url %}<a href="{{ b.line_url }}" target="_blank" rel="noopener"><svg class="ico"><use href="#i-chat"/></svg>LINE</a>{% endif %}</nav>{% endif %}
 
 {% if demo %}
 <aside class="demo-bar" id="demoBar" aria-label="製作者提示">
@@ -474,7 +474,7 @@ footer small a{text-decoration:underline;display:inline-block;padding:12px 0}
     last=y;ticking=false;
   }
   addEventListener('scroll',function(){if(!ticking){ticking=true;requestAnimationFrame(onScroll)}},{passive:true});
-  addEventListener('resize',function(){measure();onScroll()},{passive:true});addEventListener('load',measure);measure();onScroll();
+  addEventListener('resize',function(){measure();onScroll()},{passive:true});addEventListener('load',function(){requestAnimationFrame(measure)});measure();onScroll();
   /* mobile overlay menu */
   var btn=d.getElementById('menuBtn'),overlay=d.getElementById('overlay');
   function setMenu(open){overlay.classList.toggle('open',open);overlay.setAttribute('aria-hidden',!open);btn.setAttribute('aria-expanded',open);btn.setAttribute('aria-label',open?'關閉選單':'開啟選單');d.body.style.overflow=open?'hidden':''}
