@@ -244,7 +244,7 @@ def split_statement(text: str) -> tuple[str, str, str]:
     return "", text, ""
 
 
-def art_tiles(palette: dict, seed: str, n: int = 6) -> list[str]:
+def art_tiles(palette: dict, seed: str, motif: str = "", n: int = 6) -> list[str]:
     """每家店不同、但同一家店每次都一樣的抽象圖（取代照片的示意圖）。"""
     from markupsafe import Markup
     rnd = random.Random(seed)
@@ -261,13 +261,12 @@ def art_tiles(palette: dict, seed: str, n: int = 6) -> list[str]:
                  f'<rect width="400" height="300" fill="url(#{gid})"/>']
         if kind == 0:
             parts.append(f'<circle cx="{cx * 4}" cy="{cy * 3}" r="150" fill="{a}" opacity=".75"/>')
-            parts.append(f'<circle cx="{cx * 4 - 120}" cy="{cy * 3 - 110}" r="54" fill="none" stroke="{pd}" stroke-width="10"/>')
+            parts.append(f'<g transform="translate({cx * 4 - 130} {cy * 3 - 130}) scale(1.3)" fill="none" stroke="{pd}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">{motif}</g>')
         elif kind == 1:
             parts.append(f'<rect x="-60" y="120" width="560" height="90" fill="{p}" opacity=".85" transform="rotate({rot} 200 150)"/>')
             parts.append(f'<circle cx="{cx * 4 - 160}" cy="{cy * 3 - 120}" r="26" fill="{a}"/>')
         elif kind == 2:
-            for r, w in ((150, 14), (105, 10), (62, 8)):
-                parts.append(f'<circle cx="{cx * 4}" cy="{cy * 3}" r="{r}" fill="none" stroke="{pd}" stroke-width="{w}" opacity=".8" stroke-dasharray="{r * 3.6} {r * 2.7}" transform="rotate({rot * 3} {cx * 4} {cy * 3})"/>')
+            parts.append(f'<g transform="translate(40 -40) scale(1.9) rotate({rot // 2} 100 100)" fill="none" stroke="{p}" stroke-width="2.2" opacity=".9" stroke-linecap="round" stroke-linejoin="round">{motif}</g>')
         elif kind == 3:
             parts.append(f'<path d="M0 0H400V130C300 210 100 210 0 130Z" fill="{a}" opacity=".8"/>')
             parts.append(f'<rect x="{cx * 4 - 150}" y="150" width="120" height="120" rx="18" fill="{p}" transform="rotate({rot} {cx * 4 - 90} 210)"/>')
@@ -279,9 +278,42 @@ def art_tiles(palette: dict, seed: str, n: int = 6) -> list[str]:
         else:
             parts.append(f'<ellipse cx="{cx * 4 - 80}" cy="{cy * 3}" rx="150" ry="100" fill="{p}" opacity=".7" transform="rotate({rot} {cx * 4 - 80} {cy * 3})"/>')
             parts.append(f'<ellipse cx="{cx * 4 + 10}" cy="{cy * 3 - 60}" rx="130" ry="90" fill="{a}" opacity=".7" style="mix-blend-mode:multiply"/>')
+            parts.append(f'<g transform="translate(250 170) scale(.6)" fill="none" stroke="{bg}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">{motif}</g>')
         parts.append("</svg>")
         tiles.append(Markup("".join(parts)))
     return tiles
+
+
+MOTIFS_FILE = TEMPLATES_DIR.parent / "data" / "motifs.json"
+
+
+def load_motifs() -> dict:
+    return json.loads(MOTIFS_FILE.read_text(encoding="utf-8"))
+
+
+LINE_OA = re.compile(r"line\.me/R/ti/p/(@[\w.-]+)")
+
+
+def service_href(title: str, line_url: str, phone_href: str) -> str:
+    """服務列的連結：LINE 官方帳號可帶預填訊息；否則退回 LINE 連結或電話；都沒有就不連。"""
+    m = LINE_OA.search(line_url or "")
+    if m:
+        return f"https://line.me/R/oaMessage/{m.group(1)}/?{quote('想詢問：' + title)}"
+    if line_url:
+        return line_url
+    return phone_href or ""
+
+
+def statement_from(about: list[str], tagline: str) -> tuple[str, list[str]]:
+    """關於我們的大標用介紹的第一句（不重複 hero 標語）；回傳 (大標, 其餘段落)。"""
+    if not about:
+        return tagline, []
+    first = about[0]
+    head, sep, rest = first.partition("。")
+    if not sep or len(head) > 40:
+        return tagline, about
+    paras = ([rest] if rest.strip() else []) + about[1:]
+    return head, paras
 
 
 def closing_title(theme_key: str, name: str) -> str:
@@ -356,13 +388,28 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool) 
     if isinstance(about, str):
         about = [about]
 
+    motifs = load_motifs()
+    motif = motifs.get(lead.get("theme") or "default") or motifs["default"]
     imgs = [g for g in content.get("gallery", []) if g]
-    arts = art_tiles(theme["palette"], lead["slug"])
+    arts = art_tiles(theme["palette"], lead["slug"], motif)
     gallery_items = []
     for i in range(max(len(imgs), 6) if imgs else 6):
         gallery_items.append({"img": imgs[i] if i < len(imgs) else "", "art": arts[i % len(arts)], "tall": i % 3 == 1})
     mode = FONT_MODES.get(theme.get("mode", "bold"), FONT_MODES["bold"])
-    pre, em, post = split_statement(content.get("tagline", ""))
+    statement, about = statement_from(about, content.get("tagline", ""))
+    pre, em, post = split_statement(statement)
+    line_url = content.get("line_url", "")
+    services = []
+    for s_ in content.get("services", []):
+        s_ = dict(s_)
+        s_["href"] = service_href(s_.get("title", ""), line_url, phone_href(phone))
+        services.append(s_)
+    marquee = [lead.get("category") or theme["label"], f"{lead.get('city', '')}{lead.get('district', '')}" or lead.get("address", "")]
+    if lead.get("rating"):
+        marquee.append(f"Google 評分 {fmt_rating(lead['rating'])}　{lead.get('review_count', '')} 則評論")
+    if today_hours:
+        marquee.append(f"今日 {today_hours}")
+    marquee += [s_["title"] for s_ in services]
     initial = next((ch for ch in name if ch.strip()), "S")
     city_district = f"{lead.get('city', '')}{lead.get('district', '')}"
     address_short = address
@@ -406,7 +453,8 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool) 
         "review_count": lead.get("review_count", ""), "maps_url": maps_url,
         "embed_url": f"https://www.google.com/maps?q={quote(name + ' ' + address)}&hl=zh-TW&z=16&output=embed",
         "tagline": content.get("tagline", ""), "about_paragraphs": about,
-        "highlights": content.get("highlights", []), "services": content.get("services", []),
+        "highlights": content.get("highlights", []), "services": services,
+        "services_linked": any(s_["href"] for s_ in services), "marquee": marquee,
         "gallery_items": gallery_items,
         "weekday_hours": weekday_hours, "periods": periods, "today_hours": today_hours,
         "jsonld": jsonld, "favicon_svg": favicon_svg(theme["palette"]["pd"], initial),
@@ -421,7 +469,8 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool) 
         "price_twd": brand.get("price_twd", 860),
     }
     tpl = _env.get_template("onepage.html.j2")
-    return minify_css(tpl.render(b=b, t={**theme["palette"], "word": theme.get("word", "LOCAL")}, demo=demo))
+    from markupsafe import Markup
+    return minify_css(tpl.render(b=b, t={**theme["palette"], "word": theme.get("word", "LOCAL"), "motif": Markup(motif)}, demo=demo))
 
 
 CSS_COMMENT = re.compile(r"/\*.*?\*/", re.S)

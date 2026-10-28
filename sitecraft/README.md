@@ -96,14 +96,29 @@ sitecraft/
 - 寵物美容 <https://isaacmolt.github.io/-/sites/demo-pet/>
 - 作品集 <https://isaacmolt.github.io/-/sites/>
 
-每個網站都有：手機優先的 RWD、店名/標語/類別、Google 評分徽章（連回地圖）、一鍵撥號 / LINE / 導航、關於我們 + 三大特色、四項服務卡片、相簿（示範版用示意圖，正式版放老闆的照片）、每週營業時間（自動標今天、判斷營業中/休息中）、Google 地圖嵌入、Facebook/IG/LINE 連結、SEO 用的 `LocalBusiness` 結構化資料、OG 標籤。單一 HTML 檔，沒有任何框架或後端，100 年後也能開。
+品質標準以 Awwwards、Webby Awards、FWA 獲獎作品為目標，每次改模板都跑一輪自我檢查：
+`axe-core` 無障礙 0 違規、Lighthouse 行動版四項 90 以上、無橫向溢出、所有可點元素 44px 以上、
+首屏資訊列在 1366×768 / 1440×900 / 390×844 都放得進一屏、整站零 emoji，再交給獨立評審依六項指標打分、修到過關。
+
+每個網站都有：
+- 兩種字型語氣：編輯感（Fraunces + Noto Serif TC，咖啡、美髮、花店等）與粗獷感（Syne + Noto Sans TC，健身、修車、小吃等），由 `themes.json` 的 `mode` 決定
+- 全屏 hero：逐字進場的店名、該類別專屬的線條圖騰（咖啡杯、剪刀、貓掌、牙科十字等 17 種，在 `data/motifs.json`）、單一主要行動（LINE 為主、電話其次、地圖為文字連結）
+- 首屏資訊列：今日營業（即時判斷營業中／休息中／今日公休與下次開門時間）、Google 評分與評論數、地址、電話
+- 跑馬燈帶資訊：類別、區域、評分、今日時段、服務名稱
+- 關於我們：以介紹的第一句當大標、三大特色編號清單
+- 服務列：四項可點的連結，直接開 LINE 並預填「想詢問：某服務」
+- 環境相簿：可拖曳、可按鍵的橫向捲動；示範版用該店專屬的抽象圖與圖騰，正式版放老闆照片
+- 營業資訊：一週時段（標今天）、一鍵複製地址、電話、LINE、Google 地圖嵌入
+- 收尾區：大字電話 + LINE；頁尾社群連結與製作者署名
+- 手機：全螢幕選單（含撥打／LINE／導航）、底部「電話｜LINE」快速列；深色模式、減少動態偏好、鍵盤焦點樣式、略過連結
+- SEO：`LocalBusiness` 結構化資料（含營業時間與評分）、OG 標籤、canonical。單一 HTML 檔、無框架、無後端。
 
 ## 改東西
 
 | 想改 | 去哪裡 |
 |---|---|
 | 價格、品牌名、加購、縣市與類型 | `config.json` |
-| 某一類店的顏色 / 圖示 / 預設文案 | `data/themes.json` |
+| 某一類店的顏色 / 字型語氣 / 預設文案 | `data/themes.json`；線條圖騰在 `data/motifs.json` |
 | 某一家店的文字、聯絡方式、照片 | `sites/<slug>/content.json`，改完 `build_site.py --slug <slug> --rebuild` |
 | 網站版型 | `templates/site/onepage.html.j2`，改完 `build_site.py --rebuild` 全部重做 |
 | 信件內容 | `templates/email/*.txt`（第一行是主旨，支援 `{{ 變數 }}`） |
