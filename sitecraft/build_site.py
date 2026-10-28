@@ -277,41 +277,41 @@ def split_statement(text: str) -> tuple[str, str, str]:
     return "", text, ""
 
 
-def art_tiles(palette: dict, seed: str, motif: str = "", n: int = 6) -> list[str]:
+def art_tiles(palette: dict, seed: str, mset: dict, n: int = 6) -> list[str]:
     """
-    示意圖是一套系統而不是隨機圖案：雙色底 + 該類別圖騰的三種尺度（滿版、特寫、重複圖樣），
-    外加一張「相框」告訴老闆這裡會換成照片。同一家店每次產生都一樣。
+    示意圖是一套系統：同一類別的三個圖騰（a 主圖、b 圖樣、c 對比底）在六格裡輪流擔綱，
+    中間穿插兩張文字磚（標語直排、營業資訊）。同一家店每次產生都一樣。
     """
     from markupsafe import Markup
     rnd = random.Random(seed)
     p, pd, a, bg = palette["p"], palette["pd"], palette["a"], palette["bg"]
     soft, asoft = palette["p_soft"], palette["a_soft"]
+    A, B, C = mset["a"], mset.get("b", mset["a"]), mset.get("c", mset["a"])
     stroke = 'fill="none" stroke-linecap="round" stroke-linejoin="round"'
 
-    def g(tx, ty, sc, color, width, extra=""):
+    def g(m, tx, ty, sc, color, width, extra=""):
         return (f'<g transform="translate({tx} {ty}) scale({sc})" {stroke} stroke="{color}" '
-                f'stroke-width="{width}" {extra}>{motif}</g>')
+                f'stroke-width="{width}" {extra}>{m}</g>')
 
     specs = [
-        # (ground colour, motif placement)
-        (asoft, g(80, 30, 1.2, pd, 2.4)),                                   # 1 滿版主圖
-        (p, g(-60, -40, 2.6, bg, 1.6, 'opacity=".9"')),                      # 2 特寫（高）
-        (asoft, '<circle cx="70" cy="60" r="34" fill="' + a + '" opacity=".9"/>' + g(120, 70, 1.5, pd, 1.8, 'opacity=".9"')),  # 3 大圖騰 + 一點
-        (a, g(110, 40, 1.9, pd, 1.8, 'opacity=".85"')),                       # 4 完整圖騰
-        (soft, "".join(g(20 + i * 120, 6 + j * 96, .45, p, 4, 'opacity=".4"') for i in range(3) for j in range(3))),  # 5 織紋（高）
-        (pd, g(90, 40, 1.1, a, 2.6)),                                        # 6 深底主圖
+        (f'<rect width="400" height="300" fill="{asoft}"/>'
+         f'<circle cx="{rnd.randint(280, 330)}" cy="{rnd.randint(50, 100)}" r="{rnd.randint(70, 100)}" fill="{a}" opacity=".55"/>'
+         + g(A, 80, 30, 1.2, pd, 2.4)),                                                       # 0 主圖騰 + 一點
+        "",                                                                                   # 1 標語直排（HTML）
+        f'<rect width="400" height="300" fill="{soft}"/>'
+        + "".join(g(B, 20 + i * 120, 6 + j * 96, .45, p, 4, 'opacity=".42"') for i in range(3) for j in range(3)),  # 2 圖樣
+        f'<rect width="200" height="300" fill="{asoft}"/><rect x="200" width="200" height="300" fill="{soft}"/>'
+        + g(C, 100, 50, 1.0, pd, 2.6),                                                        # 3 雙色底 + 對比圖騰
+        "",                                                                                   # 4 營業資訊（HTML）
+        f'<rect width="400" height="300" fill="{pd}"/>' + g(A, 90, 40, 1.1, a, 2.6),          # 5 深底主圖
     ]
     tiles = []
     for i in range(n):
-        ground, art = specs[i % len(specs)]
-        rot = 0 if i % 6 == 4 else rnd.randint(-6, 6)
-        parts = [f'<svg class="art" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true">',
-                 f'<rect width="400" height="300" fill="{ground}"/>']
-        if i % 6 in (0, 3):
-            parts.append(f'<circle cx="{rnd.randint(260, 330)}" cy="{rnd.randint(60, 120)}" r="{rnd.randint(70, 110)}" fill="{a if i % 6 == 0 else asoft}" opacity=".55"/>')
-        parts.append(f'<g transform="rotate({rot} 200 150)">{art}</g>')
-        parts.append("</svg>")
-        tiles.append(Markup("".join(parts)))
+        body = specs[i % len(specs)]
+        if not body:
+            tiles.append(Markup(""))
+            continue
+        tiles.append(Markup(f'<svg class="art" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true">{body}</svg>'))
     return tiles
 
 
@@ -320,6 +320,14 @@ MOTIFS_FILE = TEMPLATES_DIR.parent / "data" / "motifs.json"
 
 def load_motifs() -> dict:
     return json.loads(MOTIFS_FILE.read_text(encoding="utf-8"))
+
+
+SHAPE_TAG = re.compile(r"<(path|circle|ellipse|rect)\b")
+
+
+def drawable(markup: str) -> str:
+    """每個形狀加 pathLength=1，CSS 就能用 dasharray 做「畫出來」的動畫。"""
+    return SHAPE_TAG.sub(r'<\1 pathLength="1"', markup)
 
 
 LINE_OA = re.compile(r"line\.me/R/ti/p/(@[\w.-]+)")
@@ -495,14 +503,16 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, 
         about = [about]
 
     motifs = load_motifs()
-    motif = motifs.get(lead.get("theme") or "default") or motifs["default"]
+    mset = motifs.get(lead.get("theme") or "default") or motifs["default"]
+    motif = mset["a"]
     imgs = [g for g in content.get("gallery", []) if g]
-    arts = art_tiles(theme["palette"], lead["slug"], motif)
+    arts = art_tiles(theme["palette"], lead["slug"], mset)
     gallery_items = []
     for i in range(max(len(imgs), 6) if imgs else 6):
         labels = theme.get("gallery_labels") or ["店面", "服務區", "作品", "環境", "商品", "入口"]
         gallery_items.append({"img": imgs[i] if i < len(imgs) else "", "art": arts[i % len(arts)],
-                              "tall": i % 3 == 1, "type": (not imgs) and i == 1, "label": labels[i % len(labels)]})
+                              "tall": i % 3 == 1, "type": (not imgs) and i == 1, "info": (not imgs) and i == 4,
+                              "label": labels[i % len(labels)]})
     mode = FONT_MODES.get(theme.get("mode", "bold"), FONT_MODES["bold"])
     statement, about = statement_from(about, content.get("tagline", ""))
     statement_name = ""
@@ -579,7 +589,10 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, 
     }
     tpl = _env.get_template("onepage.html.j2")
     from markupsafe import Markup
-    return minify_css(tpl.render(b=b, t={**theme["palette"], "word": theme.get("word", "LOCAL"), "motif": Markup(motif)}, demo=demo))
+    band = "".join(f'<g transform="translate({x} 0) rotate({r} 100 100)">{drawable(mset.get(k, motif))}</g>'
+                   for x, r, k in ((0, -8, "a"), (300, 6, "b"), (600, -5, "c")))
+    return minify_css(tpl.render(b=b, t={**theme["palette"], "word": theme.get("word", "LOCAL"), "motif": Markup(motif),
+                                         "motif_draw": Markup(drawable(motif)), "motif_band": Markup(band)}, demo=demo))
 
 
 CSS_COMMENT = re.compile(r"/\*.*?\*/", re.S)

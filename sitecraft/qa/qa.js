@@ -68,6 +68,10 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
         const inside2 = await page.evaluate(() => !!document.activeElement.closest('#overlay') || document.activeElement === document.getElementById('menuBtn'));
         await page.keyboard.press('Escape'); await page.waitForTimeout(300);
         r.fn.modalFocusTrapped = inside1 && inside2;
+        // overlay hours mirror the facts bar as separate spans (no glued string)
+        await page.click('#menuBtn'); await page.waitForTimeout(400);
+        r.fn.overlayHoursSpans = await page.evaluate(() => { const n = document.querySelectorAll('#ovHours > span').length; const t = document.getElementById('ovHours').textContent; return n >= 2 || (n === 1 && !/營業中\d|公休明天|休息中\d/.test(t)); });
+        await page.keyboard.press('Escape'); await page.waitForTimeout(300);
         r.fn.factClipped = await page.evaluate(() => [...document.querySelectorAll('.fact > span')].some(sp => sp.scrollWidth > sp.clientWidth + 1 && !sp.classList.contains('num')));
         // no-break spans must stay on one line (no CJK orphans)
         r.fn.nbBroken = await page.evaluate(() => [...document.querySelectorAll('.nb')].some(el => { const lh = parseFloat(getComputedStyle(el).lineHeight) || 20; return el.getBoundingClientRect().height > lh * 1.5; }));
@@ -94,6 +98,11 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
         await page.evaluate(() => { document.addEventListener('keydown', () => document.querySelector('.svc li > a').focus(), { once: true }); });
         await page.keyboard.press('Shift'); await page.waitForTimeout(100);
         r.focusRing = await page.evaluate(() => { const a = document.querySelector('.svc li > a'); const fv = a.matches(':focus-visible'); const oc = getComputedStyle(a).outlineColor; const ink = getComputedStyle(document.documentElement).getPropertyValue('--pd').trim(); const h = ink.replace('#',''); const rgb = `rgb(${parseInt(h.slice(0,2),16)}, ${parseInt(h.slice(2,4),16)}, ${parseInt(h.slice(4,6),16)})`; a.blur(); return { focusVisible: fv, outline: oc, ink: rgb, ok: fv && oc === rgb }; });
+        // band hero: motif never overlaps the title box; parallax never moves the facts bar
+        r.heroGeom = await page.evaluate(() => { const h = document.querySelector('h1').getBoundingClientRect(); const m = document.querySelector('.motif').getBoundingClientRect(); const band = document.querySelector('.hero').dataset.hero === 'band'; const ox = Math.max(0, Math.min(h.right, m.right) - Math.max(h.left, m.left)); const oy = Math.max(0, Math.min(h.bottom, m.bottom) - Math.max(h.top, m.top)); return { band, overlapPct: Math.round(100 * ox * oy / (h.width * h.height)) }; });
+        await page.mouse.move(20, 300); await page.waitForTimeout(1000);
+        r.factsDrift = await page.evaluate(() => getComputedStyle(document.querySelector('.facts')).transform);
+        await page.mouse.move(700, 450);
         // scroll-spy: after scrolling to services, the matching nav link is current
         await page.evaluate(() => document.getElementById('services').scrollIntoView({ block: 'center' })); await page.waitForTimeout(500);
         r.scrollSpy = await page.evaluate(() => { const a = document.querySelector('.nav ul a[aria-current="true"]'); return a ? a.getAttribute('href') : null; });
@@ -154,12 +163,13 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
     const ok = fn.fabHiddenAtTop && fn.menuBtnOnTop && fn.menuClosedByTap && fn.galleryCounterAfter2Next === '3' && fn.galleryCounterAfterPrev === '2'
       && fn.serviceLinksFocusable && Math.abs(fn.titleIndent) <= 2 && fn.modalFocusTrapped && !fn.factClipped && !fn.nbBroken && !fn.ctaOrphan && fn.visibleWithoutJs && v.scrollSpy === '#services' && c.h1DiffersFromBody && c.ogImage
       && v.anchorLanding && v.anchorLanding.solid && !v.anchorLanding.hidden && v.anchorLanding.top === 0
+      && fn.overlayHoursSpans && v.heroGeom && (!v.heroGeom.band || v.heroGeom.overlapPct === 0) && v.factsDrift === 'none'
       && v.reducedMotion && v.reducedMotion.h1 === 'none' && v.reducedMotion.revealOpacity === '1' && v.focusRing && v.focusRing.ok
       && Math.abs(c.tileRatio - 1.33) < 0.05 && Math.abs(c.tallRatio - 0.75) < 0.05 && !v.errors.length && !v.smallTargets.length
       && !v.axe.length && !(v.axeDark || []).length && !v.emoji && Object.values(v.heroFit).every(x => x.includes('ok')) && Object.values(v.overflow).every(o => o === 0);
     allOk = allOk && ok;
     console.log(`${slug}: ${ok ? 'PASS' : 'FAIL'}`);
-    if (!ok) console.log(JSON.stringify({ fn, scrollSpy: v.scrollSpy, anchorLanding: v.anchorLanding, reducedMotion: v.reducedMotion, focusRing: v.focusRing, computed: c, axe: v.axe, axeDark: v.axeDark, errors: v.errors, small: v.smallTargets, heroFit: v.heroFit, overflow: v.overflow, emoji: v.emoji }, null, 2));
+    if (!ok) console.log(JSON.stringify({ fn, scrollSpy: v.scrollSpy, heroGeom: v.heroGeom, factsDrift: v.factsDrift, anchorLanding: v.anchorLanding, reducedMotion: v.reducedMotion, focusRing: v.focusRing, computed: c, axe: v.axe, axeDark: v.axeDark, errors: v.errors, small: v.smallTargets, heroFit: v.heroFit, overflow: v.overflow, emoji: v.emoji }, null, 2));
   }
   const lh = report.lighthouse;
   const lhOk = lh && typeof lh === 'object' && ['performance', 'accessibility', 'best-practices', 'seo'].every(k => lh[k] >= 90);

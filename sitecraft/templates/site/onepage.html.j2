@@ -33,7 +33,7 @@
   --noise:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 @media (prefers-color-scheme:dark){:root{
-  --bg:color-mix(in oklab,var(--pd) 14%,#0d0d10);--sf:color-mix(in oklab,var(--pd) 22%,#141418);
+  --bg:color-mix(in oklab,var(--pd) 14%,#0d0d10);--sf:color-mix(in oklab,var(--a) 9%,#15151a);
   --tx:#f3f1ec;--mu:#b3aea6;--line:rgba(255,255,255,.12);
   --p-soft:color-mix(in oklab,var(--p) 28%,transparent);--a-soft:color-mix(in oklab,var(--a) 22%,transparent);
   --ink:var(--a);--ink2:color-mix(in oklab,var(--a) 70%,#fff);
@@ -107,8 +107,14 @@ h1,h2,.display{font-family:var(--display),var(--cjk-head),var(--body);font-weigh
 .motif{position:absolute;right:clamp(-120px,-6vw,-40px);top:2vh;z-index:-1;width:clamp(320px,54vw,780px);pointer-events:none}
 .motif svg{width:100%;height:auto;color:#fff;opacity:.34;stroke:currentColor;fill:none;stroke-width:1.2;stroke-linecap:round;stroke-linejoin:round;}
 @media (hover:hover){.motif svg{transform:translate3d(calc(var(--mx)*-48px),calc(var(--my)*-32px),0) rotate(calc(var(--mx)*-2.5deg));transition:transform .9s var(--ease)}
-.hero .wrap{transform:translate3d(calc(var(--mx)*10px),calc(var(--my)*6px),0);transition:transform .9s var(--ease)}}
+.hero>.wrap{transform:translate3d(calc(var(--mx)*10px),calc(var(--my)*6px),0);transition:transform .9s var(--ease)}}
 .motif .d{animation:drift 10s ease-in-out infinite alternate}
+.js .motif svg :is(path,circle,ellipse,rect){stroke-dasharray:1;stroke-dashoffset:1;animation:draw 2.2s var(--ease) .25s forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.js .cl-motif :is(path,circle,ellipse,rect){stroke-dasharray:1;stroke-dashoffset:1}
+.js .closing.in .cl-motif :is(path,circle,ellipse,rect){animation:draw 1.8s var(--ease) forwards}
+.js .strip .tile{opacity:0;transform:translateY(18px);transition:opacity .8s var(--ease),transform .8s var(--ease);transition-delay:calc(var(--i,0)*70ms)}
+.js .strip.in .tile{opacity:1;transform:none}
 @keyframes drift{from{transform:translate(0,0)}to{transform:translate(-4vw,-2.5vw)}}
 .hero .wrap{position:relative;margin-block:auto;padding:clamp(88px,11vh,112px) 0 clamp(24px,4vh,48px)}
 .eyebrow{display:inline-flex;align-items:center;gap:12px;font-size:.82rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;opacity:.85}
@@ -153,6 +159,7 @@ body[data-mode="editorial"] h1 .en{font-style:italic;font-weight:400}
 @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(110,231,160,.6)}70%{box-shadow:0 0 0 10px rgba(110,231,160,0)}100%{box-shadow:0 0 0 0 rgba(110,231,160,0)}}
 @media (max-width:880px){.hero .wrap{padding-top:96px;padding-bottom:20px}.facts{grid-template-columns:1fr 1fr}.fact{padding:13px 0 13px 18px}.fact>span:not(.num){font-size:.95rem;white-space:normal;overflow:visible;line-height:1.45}.status{flex-wrap:wrap;row-gap:2px}.nb{white-space:nowrap}.fact:nth-child(odd){border-left:0;padding-left:0}.fact:nth-child(n+3){border-top:1px solid rgba(255,255,255,.14)}}
 @media (max-width:880px){.motif{top:40px;right:-16vw;width:68vw}.motif svg{opacity:.24}}
+@media (orientation:portrait) and (min-width:700px){.hero,body.demo .hero{min-height:min(calc(100svh - var(--bar,0px)),860px)}.motif{width:72vw;right:-14vw;top:4vh}}
 @media (max-width:480px){h1{max-width:none}.hero .cta{gap:10px}.hero .cta .btn{flex:1 1 calc(50% - 5px);justify-content:center;padding:0 14px}.hero .cta .tlink{flex:1 1 100%;justify-content:center;min-height:50px;border:1.5px solid rgba(255,255,255,.4);border-radius:999px}}
 
 /* hero: band variant (centred type, motif runs behind the facts bar) */
@@ -161,9 +168,11 @@ body[data-mode="editorial"] h1 .en{font-style:italic;font-weight:400}
 .hero[data-hero="band"] .eyebrow::after{content:"";width:34px;height:1px;background:currentColor}
 .hero[data-hero="band"] .tagline{margin-inline:auto}
 .hero[data-hero="band"] .cta{justify-content:center}
-.hero[data-hero="band"] .motif{left:50%;right:auto;top:auto;bottom:-6vw;width:min(92vw,1100px);transform:translateX(-50%)}
-.hero[data-hero="band"] .motif svg{opacity:.16}
-@media (max-width:880px){.hero[data-hero="band"] .motif{bottom:auto;top:30px;width:120vw}.hero[data-hero="band"] .motif svg{opacity:.14}}
+.hero[data-hero="band"]::before{background:radial-gradient(70% 45% at 50% 100%,color-mix(in oklab,var(--a) 55%,transparent),transparent 70%)}
+.hero[data-hero="band"] .motif{left:50%;right:auto;top:auto;bottom:8px;width:min(88vw,1040px);height:auto;aspect-ratio:4/1;transform:translateX(-50%);-webkit-mask-image:linear-gradient(to top,#000 60%,transparent);mask-image:linear-gradient(to top,#000 60%,transparent)}
+.hero[data-hero="band"] .motif svg{width:100%;height:100%;opacity:.3}
+.hero[data-hero="band"] .wrap{padding-bottom:clamp(60px,12vh,150px)}
+@media (max-width:880px){.hero[data-hero="band"] .motif{top:auto;bottom:4px;width:150vw;max-width:none}.hero[data-hero="band"] .motif svg{opacity:.22}.hero[data-hero="band"] .wrap{padding-bottom:70px}}
 /* ---------- sections ---------- */
 section:not(.hero){padding:clamp(80px,10vw,140px) 0}
 h2{font-size:clamp(2rem,4.4vw,3.6rem);margin-bottom:22px}
@@ -218,7 +227,14 @@ body[data-mode="mono"] .btn{border-radius:12px}
 .tile{position:relative;flex:0 0 auto;width:calc(var(--th)*4/3);height:var(--th);border-radius:var(--r);overflow:hidden;scroll-snap-align:start;background:var(--sf);border:1px solid var(--line)}
 .tile.tall{width:calc(var(--th)*3/4)}
 .tile.type{display:grid;place-items:center;background:linear-gradient(165deg,{{ t.a_soft }},{{ t.p_soft }})}
-.tile.type .vtext{writing-mode:vertical-rl;text-orientation:upright;font-family:var(--cjk-head),var(--display),var(--body);font-weight:var(--head-weight);font-size:clamp(1.5rem,2.6vw,2.2rem);letter-spacing:.22em;line-height:1.25;color:{{ t.pd }};max-height:82%;text-wrap:balance}
+.seg{word-break:keep-all;overflow-wrap:anywhere;line-break:strict}
+.tile.type .vtext{writing-mode:vertical-rl;text-orientation:mixed;font-family:var(--cjk-head),var(--display),var(--body);font-weight:var(--head-weight);font-size:clamp(1.5rem,2.6vw,2.2rem);letter-spacing:.22em;line-height:1.25;color:{{ t.pd }};max-height:82%;text-wrap:balance}
+.tile.info{background:{{ t.sf }};display:flex;align-items:flex-end;padding:26px 24px 60px}
+.tile.info .inf{display:grid;gap:2px 0;color:{{ t.tx }}}
+.tile.info b{font-size:.68rem;font-weight:700;letter-spacing:.16em;color:{{ t.mu }};margin-top:12px}
+.tile.info b:first-child{margin-top:0}
+.tile.info span{font-size:1.05rem;font-weight:600;line-height:1.4}
+.tile.info .num{font-size:1.5rem;color:{{ t.pd }}}
 .tile.type::before{content:"";position:absolute;left:22px;top:22px;bottom:72px;width:1px;background:{{ t.pd }};opacity:.35}
 .tile .cap{color:{{ t.tx }};background:rgba(255,255,255,.82)}
 .tile::after{content:"";position:absolute;inset:0;background:var(--noise) 0 0/160px 160px;opacity:.14;mix-blend-mode:soft-light;pointer-events:none}
@@ -289,7 +305,9 @@ body.demo .fab{bottom:78px}
 @media (prefers-reduced-motion:reduce){
   .js [data-reveal]{opacity:1;transform:none;transition:none}
   .js h1 .w,.js .tagline,.js .hero .cta{animation:none;opacity:1;transform:none}
-  .motif .d,.status i{animation:none}.motif svg,.hero .wrap{transition:none;transform:none}
+  .motif .d,.status i{animation:none}.motif svg,.hero>.wrap{transition:none;transform:none}
+  .motif svg :is(path,circle,ellipse,rect),.cl-motif :is(path,circle,ellipse,rect){animation:none;stroke-dashoffset:0}
+  .js .strip .tile{opacity:1;transform:none;transition:none}
   html{scroll-behavior:auto}
 }
 {% if demo %}
@@ -339,7 +357,7 @@ body.demo .fab{bottom:78px}
   <a href="#services" style="--i:1">服務項目</a>
   <a href="#gallery" style="--i:2">環境照片</a>
   <a href="#info" style="--i:3">營業資訊</a>
-  <small><span id="ovHours" class="nb">{% if b.today_hours %}今日 {{ b.today_hours }}{% endif %}</span>　<span class="nb">{{ b.address_short }}</span></small>
+  <small><span id="ovHours" style="display:inline-flex;gap:0 10px;flex-wrap:wrap"><span class="nb">{% if b.today_hours %}今日 {{ b.today_hours }}{% endif %}</span></span>　<span class="nb">{{ b.address_short }}</span></small>
   <div class="acts">
     {% if b.phone_href %}<a class="btn btn-solid" href="{{ b.phone_href }}"><svg class="ico"><use href="#i-phone"/></svg>電話</a>{% endif %}
     {% if b.line_url %}<a class="btn btn-line" href="{{ b.line_url }}" target="_blank" rel="noopener"><svg class="ico"><use href="#i-chat"/></svg>LINE</a>{% endif %}
@@ -351,7 +369,7 @@ body.demo .fab{bottom:78px}
 <main id="main">
 <section class="hero" id="top" data-hero="{{ b.hero_layout }}" aria-label="{{ b.name }}">
   <div class="grain" aria-hidden="true"></div>
-  <div class="motif" aria-hidden="true"><svg viewBox="-10 -10 220 220"><g class="d">{{ t.motif }}</g></svg></div>
+  <div class="motif" aria-hidden="true">{% if b.hero_layout == "band" %}<svg viewBox="-10 -10 820 220" preserveAspectRatio="xMidYMax meet"><g class="d">{{ t.motif_band }}</g></svg>{% else %}<svg viewBox="-10 -10 220 220"><g class="d">{{ t.motif_draw }}</g></svg>{% endif %}</div>
   <div class="wrap">
     <p class="eyebrow">{{ b.category }}　{{ b.city }}{{ b.district }}</p>
     <h1 aria-label="{{ b.name }}">{% set ns = namespace(i=0) %}{% for line in b.name_lines %}{% if line.kind == "en" %}<span class="en">{% endif %}{% for w in line.tokens %}<span class="w" style="--i:{{ ns.i }}">{{ w }}</span>{% if line.kind == "en" and not loop.last %} {% endif %}{% set ns.i = ns.i + 1 %}{% endfor %}{% if line.kind == "en" %}</span>{% endif %}{% endfor %}</h1>
@@ -417,7 +435,7 @@ body.demo .fab{bottom:78px}
       </div>
       <div class="count" data-reveal style="--i:2">
         <button type="button" id="prevTile" aria-label="上一張"><svg class="ico" style="transform:rotate(180deg)"><use href="#i-arrow"/></svg></button>
-        <span><span id="tileNow">1</span> / {{ b.gallery_items | length }}</span>
+        <span aria-live="polite"><span id="tileNow">1</span> / {{ b.gallery_items | length }}</span>
         <button type="button" id="nextTile" aria-label="下一張"><svg class="ico"><use href="#i-arrow"/></svg></button>
       </div>
     </div>
@@ -425,9 +443,9 @@ body.demo .fab{bottom:78px}
   <div class="wrap">
     <div class="strip" id="strip" data-reveal style="--i:2" tabindex="0" aria-label="環境照片，可左右捲動">
       {% for g in b.gallery_items %}
-      <figure class="tile{% if g.tall %} tall{% endif %}{% if g.type %} type{% endif %}">
-        {% if g.img %}<img src="{{ g.img }}" alt="{{ b.name }} 環境照片 {{ loop.index }}" loading="lazy">{% elif g.type %}<span class="vtext">{{ b.tagline }}</span>{% else %}{{ g.art }}{% endif %}
-        <figcaption class="cap">{% if g.img or g.type %}{{ b.name }}{% else %}{{ g.label }}{% endif %}</figcaption>
+      <figure class="tile{% if g.tall %} tall{% endif %}{% if g.type %} type{% endif %}{% if g.info %} info{% endif %}" style="--i:{{ loop.index0 }}">
+        {% if g.img %}<img src="{{ g.img }}" alt="{{ b.name }} 環境照片 {{ loop.index }}" loading="lazy">{% elif g.type %}<span class="vtext">{{ b.tagline }}</span>{% elif g.info %}<div class="inf"><b>今日營業</b><span class="num">{{ b.today_hours or "請來電詢問" }}</span><b>地址</b><span>{{ b.address_short }}</span>{% if b.rating %}<b>Google 評分</b><span class="num">{{ b.rating }}　{{ b.review_count }} 則</span>{% endif %}</div>{% else %}{{ g.art }}{% endif %}
+        <figcaption class="cap">{% if g.img or g.type %}{{ b.name }}{% elif g.info %}{{ b.city }}{{ b.district }}{% else %}{{ g.label }}{% endif %}</figcaption>
       </figure>
       {% endfor %}
     </div>
@@ -464,7 +482,7 @@ body.demo .fab{bottom:78px}
 </section>
 
 <section class="closing" aria-labelledby="closingTitle">
-  <svg class="cl-motif" viewBox="0 0 200 200" aria-hidden="true">{{ t.motif }}</svg>
+  <svg class="cl-motif" viewBox="0 0 200 200" aria-hidden="true">{{ t.motif_draw }}</svg>
   <div class="wrap">
     <div>
       <h2 id="closingTitle" data-reveal>{{ b.closing_title }}</h2>
@@ -522,7 +540,7 @@ body.demo .fab{bottom:78px}
   /* mobile overlay menu */
   function setMenu(open){overlay.classList.toggle('open',open);overlay.setAttribute('aria-hidden',!open);btn.setAttribute('aria-expanded',open);btn.setAttribute('aria-label',open?'關閉選單':'開啟選單');d.body.style.overflow=open?'hidden':'';
     d.querySelectorAll('main,header,.fab,.demo-bar,footer').forEach(function(el){el.inert=open});
-    if(open){var ov=d.getElementById('ovHours'),hh=d.getElementById('heroHours');if(ov&&hh&&hh.textContent)ov.textContent=hh.textContent;setTimeout(function(){overlay.querySelector('a').focus()},60)}else{btn.focus()}}
+    if(open){var ov=d.getElementById('ovHours'),hh=d.getElementById('heroHours');if(ov&&hh&&hh.textContent){ov.innerHTML='';[].forEach.call(hh.children,function(n){ov.appendChild(n.cloneNode(true))})}setTimeout(function(){overlay.querySelector('a').focus()},60)}else{btn.focus()}}
   btn.addEventListener('click',function(){setMenu(!overlay.classList.contains('open'))});
   overlay.addEventListener('click',function(e){if(e.target===overlay)setMenu(false)});
   overlay.querySelectorAll('a').forEach(function(a){a.addEventListener('click',function(){setMenu(false)})});
@@ -552,7 +570,9 @@ body.demo .fab{bottom:78px}
   var ist=d.getElementById('infoStatusText');if(ist&&state)ist.textContent=state.text;
   var ch=d.getElementById('closingHours');if(ch&&state)ch.textContent=state.text;
   var hs=d.getElementById('heroHours');if(hs&&state){var nxt=state.text.split('　')[1]||'';var a1=state.open?'營業中':(todayClosed?'今日公休':'休息中'),a2=state.open?li.children[1].textContent:nxt.replace(' 開始營業',' 開門');hs.innerHTML='';var s1=d.createElement('span');s1.textContent=a1;hs.appendChild(s1);if(a2){var s2=d.createElement('span');s2.className='nb';s2.textContent=a2;hs.appendChild(s2)}}
-  var closing=d.querySelector('.closing');if(closing&&'IntersectionObserver' in window){new IntersectionObserver(function(es){es.forEach(function(e){fab.classList.toggle('hold',e.isIntersecting)})},{threshold:.2}).observe(closing)}
+  var closing=d.querySelector('.closing');if(closing&&'IntersectionObserver' in window){new IntersectionObserver(function(es){es.forEach(function(e){fab.classList.toggle('hold',e.isIntersecting);if(e.isIntersecting)closing.classList.add('in')})},{threshold:.2}).observe(closing)}
+  /* 中文斷詞：標題級文字只在詞的邊界換行 */
+  if(window.Intl&&Intl.Segmenter){try{var seg=new Intl.Segmenter('zh-Hant',{granularity:'word'});d.querySelectorAll('h2.statement,.tile.type .vtext,.tagline').forEach(function(el){var w=d.createTreeWalker(el,NodeFilter.SHOW_TEXT),nodes=[];while(w.nextNode())nodes.push(w.currentNode);nodes.forEach(function(n){var parts=[];for(var it=seg.segment(n.nodeValue)[Symbol.iterator](),r=it.next();!r.done;r=it.next())parts.push(r.value.segment);if(parts.length<2)return;var f=d.createDocumentFragment();parts.forEach(function(tx,i){if(i)f.appendChild(d.createElement('wbr'));f.appendChild(d.createTextNode(tx))});n.parentNode.replaceChild(f,n)});el.classList.add('seg')})}catch(e){}}
   /* reveal + counters */
   function count(el){var to=parseFloat(el.dataset.count),dec=+el.dataset.dec||0,t0=null;function step(ts){if(!t0)t0=ts;var p=Math.min((ts-t0)/1100,1),e=1-Math.pow(1-p,3);el.textContent=(to*e).toFixed(dec);if(p<1)requestAnimationFrame(step)}requestAnimationFrame(step)}
   if(!reduce)d.querySelectorAll('[data-count]').forEach(count);
