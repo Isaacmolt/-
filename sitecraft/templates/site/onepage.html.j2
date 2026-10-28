@@ -7,6 +7,7 @@
 <title>{{ b.name }}｜{{ b.category }}｜{{ b.city }}{{ b.district }}</title>
 <meta name="description" content="{{ b.name }}（{{ b.city }}{{ b.district }}{{ b.category }}）：{{ b.tagline }}。營業時間、地址地圖、電話與 LINE 聯絡方式一頁看完。">
 <meta name="theme-color" content="{{ t.pd }}">
+<meta name="color-scheme" content="light dark">
 <meta property="og:type" content="website">
 <meta property="og:title" content="{{ b.name }}｜{{ b.category }}">
 <meta property="og:description" content="{{ b.tagline }}｜{{ b.address }}">
@@ -38,7 +39,8 @@
   --ink:var(--a);--ink2:color-mix(in oklab,var(--a) 70%,#fff);
 }}
 *{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth;scroll-padding-top:80px}
+html{scroll-behavior:smooth;scroll-padding-top:76px}
+@media (max-width:880px){html{scroll-padding-top:68px}}
 body{font-family:var(--body);font-synthesis:none;color:var(--tx);background:var(--bg);line-height:1.8;-webkit-font-smoothing:antialiased;font-feature-settings:"palt";overflow-x:clip}
 body.demo{padding-bottom:var(--bar,64px)}
 body.demo .hero{min-height:calc(100svh - var(--bar,64px))}
@@ -46,7 +48,8 @@ img,svg{display:block;max-width:100%}
 a{color:inherit;text-decoration:none}
 ul,ol{list-style:none}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
-:focus-visible{outline:3px solid var(--a);outline-offset:3px;border-radius:4px}
+:focus-visible{outline:3px solid var(--ink);outline-offset:3px;border-radius:4px}
+.hero :focus-visible,.closing :focus-visible,.overlay :focus-visible,footer :focus-visible,.fab :focus-visible,.demo-bar :focus-visible,.nav:not(.solid) :focus-visible{outline-color:var(--a)}
 .skip{position:absolute;left:16px;top:-60px;background:var(--tx);color:var(--bg);padding:10px 16px;border-radius:8px;z-index:200;font-weight:700}
 .skip:focus{top:12px}
 .wrap{width:min(1180px,100% - 48px);margin-inline:auto}
@@ -98,15 +101,19 @@ h1,h2,.display{font-family:var(--display),var(--cjk-head),var(--body);font-weigh
 /* ---------- hero ---------- */
 .hero{position:relative;padding:0;min-height:100svh;display:flex;flex-direction:column;justify-content:center;color:#fff;overflow:hidden;isolation:isolate;
   background:linear-gradient(160deg,var(--p) 0%,var(--pd) 62%,color-mix(in oklab,var(--pd) 80%,#000) 100%)}
-.hero::before{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(60% 55% at 85% 15%,color-mix(in oklab,var(--a) 55%,transparent),transparent 70%)}
+.hero::before{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(60% 55% at 78% 20%,color-mix(in oklab,var(--a) 65%,transparent),transparent 70%)}
 .hero .grain{position:absolute;inset:0;z-index:-1;opacity:.16;mix-blend-mode:soft-light;pointer-events:none;background:var(--noise) 0 0/160px 160px}
-.motif{position:absolute;right:clamp(-60px,-3vw,0px);top:8vh;z-index:-1;width:clamp(260px,44vw,640px);height:auto;color:#fff;opacity:.3;stroke:currentColor;fill:none;stroke-width:1.3;stroke-linecap:round;stroke-linejoin:round;pointer-events:none;--mx:0;--my:0;transform:translate3d(calc(var(--mx)*-18px),calc(var(--my)*-12px),0);transition:transform .9s var(--ease);will-change:transform}
+.hero{--mx:0;--my:0}
+.motif{position:absolute;right:clamp(-120px,-6vw,-40px);top:2vh;z-index:-1;width:clamp(320px,54vw,780px);pointer-events:none}
+.motif svg{width:100%;height:auto;color:#fff;opacity:.34;stroke:currentColor;fill:none;stroke-width:1.2;stroke-linecap:round;stroke-linejoin:round;}
+@media (hover:hover){.motif svg{transform:translate3d(calc(var(--mx)*-48px),calc(var(--my)*-32px),0) rotate(calc(var(--mx)*-2.5deg));transition:transform .9s var(--ease)}
+.hero .wrap{transform:translate3d(calc(var(--mx)*10px),calc(var(--my)*6px),0);transition:transform .9s var(--ease)}}
 .motif .d{animation:drift 10s ease-in-out infinite alternate}
 @keyframes drift{from{transform:translate(0,0)}to{transform:translate(-4vw,-2.5vw)}}
 .hero .wrap{position:relative;margin-block:auto;padding:clamp(88px,11vh,112px) 0 clamp(24px,4vh,48px)}
 .eyebrow{display:inline-flex;align-items:center;gap:12px;font-size:.82rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;opacity:.85}
 .eyebrow::before{content:"";width:34px;height:1px;background:currentColor}
-h1{font-size:clamp(2.75rem,2rem + 4.5vw,6.2rem);margin:18px 0 14px;letter-spacing:-.02em;line-height:1.04;max-width:12ch}
+h1{font-size:clamp(2.75rem,2rem + 5vw,7.2rem);margin:18px 0 14px;letter-spacing:-.02em;line-height:1.04;max-width:none}
 .js h1 .w{opacity:0;transform:translateY(.6em) rotate(2deg);animation:rise .9s var(--ease) forwards;animation-delay:calc(.08s + var(--i)*.045s)}
 h1 .w{display:inline-block}
 h1 .en{display:block;font-size:.72em;font-weight:500;letter-spacing:0;line-height:1.15;margin-top:.08em}
@@ -144,10 +151,19 @@ body[data-mode="editorial"] h1 .en{font-style:italic;font-weight:400}
 .status i{width:8px;height:8px;border-radius:50%;background:#6ee7a0;box-shadow:0 0 0 0 rgba(110,231,160,.7);animation:pulse 2s infinite}
 .status.off i{background:#fb7185;animation:none}
 @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(110,231,160,.6)}70%{box-shadow:0 0 0 10px rgba(110,231,160,0)}100%{box-shadow:0 0 0 0 rgba(110,231,160,0)}}
-@media (max-width:880px){.hero .wrap{padding-top:96px;padding-bottom:20px}.facts{grid-template-columns:1fr 1fr}.fact{padding:13px 0 13px 18px}.fact>span:not(.num){font-size:.95rem;white-space:normal;overflow:visible;line-height:1.45}.status{flex-wrap:wrap;row-gap:2px}.fact:nth-child(odd){border-left:0;padding-left:0}.fact:nth-child(n+3){border-top:1px solid rgba(255,255,255,.14)}}
-@media (max-width:880px){.motif{top:40px;right:-16vw;width:68vw;opacity:.24}}
+@media (max-width:880px){.hero .wrap{padding-top:96px;padding-bottom:20px}.facts{grid-template-columns:1fr 1fr}.fact{padding:13px 0 13px 18px}.fact>span:not(.num){font-size:.95rem;white-space:normal;overflow:visible;line-height:1.45}.status{flex-wrap:wrap;row-gap:2px}.nb{white-space:nowrap}.fact:nth-child(odd){border-left:0;padding-left:0}.fact:nth-child(n+3){border-top:1px solid rgba(255,255,255,.14)}}
+@media (max-width:880px){.motif{top:40px;right:-16vw;width:68vw}.motif svg{opacity:.24}}
 @media (max-width:480px){h1{max-width:none}.hero .cta{gap:10px}.hero .cta .btn{flex:1 1 calc(50% - 5px);justify-content:center;padding:0 14px}.hero .cta .tlink{flex:1 1 100%;justify-content:center;min-height:50px;border:1.5px solid rgba(255,255,255,.4);border-radius:999px}}
 
+/* hero: band variant (centred type, motif runs behind the facts bar) */
+.hero[data-hero="band"] .wrap{text-align:center}
+.hero[data-hero="band"] h1{margin-inline:auto}
+.hero[data-hero="band"] .eyebrow::after{content:"";width:34px;height:1px;background:currentColor}
+.hero[data-hero="band"] .tagline{margin-inline:auto}
+.hero[data-hero="band"] .cta{justify-content:center}
+.hero[data-hero="band"] .motif{left:50%;right:auto;top:auto;bottom:-6vw;width:min(92vw,1100px);transform:translateX(-50%)}
+.hero[data-hero="band"] .motif svg{opacity:.16}
+@media (max-width:880px){.hero[data-hero="band"] .motif{bottom:auto;top:30px;width:120vw}.hero[data-hero="band"] .motif svg{opacity:.14}}
 /* ---------- sections ---------- */
 section:not(.hero){padding:clamp(80px,10vw,140px) 0}
 h2{font-size:clamp(2rem,4.4vw,3.6rem);margin-bottom:22px}
@@ -160,6 +176,11 @@ h2.statement{font-size:clamp(1.8rem,3.8vw,3rem);line-height:1.3;margin-bottom:34
 .statement .nm{white-space:nowrap}
 @media (max-width:640px){.statement .nm{white-space:normal}.statement .nm .en{white-space:nowrap}}
 body[data-mode="bold"] h1 .en,body[data-mode="bold"] .nm .en{font-weight:700;letter-spacing:-.01em}
+body[data-mode="mono"] h1,body[data-mode="mono"] h2,body[data-mode="mono"] .display{letter-spacing:0}
+body[data-mode="mono"] h1 .en{font-weight:500;letter-spacing:-.02em}
+body[data-mode="mono"] .statement em{background:none;border-bottom:3px solid var(--a);padding-bottom:2px}
+body[data-mode="mono"] .btn{border-radius:12px}
+.statement .nm{margin-right:.22em}
 .statement em{font-style:normal;color:var(--ink2);box-decoration-break:clone;-webkit-box-decoration-break:clone;background:linear-gradient(transparent 62%,var(--a-soft) 62%)}
 .about p{margin-bottom:18px;font-size:1.06rem;max-width:58ch}
 .hl{counter-reset:h;border-top:1px solid var(--line);margin-top:.35em}
@@ -173,7 +194,8 @@ body[data-mode="bold"] h1 .en,body[data-mode="bold"] .nm .en{font-weight:700;let
 .svc li{position:relative;border-bottom:1px solid var(--line);isolation:isolate;overflow:hidden}
 .svc li>a,.svc li>div{display:grid;grid-template-columns:70px 1.1fr 1.6fr 48px;gap:24px;align-items:center;padding:30px 0}
 .svc li>a:focus-visible{outline-offset:-3px}
-.svc li::before{content:"";position:absolute;inset:0;z-index:-1;background:var(--bg);transform:scaleY(0);transform-origin:bottom;transition:transform .45s var(--ease)}
+.svc li::before{content:"";position:absolute;inset:0;z-index:-1;background:color-mix(in oklab,var(--bg) 55%,var(--a-soft));transform:scaleY(0);transform-origin:bottom;transition:transform .45s var(--ease)}
+@media (prefers-color-scheme:dark){.svc li::before{background:var(--p-soft)}}
 .svc li:hover::before{transform:none}
 .svc li h3,.svc li p{transition:transform .45s var(--ease)}
 .svc li:hover h3,.svc li:hover p{transform:translateX(10px)}
@@ -189,20 +211,21 @@ body[data-mode="bold"] h1 .en,body[data-mode="bold"] .nm .en{font-weight:700;let
 .gallery .count{font-family:var(--display);font-size:1.1rem;color:var(--mu);white-space:nowrap;display:flex;gap:16px;align-items:center}
 .gallery .count button{width:44px;height:44px;border-radius:50%;border:1.5px solid var(--line);display:grid;place-items:center;transition:background .3s,color .3s}
 .gallery .count button:hover{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-.strip{--gut:calc((100vw - min(1180px,100vw - 48px))/2);display:flex;align-items:flex-start;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding-inline:var(--gut);padding:4px var(--gut) 24px;margin-left:calc(-1*var(--gut));width:calc(100% + 2*var(--gut));scrollbar-width:none;-webkit-overflow-scrolling:touch;cursor:grab;user-select:none;-webkit-user-select:none}
+.strip{--gut:calc((100vw - min(1180px,100vw - 48px))/2);display:flex;align-items:stretch;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding-inline:var(--gut);padding:4px var(--gut) 24px;margin-left:calc(-1*var(--gut));width:calc(100% + 2*var(--gut));scrollbar-width:none;-webkit-overflow-scrolling:touch;cursor:grab;user-select:none;-webkit-user-select:none}
 .strip::-webkit-scrollbar{display:none}
 .strip:active{cursor:grabbing}
-.tile{position:relative;flex:0 0 min(78vw,520px);aspect-ratio:4/3;border-radius:var(--r);overflow:hidden;scroll-snap-align:start;background:var(--sf);border:1px solid var(--line)}
-.tile.tall{flex-basis:min(62vw,380px);aspect-ratio:3/4}
+.strip{--th:clamp(260px,30vw,420px)}
+.tile{position:relative;flex:0 0 auto;width:calc(var(--th)*4/3);height:var(--th);border-radius:var(--r);overflow:hidden;scroll-snap-align:start;background:var(--sf);border:1px solid var(--line)}
+.tile.tall{width:calc(var(--th)*3/4)}
 .tile.type{display:grid;place-items:center;background:linear-gradient(165deg,{{ t.a_soft }},{{ t.p_soft }})}
 .tile.type .vtext{writing-mode:vertical-rl;text-orientation:upright;font-family:var(--cjk-head),var(--display),var(--body);font-weight:var(--head-weight);font-size:clamp(1.5rem,2.6vw,2.2rem);letter-spacing:.22em;line-height:1.25;color:{{ t.pd }};max-height:82%;text-wrap:balance}
-.tile.type::before{content:"";position:absolute;left:22px;top:22px;bottom:22px;width:1px;background:{{ t.pd }};opacity:.35}
+.tile.type::before{content:"";position:absolute;left:22px;top:22px;bottom:72px;width:1px;background:{{ t.pd }};opacity:.35}
 .tile .cap{color:{{ t.tx }};background:rgba(255,255,255,.82)}
 .tile::after{content:"";position:absolute;inset:0;background:var(--noise) 0 0/160px 160px;opacity:.14;mix-blend-mode:soft-light;pointer-events:none}
 .tile svg.art,.tile img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 1.2s var(--ease)}
 .tile:hover svg.art,.tile:hover img{transform:scale(1.04)}
 .tile .cap{position:absolute;left:18px;bottom:16px;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;backdrop-filter:blur(8px);padding:6px 12px;border-radius:999px}
-@media (max-width:640px){.strip{--gut:18px}.gallery .head{flex-direction:column;align-items:flex-start;gap:16px}}
+@media (max-width:640px){.strip{--gut:18px;--th:clamp(240px,62vw,300px)}.gallery .head{flex-direction:column;align-items:flex-start;gap:16px}}
 
 /* info */
 .info{background:var(--sf)}
@@ -220,9 +243,12 @@ body[data-mode="bold"] h1 .en,body[data-mode="bold"] .nm .en{font-weight:700;let
 .contact a,.contact button{display:flex;align-items:center;gap:14px;min-height:52px;padding:0 16px 0 14px;border:1px solid var(--line);border-radius:14px;background:var(--bg);font-weight:600;text-align:left;transition:border-color .3s,transform .3s var(--ease)}
 .contact a:hover,.contact button:hover{border-color:var(--ink2);transform:translateX(4px)}
 .contact .ico{font-size:1.1rem;color:var(--ink2)}
-.contact small{margin-left:auto;color:var(--mu);font-weight:500;font-size:.8rem;letter-spacing:.06em}
+.contact small{margin-left:auto;flex:none;white-space:nowrap;color:var(--mu);font-weight:500;font-size:.8rem;letter-spacing:.06em}
+.contact .addr{flex:1;min-width:0}
+.nb{white-space:nowrap}
 .map{border-radius:var(--r);overflow:hidden;border:1px solid var(--line);min-height:420px;background:var(--bg);position:relative}
 .map iframe{position:absolute;inset:0;width:100%;height:100%;border:0;filter:saturate(.85)}
+@media (prefers-color-scheme:dark){.map iframe{filter:invert(.92) hue-rotate(180deg) saturate(.7)}}
 @media (max-width:880px){.info .cols{grid-template-columns:1fr}.map{min-height:0;aspect-ratio:4/3}}
 
 /* closing */
@@ -261,9 +287,9 @@ body.demo .fab{bottom:78px}
 .js [data-reveal]{opacity:0;transform:translateY(22px);transition:opacity .9s var(--ease),transform .9s var(--ease);transition-delay:calc(var(--i,0)*90ms)}
 [data-reveal].in{opacity:1;transform:none}
 @media (prefers-reduced-motion:reduce){
-  [data-reveal]{opacity:1;transform:none;transition:none}
-  h1 .w,.tagline,.cta{animation:none;opacity:1;transform:none}
-  .motif .d,.status i{animation:none}.motif{transition:none}
+  .js [data-reveal]{opacity:1;transform:none;transition:none}
+  .js h1 .w,.js .tagline,.js .hero .cta{animation:none;opacity:1;transform:none}
+  .motif .d,.status i{animation:none}.motif svg,.hero .wrap{transition:none;transform:none}
   html{scroll-behavior:auto}
 }
 {% if demo %}
@@ -313,7 +339,7 @@ body.demo .fab{bottom:78px}
   <a href="#services" style="--i:1">服務項目</a>
   <a href="#gallery" style="--i:2">環境照片</a>
   <a href="#info" style="--i:3">營業資訊</a>
-  <small><span id="ovHours">{% if b.today_hours %}今日 {{ b.today_hours }}{% endif %}</span>　{{ b.address_short }}</small>
+  <small><span id="ovHours" class="nb">{% if b.today_hours %}今日 {{ b.today_hours }}{% endif %}</span>　<span class="nb">{{ b.address_short }}</span></small>
   <div class="acts">
     {% if b.phone_href %}<a class="btn btn-solid" href="{{ b.phone_href }}"><svg class="ico"><use href="#i-phone"/></svg>電話</a>{% endif %}
     {% if b.line_url %}<a class="btn btn-line" href="{{ b.line_url }}" target="_blank" rel="noopener"><svg class="ico"><use href="#i-chat"/></svg>LINE</a>{% endif %}
@@ -323,12 +349,12 @@ body.demo .fab{bottom:78px}
 <button class="menu-btn" id="menuBtn" aria-label="開啟選單" aria-expanded="false" aria-controls="overlay"><span></span><span></span></button>
 
 <main id="main">
-<section class="hero" id="top" aria-label="{{ b.name }}">
+<section class="hero" id="top" data-hero="{{ b.hero_layout }}" aria-label="{{ b.name }}">
   <div class="grain" aria-hidden="true"></div>
-  <svg class="motif" viewBox="0 0 200 200" aria-hidden="true"><g class="d">{{ t.motif }}</g></svg>
+  <div class="motif" aria-hidden="true"><svg viewBox="-10 -10 220 220"><g class="d">{{ t.motif }}</g></svg></div>
   <div class="wrap">
     <p class="eyebrow">{{ b.category }}　{{ b.city }}{{ b.district }}</p>
-    <h1>{% set ns = namespace(i=0) %}{% for line in b.name_lines %}{% if line.kind == "en" %}<span class="en">{% endif %}{% for w in line.tokens %}<span class="w" style="--i:{{ ns.i }}">{{ w }}</span>{% if line.kind == "en" and not loop.last %} {% endif %}{% set ns.i = ns.i + 1 %}{% endfor %}{% if line.kind == "en" %}</span>{% endif %}{% endfor %}</h1>
+    <h1 aria-label="{{ b.name }}">{% set ns = namespace(i=0) %}{% for line in b.name_lines %}{% if line.kind == "en" %}<span class="en">{% endif %}{% for w in line.tokens %}<span class="w" style="--i:{{ ns.i }}">{{ w }}</span>{% if line.kind == "en" and not loop.last %} {% endif %}{% set ns.i = ns.i + 1 %}{% endfor %}{% if line.kind == "en" %}</span>{% endif %}{% endfor %}</h1>
     <p class="tagline">{{ b.tagline }}</p>
     <div class="cta">
       {% if b.line_url %}<a class="btn btn-line" href="{{ b.line_url }}" target="_blank" rel="noopener"><svg class="ico"><use href="#i-chat"/></svg>LINE 聯絡</a>
@@ -340,7 +366,7 @@ body.demo .fab{bottom:78px}
   <div class="hero-foot">
     <div class="wrap" style="padding:0;position:relative">
       <div class="facts">
-        <div class="fact"><b>今日營業</b><span class="status" id="heroStatus"><i></i><span id="heroHours">{{ b.today_hours or "請來電詢問" }}</span></span></div>
+        <div class="fact"><b>今日營業</b><span class="status" id="heroStatus"><i></i><span id="heroHours" style="display:inline-flex;gap:0 10px;flex-wrap:wrap"><span class="nb">{{ b.today_hours or "請來電詢問" }}</span></span></span></div>
         {% if b.rating %}<div class="fact"><b>Google 評分</b><span><svg class="star" viewBox="0 0 24 24"><use href="#i-star"/></svg><span class="num" data-count="{{ b.rating }}" data-dec="1">{{ b.rating }}</span><span class="sub">{{ b.review_count }} 則評論</span></span></div>{% endif %}
         <div class="fact"><b>地址</b><span>{{ b.address_short }}</span></div>
         {% if b.phone %}<div class="fact"><b>電話</b><span class="num">{{ b.phone }}</span></div>{% endif %}
@@ -424,7 +450,7 @@ body.demo .fab{bottom:78px}
         <ul class="hours"><li><span>營業時間</span><span class="closed">請來電詢問</span></li></ul>
         {% endif %}
         <div class="contact">
-          <a href="{{ b.maps_url }}" target="_blank" rel="noopener"><svg class="ico"><use href="#i-pin"/></svg>{{ b.address }}<small>導航</small></a>
+          <a href="{{ b.maps_url }}" target="_blank" rel="noopener"><svg class="ico"><use href="#i-pin"/></svg><span class="addr">{{ b.address_html }}</span><small>導航</small></a>
           <button type="button" id="copyAddr" data-addr="{{ b.address }}"><svg class="ico"><use href="#i-copy"/></svg><span>複製地址</span><small>一鍵複製</small></button>
           {% if b.phone %}<a href="{{ b.phone_href }}"><svg class="ico"><use href="#i-phone"/></svg><span class="num">{{ b.phone }}</span><small>撥打</small></a>{% endif %}
           {% if b.line_url %}<a href="{{ b.line_url }}" target="_blank" rel="noopener"><svg class="ico"><use href="#i-chat"/></svg>LINE 聯絡我們<small>加入好友</small></a>{% endif %}
@@ -482,14 +508,16 @@ body.demo .fab{bottom:78px}
   var nav=d.getElementById('nav'),hero=d.querySelector('.hero'),last=0,heroH=0,maxY=1,ticking=false,fab=d.querySelector('.fab')||{classList:{toggle:function(){}}};
   var btn=d.getElementById('menuBtn'),overlay=d.getElementById('overlay');
   function measure(){var bar=d.getElementById('demoBar');if(bar)d.documentElement.style.setProperty('--bar',bar.offsetHeight+'px');heroH=hero.offsetHeight;maxY=Math.max(d.documentElement.scrollHeight-innerHeight,1)}
+  var foot=d.querySelector('.hero-foot'),lock=0,lockT=null;
   function onScroll(){
-    var y=scrollY;
-    var solid=y>heroH-80;nav.classList.toggle('solid',solid);btn.classList.toggle('solid',solid);fab.classList.toggle('show',y>heroH-120);
-    nav.classList.toggle('hide',y>last&&y>heroH&&!overlay.classList.contains('open'));
+    var y=scrollY,solidAt=heroH-foot.offsetHeight-nav.offsetHeight;
+    var solid=y>solidAt;nav.classList.toggle('solid',solid);btn.classList.toggle('solid',solid);fab.classList.toggle('show',y>heroH-120);
+    nav.classList.toggle('hide',!lock&&y>last&&y>heroH&&!overlay.classList.contains('open'));
     last=y;ticking=false;
   }
+  d.querySelectorAll('a[href^="#"]').forEach(function(a){a.addEventListener('click',function(){lock=1;nav.classList.remove('hide');clearTimeout(lockT);lockT=setTimeout(function(){lock=0;last=scrollY},1200)})});
+  addEventListener('scrollend',function(){lock=0;last=scrollY});
   addEventListener('scroll',function(){if(!ticking){ticking=true;requestAnimationFrame(onScroll)}},{passive:true});
-  addEventListener('hashchange',function(){nav.classList.remove('hide');last=scrollY});
   addEventListener('resize',function(){measure();onScroll()},{passive:true});addEventListener('load',function(){requestAnimationFrame(measure)});measure();onScroll();
   /* mobile overlay menu */
   function setMenu(open){overlay.classList.toggle('open',open);overlay.setAttribute('aria-hidden',!open);btn.setAttribute('aria-expanded',open);btn.setAttribute('aria-label',open?'關閉選單':'開啟選單');d.body.style.overflow=open?'hidden':'';
@@ -501,7 +529,7 @@ body.demo .fab{bottom:78px}
   d.addEventListener('keydown',function(e){if(e.key==='Escape'&&overlay.classList.contains('open'))setMenu(false)});
   /* hero motif follows the pointer (hover devices only) */
   var motif=d.querySelector('.motif');
-  if(motif&&!reduce&&matchMedia('(hover:hover)').matches){hero.addEventListener('pointermove',function(e){var r=hero.getBoundingClientRect();motif.style.setProperty('--mx',((e.clientX-r.left)/r.width-.5).toFixed(3));motif.style.setProperty('--my',((e.clientY-r.top)/r.height-.5).toFixed(3))});hero.addEventListener('pointerleave',function(){motif.style.setProperty('--mx',0);motif.style.setProperty('--my',0)})}
+  if(motif&&!reduce&&matchMedia('(hover:hover)').matches){hero.addEventListener('pointermove',function(e){var r=hero.getBoundingClientRect();hero.style.setProperty('--mx',((e.clientX-r.left)/r.width-.5).toFixed(3));hero.style.setProperty('--my',((e.clientY-r.top)/r.height-.5).toFixed(3))});hero.addEventListener('pointerleave',function(){hero.style.setProperty('--mx',0);hero.style.setProperty('--my',0)})}
   /* scroll-spy */
   if('IntersectionObserver' in window){var links=[].slice.call(d.querySelectorAll('.nav ul a'));var spy=new IntersectionObserver(function(es){es.forEach(function(e){if(!e.isIntersecting)return;links.forEach(function(a){if(a.getAttribute('href')==='#'+e.target.id)a.setAttribute('aria-current','true');else a.removeAttribute('aria-current')})})},{rootMargin:'-40% 0px -55% 0px'});d.querySelectorAll('main > section[id]').forEach(function(sec){spy.observe(sec)})}
   /* hours + live open state */
@@ -523,7 +551,7 @@ body.demo .fab{bottom:78px}
   ['heroStatus','infoStatus'].forEach(function(id){var el=d.getElementById(id);if(!el)return;if(!state){el.querySelector('i').style.display='none';return}el.classList.toggle('off',!state.open)});
   var ist=d.getElementById('infoStatusText');if(ist&&state)ist.textContent=state.text;
   var ch=d.getElementById('closingHours');if(ch&&state)ch.textContent=state.text;
-  var hs=d.getElementById('heroHours');if(hs&&state){var nxt=state.text.split('　')[1]||'';hs.textContent=state.open?('營業中　'+li.children[1].textContent):(todayClosed?'今日公休':'休息中')+(nxt?'　'+nxt.replace(' 開始營業',' 開門'):'')}
+  var hs=d.getElementById('heroHours');if(hs&&state){var nxt=state.text.split('　')[1]||'';var a1=state.open?'營業中':(todayClosed?'今日公休':'休息中'),a2=state.open?li.children[1].textContent:nxt.replace(' 開始營業',' 開門');hs.innerHTML='';var s1=d.createElement('span');s1.textContent=a1;hs.appendChild(s1);if(a2){var s2=d.createElement('span');s2.className='nb';s2.textContent=a2;hs.appendChild(s2)}}
   var closing=d.querySelector('.closing');if(closing&&'IntersectionObserver' in window){new IntersectionObserver(function(es){es.forEach(function(e){fab.classList.toggle('hold',e.isIntersecting)})},{threshold:.2}).observe(closing)}
   /* reveal + counters */
   function count(el){var to=parseFloat(el.dataset.count),dec=+el.dataset.dec||0,t0=null;function step(ts){if(!t0)t0=ts;var p=Math.min((ts-t0)/1100,1),e=1-Math.pow(1-p,3);el.textContent=(to*e).toFixed(dec);if(p<1)requestAnimationFrame(step)}requestAnimationFrame(step)}

@@ -202,7 +202,27 @@ FONT_MODES = {
         "url": "https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=Noto+Sans+TC:wght@400;500;600;700;900&display=swap",
         "display": "Syne", "head": "Noto Sans TC", "weight": "800",
     },
+    # 清爽感：Space Grotesk + 黑體 600，診所、教室、寵物等
+    "mono": {
+        "url": "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap",
+        "display": "Space Grotesk", "head": "Noto Sans TC", "weight": "600",
+    },
 }
+
+ADDR_NO = re.compile(r"(\d+(?:之\d+)?號(?:\d+樓)?(?:之\d+)?)")
+
+
+def address_html(address: str, city: str, district: str):
+    """地址：區之後允許換行（<wbr>），門牌號與樓層不拆（.nb）。"""
+    from markupsafe import Markup, escape
+    head = f"{city}{district}"
+    out = ""
+    rest = address
+    if head and head in address:
+        pre, _, rest = address.partition(head)
+        out += str(escape(pre + head)) + "<wbr>"
+    out += ADDR_NO.sub(lambda m: f'<span class="nb">{escape(m.group(1))}</span>', str(escape(rest)))
+    return Markup(out)
 
 CJK = re.compile(r"[\u3400-\u9fff\uf900-\ufaff]")
 
@@ -546,7 +566,8 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, 
         "weekday_hours": weekday_hours, "periods": periods, "today_hours": today_hours,
         "jsonld": jsonld, "favicon_svg": favicon_svg(theme["palette"]["pd"], initial),
         "initial": initial, "name_tokens": name_tokens(name), "name_lines": name_lines(name), "address_short": address_short,
-        "mode": theme.get("mode", "bold"),
+        "address_html": address_html(address, lead.get("city", ""), lead.get("district", "")),
+        "mode": theme.get("mode", "bold"), "hero_layout": theme.get("hero", "side"),
         "fonts_url": mode["url"], "font_display": mode["display"], "font_head": mode["head"], "head_weight": mode["weight"],
         "statement_pre": pre, "statement_em": em, "statement_post": post, "statement_name": statement_name,
         "closing_title": closing_title(lead.get("theme") or "default", name),
