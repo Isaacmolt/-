@@ -195,16 +195,16 @@ def load_or_make_content(lead: dict, theme: dict, site_dir: Path, use_ai: bool, 
 FONT_MODES = {
     # 編輯感：襯線中文 + Fraunces；粗獷感：黑體 900 + Syne
     "editorial": {
-        "url": "https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Noto+Serif+TC:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap",
+        "url": "https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Noto+Serif+TC:wght@600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap",
         "display": "Fraunces", "head": "Noto Serif TC", "weight": "600",
     },
     "bold": {
-        "url": "https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=Noto+Sans+TC:wght@400;500;600;700;900&display=swap",
+        "url": "https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap",
         "display": "Syne", "head": "Noto Sans TC", "weight": "800",
     },
     # 清爽感：Space Grotesk + 黑體 600，診所、教室、寵物等
     "mono": {
-        "url": "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap",
+        "url": "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;700&display=swap",
         "display": "Space Grotesk", "head": "Noto Sans TC", "weight": "600",
     },
 }
@@ -594,6 +594,7 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, 
         "gallery_items": gallery_items,
         "weekday_hours": weekday_hours, "periods": periods, "today_hours": today_hours,
         "jsonld": jsonld, "favicon_svg": favicon_svg(theme["palette"]["pd"], initial),
+        "type_ground": _mix(theme["palette"]["a_soft"], theme["palette"]["sf"], 0.55),
         "initial": initial, "name_tokens": name_tokens(name), "name_lines": name_lines(name), "address_short": address_short,
         "address_html": address_html(address, lead.get("city", ""), lead.get("district", "")),
         "mode": theme.get("mode", "bold"), "hero_layout": theme.get("hero", "side"),

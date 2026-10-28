@@ -24,6 +24,12 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
     r.heroFit = {};
     for (const [n, vp] of [['1366x768', {width:1366,height:768}], ['1440x900', {width:1440,height:900}], ['390x844', {width:390,height:844}]]) {
       const pg = await browser.newPage({ viewport: vp }); await pg.goto(url, { waitUntil: 'load' }); await pg.waitForTimeout(1200);
+      if (n !== '390x844') {
+        r.closingClear = r.closingClear || {};
+        await pg.evaluate(() => document.querySelector('.closing').scrollIntoView()); await pg.waitForTimeout(300);
+        r.closingClear[n] = await pg.evaluate(() => { const btns = [...document.querySelectorAll('.closing .btn, .closing .big')].map(b => b.getBoundingClientRect()); const shapes = [...document.querySelectorAll('.cl-motif :is(path,circle,ellipse,rect)')].map(s => s.getBoundingClientRect()); const hit = (a, b) => a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom; return !btns.some(b => shapes.some(s => hit(b, s))); });
+        await pg.evaluate(() => scrollTo(0, 0)); await pg.waitForTimeout(200);
+      }
       r.heroFit[n] = await pg.evaluate(() => { const h = document.querySelector('.hero').getBoundingClientRect(); const bar = document.getElementById('demoBar'); const limit = innerHeight - (bar ? bar.getBoundingClientRect().height : 0); return Math.round(h.bottom) + '/' + Math.round(limit) + (h.bottom <= limit + 1 ? ' ok' : ' OVER'); });
       if (n === '1366x768') await pg.screenshot({ path: path.join(OUT, `${slug}-laptop-hero.png`) });
       await pg.close();
@@ -61,6 +67,13 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
         r.fn.serviceLinksFocusable = await page.evaluate(() => [...document.querySelectorAll('.svc li > a')].every(a => { a.focus(); return document.activeElement === a; }));
         // two-line title alignment: left edges match (side layout) or centres match (band layout)
         r.fn.bandVisibleMobile = await page.evaluate(() => { const hero = document.querySelector('.hero'); if (hero.dataset.hero !== 'band') return true; const m = document.querySelector('.motif').getBoundingClientRect(); const bar = document.querySelector('.hero-foot').getBoundingClientRect(); return m.bottom <= bar.top + 8 && m.height > 60; });
+        await page.evaluate(() => document.getElementById('gallery').scrollIntoView()); await page.waitForTimeout(400);
+        await page.click('.strip .tile:first-child', { position: { x: 40, y: 40 } }); await page.waitForTimeout(300);
+        const lbOpen = await page.evaluate(() => document.getElementById('lb').open);
+        await page.keyboard.press('ArrowRight'); await page.waitForTimeout(100);
+        const lbNow = await page.textContent('#lbNow');
+        await page.keyboard.press('Escape'); await page.waitForTimeout(300);
+        r.fn.lightbox = await page.evaluate(([o, n]) => o && n.trim().startsWith('2') && !document.getElementById('lb').open && document.activeElement === document.querySelector('.strip .tile:first-child'), [lbOpen, lbNow]);
         r.fn.typeClearMobile = await page.evaluate(() => { const vt = document.querySelector('.tile.type .vtext'), cap = document.querySelector('.tile.type .cap'); if (!vt) return true; document.getElementById('gallery').scrollIntoView(); return vt.getBoundingClientRect().bottom <= cap.getBoundingClientRect().top + 1; });
         r.fn.titleIndent = await page.evaluate(() => { const h = document.querySelector('h1'); const en = h.querySelector('.en'); if (!en) return 0; const zh = [...h.querySelectorAll(':scope > .w')]; const l = Math.min(...zh.map(w => w.getBoundingClientRect().left)), rr = Math.max(...zh.map(w => w.getBoundingClientRect().right)); const eb = en.getBoundingClientRect(); const enText = en.querySelector('.w'); const et = enText.getBoundingClientRect(); const last = en.querySelectorAll('.w'); const er = last[last.length - 1].getBoundingClientRect().right; return getComputedStyle(h).textAlign === 'center' ? Math.round(((et.left + er) / 2) - ((l + rr) / 2)) : Math.round(et.left - l); });
         // modal focus: after opening, focus is inside the overlay and Tab stays inside
@@ -102,7 +115,7 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
         r.focusRing = await page.evaluate(() => { const a = document.querySelector('.svc li > a'); const fv = a.matches(':focus-visible'); const oc = getComputedStyle(a).outlineColor; const ink = getComputedStyle(document.documentElement).getPropertyValue('--pd').trim(); const h = ink.replace('#',''); const rgb = `rgb(${parseInt(h.slice(0,2),16)}, ${parseInt(h.slice(2,4),16)}, ${parseInt(h.slice(4,6),16)})`; a.blur(); return { focusVisible: fv, outline: oc, ink: rgb, ok: fv && oc === rgb }; });
         // band hero: motif never overlaps the title box; parallax never moves the facts bar
         r.heroGeom = await page.evaluate(() => { const h = document.querySelector('h1').getBoundingClientRect(); const m = document.querySelector('.motif').getBoundingClientRect(); const band = document.querySelector('.hero').dataset.hero === 'band'; const bar = document.querySelector('.hero-foot').getBoundingClientRect(); const ox = Math.max(0, Math.min(h.right, m.right) - Math.max(h.left, m.left)); const oy = Math.max(0, Math.min(h.bottom, m.bottom) - Math.max(h.top, m.top)); return { band, overlapPct: Math.round(100 * ox * oy / (h.width * h.height)), bandAboveBar: !band || Math.round(m.bottom) <= Math.round(bar.top) + 8 }; });
-        r.tiles = await page.evaluate(() => { const th = document.getElementById('tileHours'), hh = document.getElementById('heroHours'); const vt = document.querySelector('.tile.type .vtext'), cap = document.querySelector('.tile.type .cap'); const today = document.querySelector('#hours li.today'); return { hoursMatch: !th || !today || th.textContent.trim() === today.children[1].textContent.trim(), typeClear: !vt || vt.getBoundingClientRect().bottom <= cap.getBoundingClientRect().top + 1 }; });
+        r.tiles = await page.evaluate(() => { const th = document.getElementById('tileHours'), hh = document.getElementById('heroHours'); const vt = document.querySelector('.tile.type .vtext'), cap = document.querySelector('.tile.type .cap'); const today = document.querySelector('#hours li.today'); const nb = document.querySelector('#heroHours .nb'); const tt = th ? th.textContent.trim() : ''; return { hoursMatch: !th || !today || tt === today.children[1].textContent.trim() || (nb && tt === nb.textContent.trim()), typeClear: !vt || vt.getBoundingClientRect().bottom <= cap.getBoundingClientRect().top + 1 }; });
         await page.mouse.move(20, 300); await page.waitForTimeout(1000);
         r.factsDrift = await page.evaluate(() => getComputedStyle(document.querySelector('.facts')).transform);
         await page.mouse.move(700, 450);
@@ -167,13 +180,14 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
       && fn.serviceLinksFocusable && Math.abs(fn.titleIndent) <= 2 && fn.modalFocusTrapped && !fn.factClipped && !fn.nbBroken && !fn.ctaOrphan && fn.visibleWithoutJs && v.scrollSpy === '#services' && c.h1DiffersFromBody && c.ogImage
       && v.anchorLanding && v.anchorLanding.solid && !v.anchorLanding.hidden && v.anchorLanding.top === 0
       && fn.overlayHoursSpans && v.heroGeom && (!v.heroGeom.band || v.heroGeom.overlapPct === 0) && v.heroGeom.bandAboveBar && v.factsDrift === 'none'
-      && v.tiles && v.tiles.hoursMatch && v.tiles.typeClear && fn.bandVisibleMobile && fn.typeClearMobile
+      && v.tiles && v.tiles.hoursMatch && v.tiles.typeClear && fn.bandVisibleMobile && fn.typeClearMobile && fn.lightbox
+      && v.closingClear && Object.values(v.closingClear).every(Boolean)
       && v.reducedMotion && v.reducedMotion.h1 === 'none' && v.reducedMotion.revealOpacity === '1' && v.focusRing && v.focusRing.ok
       && Math.abs(c.tileRatio - 1.33) < 0.05 && Math.abs(c.tallRatio - 0.75) < 0.05 && !v.errors.length && !v.smallTargets.length
       && !v.axe.length && !(v.axeDark || []).length && !v.emoji && Object.values(v.heroFit).every(x => x.includes('ok')) && Object.values(v.overflow).every(o => o === 0);
     allOk = allOk && ok;
     console.log(`${slug}: ${ok ? 'PASS' : 'FAIL'}`);
-    if (!ok) console.log(JSON.stringify({ fn, scrollSpy: v.scrollSpy, heroGeom: v.heroGeom, tiles: v.tiles, factsDrift: v.factsDrift, anchorLanding: v.anchorLanding, reducedMotion: v.reducedMotion, focusRing: v.focusRing, computed: c, axe: v.axe, axeDark: v.axeDark, errors: v.errors, small: v.smallTargets, heroFit: v.heroFit, overflow: v.overflow, emoji: v.emoji }, null, 2));
+    if (!ok) console.log(JSON.stringify({ fn, scrollSpy: v.scrollSpy, heroGeom: v.heroGeom, tiles: v.tiles, closingClear: v.closingClear, factsDrift: v.factsDrift, anchorLanding: v.anchorLanding, reducedMotion: v.reducedMotion, focusRing: v.focusRing, computed: c, axe: v.axe, axeDark: v.axeDark, errors: v.errors, small: v.smallTargets, heroFit: v.heroFit, overflow: v.overflow, emoji: v.emoji }, null, 2));
   }
   const lh = report.lighthouse;
   const lhOk = lh && typeof lh === 'object' && ['performance', 'accessibility', 'best-practices', 'seo'].every(k => lh[k] >= 90);
