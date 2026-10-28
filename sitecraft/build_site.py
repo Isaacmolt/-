@@ -307,14 +307,15 @@ def art_tiles(palette: dict, seed: str, mset: dict, n: int = 6) -> list[str]:
     specs = [
         (f'<rect width="400" height="300" fill="{asoft}"/>'
          f'<circle cx="{rnd.randint(280, 330)}" cy="{rnd.randint(50, 100)}" r="{rnd.randint(70, 100)}" fill="{a}" opacity=".55"/>'
-         + g(A, 80, 30, 1.2, pd, 2.4)),                                                       # 0 主圖騰 + 一點
-        "",                                                                                   # 1 標語直排（HTML）
+         f'<path d="M40 252H360" stroke="{pd}" stroke-width="2" opacity=".35"/>'
+         + g(A, 70, 20, 1.15, pd, 2.4) + g(C, 290, 180, .38, pd, 5, 'opacity=".7"')),               # 0 主圖騰 + 地平線 + 小圖騰
+        "",                                                                                       # 1 標語直排（HTML）
         f'<rect width="400" height="300" fill="{soft}"/>'
-        + "".join(g(B, 20 + i * 120, 6 + j * 96, .45, p, 4, 'opacity=".42"') for i in range(3) for j in range(3)),  # 2 圖樣
+        + "".join(g(B, 14 + i * 118 + (60 if j % 2 else 0), -4 + j * 86, .42, p, 4, f'opacity="{".32" if (i + j) % 2 else ".52"}"') for i in range(4) for j in range(4)),  # 2 織紋（錯位）
         f'<rect width="200" height="300" fill="{asoft}"/><rect x="200" width="200" height="300" fill="{soft}"/>'
-        + g(C, 100, 50, 1.0, pd, 2.6),                                                        # 3 雙色底 + 對比圖騰
-        "",                                                                                   # 4 營業資訊（HTML）
-        f'<rect width="400" height="300" fill="{pd}"/>' + g(A, 90, 40, 1.1, a, 2.6),          # 5 深底主圖
+        + g(C, 100, 50, 1.0, pd, 2.6) + g(B, 20, 215, .32, pd, 5, 'opacity=".55"'),                 # 3 雙色底 + 兩個圖騰
+        "",                                                                                       # 4 營業資訊（HTML）
+        "",                                                                                       # 5 菜單／價目（HTML）
     ]
     tiles = []
     for i in range(n):
@@ -540,6 +541,7 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, 
         labels = theme.get("gallery_labels") or ["店面", "服務區", "作品", "環境", "商品", "入口"]
         gallery_items.append({"img": imgs[i] if i < len(imgs) else "", "art": arts[i % len(arts)],
                               "tall": i % 3 == 1, "type": (not imgs) and i == 1, "info": (not imgs) and i == 4,
+                              "menu": (not imgs) and i == 5,
                               "label": labels[i % len(labels)]})
     mode = FONT_MODES.get(theme.get("mode", "bold"), FONT_MODES["bold"])
     statement, about = statement_from(about, content.get("tagline", ""))
@@ -604,6 +606,7 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, 
         "weekday_hours": weekday_hours, "periods": periods, "today_hours": today_hours,
         "jsonld": jsonld, "favicon_svg": favicon_svg(theme["palette"]["pd"], initial),
         "type_ground": _mix(theme["palette"]["a_soft"], theme["palette"]["sf"], 0.55),
+        "menu_title": {"cafe": "今日菜單", "breakfast": "今日菜單", "restaurant": "推薦菜色", "snack": "菜單", "hotpot": "菜單", "dessert": "今日甜點"}.get(lead.get("theme") or "", "服務與價目"),
         "ink2": _mix(theme["palette"]["a"], theme["palette"]["tx"], 0.55) if _lum(theme["palette"]["p"]) < 0.2 else theme["palette"]["p"],
         "name_len": name_len_units(name),
         "initial": initial, "name_tokens": name_tokens(name), "name_lines": name_lines(name), "address_short": address_short,

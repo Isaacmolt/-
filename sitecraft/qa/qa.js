@@ -53,8 +53,9 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
       page.on('pageerror', e => r.errors.push(name + ': ' + e.message));
       page.on('console', m => { if (m.type() === 'error' && !/fonts|maps|net::|favicon/i.test(m.text())) r.errors.push(name + ': ' + m.text()); });
       await page.goto(url, { waitUntil: 'load' });
-      await page.evaluate(() => document.fonts.ready); await page.waitForTimeout(1500);
+      await page.evaluate(() => document.fonts.ready); await page.waitForTimeout(2200);
       await page.screenshot({ path: path.join(OUT, `${slug}-${name}-hero.png`) });
+      if (name === 'desktop') r.nmOneLine = await page.evaluate(() => { const nm = document.querySelector('.statement .nm'); return !nm || nm.getClientRects().length === 1; });
       await page.evaluate(() => { document.querySelectorAll('[data-reveal]').forEach(el => el.classList.add('in')); document.querySelector('.closing').classList.add('in'); });
       await page.waitForTimeout(2200);
       await page.screenshot({ path: path.join(OUT, `${slug}-${name}-full.png`), fullPage: true });
@@ -103,7 +104,8 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
         await page.keyboard.press('Escape'); await page.waitForTimeout(300);
         r.fn.factClipped = await page.evaluate(() => [...document.querySelectorAll('.fact > span')].some(sp => sp.scrollWidth > sp.clientWidth + 1 && !sp.classList.contains('num')));
         // no-break spans must stay on one line (no CJK orphans)
-        r.fn.nbBroken = await page.evaluate(() => [...document.querySelectorAll('.nb')].some(el => { const lh = parseFloat(getComputedStyle(el).lineHeight) || 20; return el.getBoundingClientRect().height > lh * 1.5; }));
+        r.fn.nbBroken = await page.evaluate(() => [...document.querySelectorAll('.nb, .statement .nm .en')].some(el => { const lh = parseFloat(getComputedStyle(el).lineHeight) || 20; return el.getBoundingClientRect().height > lh * 1.5 || el.getClientRects().length > 1; }));
+        r.fn.menuBtnClear = await page.evaluate(() => { const b = document.getElementById('menuBtn').getBoundingClientRect(); const shapes = [...document.querySelectorAll('.hero .motif :is(path,circle,ellipse,rect)')].map(s => s.getBoundingClientRect()); return !shapes.some(s => s.left < b.right && b.left < s.right && s.top < b.bottom && b.top < s.bottom); });
         // hero CTA row: no orphan control on phones (every control shares a row with another, or spans full width)
         r.fn.ctaOrphan = await page.evaluate(() => { const els = [...document.querySelectorAll('.hero .cta > *')]; const rows = {}; els.forEach(e => { const b = e.getBoundingClientRect(); const k = Math.round(b.top); (rows[k] = rows[k] || []).push(b.width); }); return Object.values(rows).some(ws => ws.length === 1 && ws[0] < 300); });
         // no-JS: content still visible
@@ -194,6 +196,7 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
       && fn.serviceLinksFocusable && Math.abs(fn.titleIndent) <= 2 && fn.modalFocusTrapped && !fn.factClipped && !fn.nbBroken && !fn.ctaOrphan && fn.visibleWithoutJs && v.scrollSpy === '#services' && c.h1DiffersFromBody && c.ogImage
       && v.anchorLanding && v.anchorLanding.solid && !v.anchorLanding.hidden && v.anchorLanding.top === 0
       && fn.overlayHoursSpans && v.heroGeom && (!v.heroGeom.band || v.heroGeom.overlapPct === 0) && v.heroGeom.bandAboveBar && v.factsDrift === 'none'
+      && fn.menuBtnClear && v.nmOneLine
       && v.tiles && v.tiles.hoursMatch && v.tiles.typeClear && fn.bandVisibleMobile && fn.typeClearMobile && fn.lightbox
       && v.closingClear && Object.values(v.closingClear).every(Boolean)
       && v.nameClear && Object.values(v.nameClear).every(x => x.real === 0 && x.long === 0) && v.bandGap && Object.values(v.bandGap).every(g => g >= 24)

@@ -78,7 +78,7 @@ h1,h2,.display{font-family:var(--display),var(--cjk-head),var(--body);font-weigh
 .nav ul a:hover::after,.nav ul a:focus-visible::after,.nav ul a[aria-current="true"]::after{transform:scaleX(1);transform-origin:left}
 .nav .call{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 20px;border-radius:999px;border:1.5px solid currentColor;font-weight:600;font-size:.92rem;transition:background .25s,color .25s}
 .nav .call:hover{background:var(--a);border-color:var(--a);color:var(--tx)}
-.menu-btn{display:none;width:48px;height:48px;align-items:center;justify-content:center;border-radius:12px;border:1.5px solid currentColor;position:fixed;top:10px;right:18px;z-index:120;color:#fff;transition:color .3s}
+.menu-btn{display:none;width:48px;height:48px;align-items:center;justify-content:center;border-radius:12px;border:1.5px solid rgba(255,255,255,.4);background:color-mix(in srgb,var(--pd) 55%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);position:fixed;top:10px;right:18px;z-index:120;color:#fff;transition:color .3s,background .3s}
 .menu-btn.solid{color:var(--tx);background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-color:var(--line)}
 .menu-btn[aria-expanded="true"]{color:#fff}
 .menu-btn span{display:block;width:20px;height:1.8px;background:currentColor;position:absolute;transition:transform .35s var(--ease),opacity .2s}
@@ -122,12 +122,16 @@ h1,h2,.display{font-family:var(--display),var(--cjk-head),var(--body);font-weigh
 .js .strip .tile{opacity:0;transform:translate3d(32px,16px,0);transition:opacity .7s var(--ease),transform .9s var(--ease);transition-delay:calc(var(--i,0)*110ms)}
 .js .strip.in .tile{opacity:1;transform:none}
 @keyframes drift{from{transform:translate(0,0)}to{transform:translate(-4vw,-2.5vw)}}
-.hero .wrap{position:relative;margin-block:auto;padding:clamp(88px,11vh,112px) 0 clamp(24px,4vh,48px);--lane:calc(min(1180px,100vw - 48px) - min(36vw,520px) - 40px)}
+.hero>.wrap{position:relative;margin-block:auto;padding:clamp(88px,11vh,112px) 0 clamp(24px,4vh,48px);--lane:calc(min(1180px,100vw - 48px) - min(36vw,520px) - 40px)}
 .hero[data-hero="side"]>.wrap{display:grid;grid-template-columns:minmax(0,1fr) min(36vw,520px);column-gap:40px;align-items:center}
 .hero[data-hero="side"]>.wrap>*{grid-column:1}
 .hero[data-hero="side"]>.wrap>.motif{position:absolute;right:clamp(-120px,-6vw,-40px);top:50%;transform:translateY(-50%);width:calc(min(36vw,520px) + clamp(40px,6vw,120px) + 48px);max-width:none}
 .eyebrow{display:inline-flex;align-items:center;gap:12px;font-size:.82rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;opacity:.85}
 .eyebrow::before{content:"";width:34px;height:1px;background:currentColor}
+.js .hero .eyebrow{opacity:0;animation:fade .7s var(--ease) 0s forwards}
+.js .hero .eyebrow::before{transform:scaleX(0);transform-origin:left;animation:rule .7s var(--ease) .1s forwards}
+@keyframes rule{to{transform:none}}
+.js .hero-foot .fact{opacity:0;transform:translateY(10px);animation:rise .8s var(--ease) calc(.95s + var(--i,0)*.08s) forwards}
 h1{font-size:clamp(2.6rem,min(2rem + 5vw,calc(var(--lane,70vw)/var(--len,4)*.98)),7.2rem);margin:18px 0 14px;letter-spacing:-.02em;line-height:1.04;max-width:none}
 .js h1 .w{opacity:0;transform:translateY(.6em) rotate(2deg);animation:rise .9s var(--ease) forwards;animation-delay:calc(.08s + var(--i)*.045s)}
 h1 .w{display:inline-block}
@@ -153,22 +157,28 @@ body[data-mode="editorial"] h1 .en{font-style:italic;font-weight:400}
 .btn-line::before{background:#2ee07a}
 .btn-line:hover{color:#06200f}
 .hero-foot{position:relative;z-index:0;margin-top:0;border-top:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.16)}
+.hero .hero-foot>.wrap{padding:0;position:relative;margin:0 auto}
 .facts{display:grid;grid-template-columns:repeat(4,1fr);gap:0}
 .fact{padding:22px 24px 22px 0;border-left:1px solid rgba(255,255,255,.18);padding-left:22px;min-width:0}
 .fact:first-child{border-left:0;padding-left:0}
 .fact b{display:block;font-size:.72rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;opacity:.82;margin-bottom:6px}
-.fact>span{display:block;font-size:1rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fact>span,.fact>a{display:block;font-size:1rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fact>a{min-height:44px;display:flex;align-items:center;margin:-9px 0}
+.fact>a:hover .sub,.fact>a:focus-visible .sub{text-decoration:underline;text-underline-offset:4px}
 .fact .num{font-size:1.35rem;line-height:1}
 .fact .sub{margin-left:8px;font-size:.88rem;opacity:.75;font-weight:500}
 .fact span span,.fact .num{display:inline}
 .fact .star{width:.9em;height:.9em;fill:var(--a);stroke:none;display:inline-block;vertical-align:-.08em;margin-right:6px}
 .status{display:inline-flex!important;align-items:center;gap:8px;vertical-align:middle}
+#heroHours,#ovHours{display:inline-flex;gap:0 10px;flex-wrap:wrap}
+.sep{display:inline-block;width:1em}
 .status i{width:8px;height:8px;border-radius:50%;background:#6ee7a0;box-shadow:0 0 0 0 rgba(110,231,160,.7);animation:pulse 2s infinite}
 .status.off i{background:#fb7185;animation:none}
 @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(110,231,160,.6)}70%{box-shadow:0 0 0 10px rgba(110,231,160,0)}100%{box-shadow:0 0 0 0 rgba(110,231,160,0)}}
-@media (max-width:880px){.hero .wrap{padding-top:96px;padding-bottom:20px;--lane:calc(100vw - 36px)}.hero[data-hero="side"]>.wrap{display:block}.hero[data-hero="side"]>.wrap>.motif{position:absolute;width:68vw;right:-16vw;top:-56px}.facts{grid-template-columns:1fr 1fr}.fact{padding:13px 0 13px 18px}.fact>span:not(.num){font-size:.95rem;white-space:normal;overflow:visible;line-height:1.45}.status{flex-wrap:wrap;row-gap:2px}.nb{white-space:nowrap}.fact:nth-child(odd){border-left:0;padding-left:0}.fact:nth-child(n+3){border-top:1px solid rgba(255,255,255,.14)}}
+@media (max-width:880px){.hero>.wrap{padding-top:96px;padding-bottom:20px;--lane:calc(100vw - 36px)}.hero[data-hero="side"]>.wrap{display:block;padding-bottom:calc(8px + 32vw)}.hero[data-hero="side"]>.wrap>.motif{position:absolute;transform:none;top:auto;bottom:-5vw;right:-10vw;width:44vw;-webkit-mask-image:linear-gradient(to top,transparent,#000 30%);mask-image:linear-gradient(to top,transparent,#000 30%)}.facts{grid-template-columns:1fr 1fr}.fact{padding:13px 0 13px 18px}.fact>span:not(.num){font-size:.95rem;white-space:normal;overflow:visible;line-height:1.45}.status{flex-wrap:wrap;row-gap:2px}.fact:nth-child(odd){border-left:0;padding-left:0}.fact:nth-child(n+3){border-top:1px solid rgba(255,255,255,.14)}}
 @media (max-width:880px){.motif svg{opacity:.24}}
 @media (orientation:portrait) and (min-width:700px){.hero,body.demo .hero{min-height:min(calc(100svh - var(--bar,0px)),860px)}}
+@media (max-width:880px) and (max-height:700px){.hero[data-hero="side"]>.wrap>.motif{width:36vw}.hero[data-hero="side"]>.wrap{padding-bottom:calc(8px + 26vw)}}
 @media (max-width:480px){h1{max-width:none}.hero .cta{gap:10px}.hero .cta .btn{flex:1 1 calc(50% - 5px);justify-content:center;padding:0 14px}.hero .cta .tlink{flex:1 1 100%;justify-content:center;min-height:44px;border:0;border-radius:0;text-decoration:underline;text-underline-offset:6px;text-decoration-color:rgba(255,255,255,.45)}}
 
 /* hero: band variant (centred type, motif runs behind the facts bar) */
@@ -194,14 +204,14 @@ h2{font-size:clamp(2rem,4.4vw,3.6rem);margin-bottom:22px}
 .about .wrap{display:grid;grid-template-columns:1.15fr .85fr;gap:0 clamp(40px,7vw,110px);align-items:start}
 .about .label{grid-column:1/-1}
 h2.statement{font-size:clamp(1.8rem,3.8vw,3rem);line-height:1.3;margin-bottom:34px}
-.statement .nm{white-space:nowrap}
+.statement .nm{white-space:nowrap;margin-right:.22em}
+.nm wbr,.nb wbr{display:none}
 @media (max-width:640px){.statement .nm{white-space:normal}.statement .nm .en{white-space:nowrap}}
 body[data-mode="bold"] h1 .en,body[data-mode="bold"] .nm .en{font-weight:700;letter-spacing:-.01em}
 body[data-mode="mono"] h1,body[data-mode="mono"] h2,body[data-mode="mono"] .display{letter-spacing:0}
 body[data-mode="mono"] h1 .en{font-weight:500;letter-spacing:-.02em}
 body[data-mode="mono"] .statement em{background:none;border-bottom:3px solid var(--a);padding-bottom:2px}
 body[data-mode="mono"] .btn{border-radius:12px}
-.statement .nm{margin-right:.22em}
 .statement em{font-style:normal;color:var(--ink2);box-decoration-break:clone;-webkit-box-decoration-break:clone;background:linear-gradient(transparent 62%,var(--a-soft) 62%)}
 .about p{margin-bottom:18px;font-size:1.06rem;max-width:58ch}
 .hl{counter-reset:h;border-top:1px solid var(--line);margin-top:.35em}
@@ -211,7 +221,7 @@ body[data-mode="mono"] .btn{border-radius:12px}
 
 /* services */
 .services{background:var(--sf)}
-.svc{border-top:1px solid var(--line)}
+.svc{border-top:1px solid var(--line);margin-top:44px}
 .svc li{position:relative;border-bottom:1px solid var(--line);isolation:isolate;overflow:hidden}
 .svc li>a,.svc li>div{display:grid;grid-template-columns:56px minmax(0,1fr) auto 48px;grid-template-areas:"n h pr a" "n p pr a";column-gap:24px;row-gap:4px;align-items:center;padding:28px 0}
 .svc .n{grid-area:n}.svc h3{grid-area:h}.svc p{grid-area:p;max-width:52ch}.svc .price{grid-area:pr;font-size:1.2rem;color:var(--ink);white-space:nowrap;padding-left:16px}.svc .arr{grid-area:a}
@@ -230,6 +240,7 @@ body[data-mode="mono"] .btn{border-radius:12px}
 
 /* gallery */
 .gallery .head{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;margin-bottom:34px}
+.gallery .head h2{margin-bottom:0}
 .gallery .count{font-family:var(--display);font-size:1.1rem;color:var(--mu);white-space:nowrap;display:flex;gap:16px;align-items:center}
 .gallery .count button{width:44px;height:44px;border-radius:50%;border:1.5px solid var(--line);display:grid;place-items:center;transition:background .3s,color .3s}
 .gallery .count button:hover{background:var(--ink);color:var(--bg);border-color:var(--ink)}
@@ -244,6 +255,11 @@ body[data-mode="mono"] .btn{border-radius:12px}
 .tile.type .vtext{writing-mode:vertical-rl;text-orientation:mixed;font-family:var(--cjk-head),var(--display),var(--body);font-weight:var(--head-weight);font-size:clamp(1.5rem,2.6vw,2.2rem);letter-spacing:.22em;line-height:1.25;color:{{ t.pd }};height:calc(100% - 104px);margin-bottom:52px;text-wrap:balance}
 .tile .cap{max-width:calc(100% - 36px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 @media (max-width:640px){.tile.type .cap{font-size:.68rem;letter-spacing:.06em;padding:5px 10px}.tile.type .vtext{font-size:1.35rem;letter-spacing:.16em}}
+.tile.menu{background:{{ t.pd }};color:#fff;display:flex;align-items:flex-end;padding:26px 24px 60px}
+.tile.menu .mn{width:100%}
+.tile.menu b{display:block;font-size:.68rem;font-weight:700;letter-spacing:.16em;opacity:.7;margin-bottom:10px}
+.tile.menu li{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:7px 0;border-top:1px solid rgba(255,255,255,.14);font-size:.98rem;font-weight:600}
+.tile.menu li .num{color:{{ t.a }};font-size:1.05rem;white-space:nowrap}
 .tile.info{background:{{ t.sf }};display:flex;align-items:flex-end;padding:26px 24px 60px}
 .tile.info .inf{display:grid;gap:2px 0;color:{{ t.tx }}}
 .tile.info b{font-size:.68rem;font-weight:700;letter-spacing:.16em;color:{{ t.mu }};margin-top:12px}
@@ -254,6 +270,7 @@ body[data-mode="mono"] .btn{border-radius:12px}
 .tile .cap{color:{{ t.tx }};background:rgba(255,255,255,.82)}
 .tile::after{content:"";position:absolute;inset:0;background:var(--noise) 0 0/160px 160px;opacity:.14;mix-blend-mode:soft-light;pointer-events:none}
 .tile svg.art,.tile img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 1.2s var(--ease)}
+@media (prefers-color-scheme:dark){.tile svg.art{filter:brightness(.82) saturate(.9)}.tile.type,.tile.info,.tile.menu{background:var(--sf)}.tile.type .vtext,.tile.info .inf,.tile.info .num,.tile.menu{color:var(--tx)}.tile.type::before{background:var(--ink)}.tile .cap{color:var(--tx);background:color-mix(in srgb,var(--bg) 85%,transparent)}}
 .tile .art>g.v{transform-origin:200px 150px;transform:rotate(calc(var(--i,0)*-5deg)) scale(calc(1.06 + var(--i,0)*.06))}
 .tile:hover svg.art,.tile:hover img{transform:scale(1.04)}
 .tile .cap{position:absolute;left:18px;bottom:16px;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;backdrop-filter:blur(8px);padding:6px 12px;border-radius:999px}
@@ -341,7 +358,7 @@ body.demo .fab{bottom:78px}
 [data-reveal].in{opacity:1;transform:none}
 @media (prefers-reduced-motion:reduce){
   .js [data-reveal]{opacity:1;transform:none;transition:none}
-  .js h1 .w,.js .tagline,.js .hero .cta{animation:none;opacity:1;transform:none}
+  .js h1 .w,.js .tagline,.js .hero .cta,.js .hero .eyebrow,.js .hero .eyebrow::before,.js .hero-foot .fact{animation:none;opacity:1;transform:none}
   .motif .d,.status i{animation:none}.motif svg,.hero>.wrap{transition:none;transform:none}
   .motif svg :is(path,circle,ellipse,rect),.cl-motif :is(path,circle,ellipse,rect){animation:none;stroke-dashoffset:0}
   .js .strip .tile{opacity:1;transform:none;transition:none}
@@ -394,7 +411,7 @@ body.demo .fab{bottom:78px}
   <a href="#services" style="--i:1">服務項目</a>
   <a href="#gallery" style="--i:2">環境照片</a>
   <a href="#info" style="--i:3">營業資訊</a>
-  <small><span id="ovHours" style="display:inline-flex;gap:0 10px;flex-wrap:wrap"><span class="nb">{% if b.today_hours %}今日 {{ b.today_hours }}{% endif %}</span></span>　<span class="nb">{{ b.address_short }}</span></small>
+  <small><span id="ovHours"><span class="nb">{% if b.today_hours %}今日 {{ b.today_hours }}{% endif %}</span></span><i class="sep"></i><span class="nb">{{ b.address_short }}</span></small>
   <div class="acts">
     {% if b.phone_href %}<a class="btn btn-solid" href="{{ b.phone_href }}"><svg class="ico"><use href="#i-phone"/></svg>電話</a>{% endif %}
     {% if b.line_url %}<a class="btn btn-line" href="{{ b.line_url }}" target="_blank" rel="noopener"><svg class="ico"><use href="#i-chat"/></svg>LINE</a>{% endif %}
@@ -407,7 +424,7 @@ body.demo .fab{bottom:78px}
 <section class="hero" id="top" data-hero="{{ b.hero_layout }}" aria-label="{{ b.name }}">
   <div class="grain" aria-hidden="true"></div>
     <div class="wrap">
-    <p class="eyebrow">{{ b.category }}　{{ b.city }}{{ b.district }}</p>
+    <p class="eyebrow"><span>{{ b.category }}</span><span>{{ b.city }}{{ b.district }}</span></p>
     <h1 aria-label="{{ b.name }}" style="--len:{{ b.name_len }}">{% set ns = namespace(i=0) %}{% for line in b.name_lines %}{% if line.kind == "en" %}<span class="en">{% endif %}{% for w in line.tokens %}<span class="w" style="--i:{{ ns.i }}">{{ w }}</span>{% if line.kind == "en" and not loop.last %} {% endif %}{% set ns.i = ns.i + 1 %}{% endfor %}{% if line.kind == "en" %}</span>{% endif %}{% endfor %}</h1>
     <p class="tagline">{{ b.tagline }}</p>
     <div class="cta">
@@ -420,12 +437,12 @@ body.demo .fab{bottom:78px}
   </div>
   <div class="hero-foot">
     {% if b.hero_layout == "band" %}<div class="motif" aria-hidden="true"><svg viewBox="-10 -10 820 220" preserveAspectRatio="xMidYMax meet"><g class="d">{{ t.motif_band }}</g></svg></div>{% endif %}
-    <div class="wrap" style="padding:0;position:relative">
+    <div class="wrap">
       <div class="facts">
-        <div class="fact"><b>今日營業</b><span class="status" id="heroStatus"><i></i><span id="heroHours" style="display:inline-flex;gap:0 10px;flex-wrap:wrap"><span class="nb">{{ b.today_hours or "請來電詢問" }}</span></span></span></div>
-        {% if b.rating %}<div class="fact"><b>Google 評分</b><span><svg class="star" viewBox="0 0 24 24"><use href="#i-star"/></svg><span class="num" data-count="{{ b.rating }}" data-dec="1">{{ b.rating }}</span><span class="sub">{{ b.review_count }} 則評論</span></span></div>{% endif %}
-        <div class="fact"><b>地址</b><span>{{ b.address_short }}</span></div>
-        {% if b.phone %}<div class="fact"><b>電話</b><span class="num">{{ b.phone }}</span></div>{% endif %}
+        <div class="fact" style="--i:0"><b>今日營業</b><span class="status" id="heroStatus"><i></i><span id="heroHours"><span class="nb">{{ b.today_hours or "請來電詢問" }}</span></span></span></div>
+        {% if b.rating %}<div class="fact" style="--i:1"><b>Google 評分</b><a href="{{ b.maps_url }}" target="_blank" rel="noopener" aria-label="在 Google 地圖查看 {{ b.review_count }} 則評論"><svg class="star" viewBox="0 0 24 24"><use href="#i-star"/></svg><span class="num" data-count="{{ b.rating }}" data-dec="1">{{ b.rating }}</span><span class="sub">{{ b.review_count }} 則評論</span></a></div>{% endif %}
+        <div class="fact" style="--i:2"><b>地址</b><span>{{ b.address_short }}</span></div>
+        {% if b.phone %}<div class="fact" style="--i:3"><b>電話</b><span class="num">{{ b.phone }}</span></div>{% endif %}
       </div>
     </div>
   </div>
@@ -450,7 +467,7 @@ body.demo .fab{bottom:78px}
     <div class="label" data-reveal><b>02</b>服務項目</div>
     <h2 data-reveal style="--i:1">我們能為您做的</h2>
     <p class="lead" data-reveal style="--i:2">{% if b.services_linked %}點任一項目即可直接詢問。{% endif %}有其他需求也歡迎告訴我們。</p>
-    <ul class="svc" style="margin-top:44px">
+    <ul class="svc">
       {% for s in b.services %}
       <li data-reveal style="--i:{{ loop.index0 }}">
         {% if s.href %}<a href="{{ s.href }}"{% if s.href.startswith('http') %} target="_blank" rel="noopener"{% endif %}>{% else %}<div>{% endif %}
@@ -470,7 +487,7 @@ body.demo .fab{bottom:78px}
     <div class="head">
       <div>
         <div class="label" data-reveal><b>03</b>環境</div>
-        <h2 data-reveal style="--i:1;margin-bottom:0">{% if demo %}店內環境{% else %}走進 {{ b.name }}{% endif %}</h2>
+        <h2 data-reveal style="--i:1">{% if demo %}店內環境{% else %}走進 {{ b.name }}{% endif %}</h2>
       </div>
       <div class="count" data-reveal style="--i:2">
         <button type="button" id="prevTile" aria-label="上一張"><svg class="ico" style="transform:rotate(180deg)"><use href="#i-arrow"/></svg></button>
@@ -480,11 +497,11 @@ body.demo .fab{bottom:78px}
     </div>
   </div>
   <div class="wrap">
-    <div class="strip" id="strip" data-reveal style="--i:2" tabindex="0" aria-label="環境照片，可左右捲動">
+    <div class="strip" id="strip" data-reveal style="--i:2" tabindex="0" role="region" aria-label="環境照片，可左右捲動">
       {% for g in b.gallery_items %}
-      <div class="tile{% if g.tall %} tall{% endif %}{% if g.type %} type{% endif %}{% if g.info %} info{% endif %}" style="--i:{{ loop.index0 }}">
-        {% if g.img %}<img src="{{ g.img }}" alt="{{ b.name }} 環境照片 {{ loop.index }}" loading="lazy">{% elif g.type %}<span class="vtext">{{ b.tagline }}</span>{% elif g.info %}<div class="inf"><b id="tileHoursLabel">今日營業</b><span class="num" id="tileHours">{{ b.today_hours or "請來電詢問" }}</span><b>地址</b><span>{{ b.address_short }}</span>{% if b.rating %}<b>Google 評分</b><span class="num">{{ b.rating }}　{{ b.review_count }} 則</span>{% endif %}</div>{% else %}{{ g.art }}{% endif %}
-        <span class="cap">{% if g.img or g.type %}{{ b.name }}{% elif g.info %}{{ b.city }}{{ b.district }}{% else %}{{ g.label }}{% endif %}</span>
+      <div class="tile{% if g.tall %} tall{% endif %}{% if g.type %} type{% endif %}{% if g.info %} info{% endif %}{% if g.menu %} menu{% endif %}" style="--i:{{ loop.index0 }}">
+        {% if g.img %}<img src="{{ g.img }}" alt="{{ b.name }} 環境照片 {{ loop.index }}" loading="lazy">{% elif g.type %}<span class="vtext">{{ b.tagline }}</span>{% elif g.menu %}<div class="mn"><b>{{ b.menu_title }}</b><ul>{% for s_ in b.services[:4] %}<li><span>{{ s_.title }}</span>{% if s_.price %}<span class="num">{{ s_.price }}</span>{% endif %}</li>{% endfor %}</ul></div>{% elif g.info %}<div class="inf"><b id="tileHoursLabel">今日營業</b><span class="num" id="tileHours">{{ b.today_hours or "請來電詢問" }}</span><b>地址</b><span>{{ b.address_short }}</span>{% if b.rating %}<b>Google 評分</b><span class="num">{{ b.rating }}<i class="sep"></i>{{ b.review_count }} 則</span>{% endif %}</div>{% else %}{{ g.art }}{% endif %}
+        <span class="cap">{% if g.img or g.type %}{{ b.name }}{% elif g.info %}{{ b.city }}{{ b.district }}{% elif g.menu %}{{ b.menu_title }}{% else %}{{ g.label }}{% endif %}</span>
       </div>
       {% endfor %}
     </div>
@@ -544,7 +561,7 @@ body.demo .fab{bottom:78px}
 
 <footer>
   <div class="wrap">
-    <p>© {{ b.year }} {{ b.name }}　{{ b.city }}{{ b.district }}</p>
+    <p>© {{ b.year }} {{ b.name }}<i class="sep"></i>{{ b.city }}{{ b.district }}</p>
     <div class="links">
       {% if b.facebook_url %}<a href="{{ b.facebook_url }}" target="_blank" rel="noopener">Facebook</a>{% endif %}
       {% if b.instagram_url %}<a href="{{ b.instagram_url }}" target="_blank" rel="noopener">Instagram</a>{% endif %}
@@ -611,19 +628,20 @@ body.demo .fab{bottom:78px}
     });
     if(!open){for(var k=0;k<7&&!nextOpen;k++){var dd=(day+k)%7;periods.forEach(function(p){if(nextOpen||!p.open||p.open.day!==dd)return;var om=p.open.hour*60+(p.open.minute||0);if(k>0||om>mins)nextOpen={k:k,p:p.open}})}}
     hero.dataset.open=open?'open':'closed';if(closing)closing.dataset.open=hero.dataset.open;
-    state={open:open,text:open?('營業中　'+(closeAt?fmt(closeAt.hour,closeAt.minute||0)+' 打烊':'')):((todayClosed?'今日公休':'休息中')+'　'+(nextOpen?((nextOpen.k===0?'今天 ':nextOpen.k===1?'明天 ':'')+fmt(nextOpen.p.hour,nextOpen.p.minute||0)+' 開始營業'):''))};
+    var nextText=nextOpen?((nextOpen.k===0?'今天 ':nextOpen.k===1?'明天 ':'')+fmt(nextOpen.p.hour,nextOpen.p.minute||0)+' 開門'):'';
+    state={open:open,next:nextText,text:open?('營業中　'+(closeAt?fmt(closeAt.hour,closeAt.minute||0)+' 打烊':'')):((todayClosed?'今日公休':'休息中')+(nextText?'　'+nextText:''))};
   }
   ['heroStatus','infoStatus'].forEach(function(id){var el=d.getElementById(id);if(!el)return;if(!state){el.querySelector('i').style.display='none';return}el.classList.toggle('off',!state.open)});
   var ist=d.getElementById('infoStatusText');if(ist&&state)ist.textContent=state.text;
-  var th=d.getElementById('tileHours'),thl=d.getElementById('tileHoursLabel');if(th&&li&&state){var nx=(state.text.split('　')[1]||'').replace(' 開始營業',' 開門');th.textContent=todayClosed?(nx||'休息'):li.children[1].textContent;if(thl)thl.textContent=todayClosed?'今日公休':'今日營業'}
+  var th=d.getElementById('tileHours'),thl=d.getElementById('tileHoursLabel');if(th&&li&&state){th.textContent=todayClosed?(state.next||'休息'):li.children[1].textContent;if(thl)thl.textContent=todayClosed?'今日公休':'今日營業'}
   var ch=d.getElementById('closingHours');if(ch&&state)ch.textContent=state.text;
-  var hs=d.getElementById('heroHours');if(hs&&state){var nxt=state.text.split('　')[1]||'';var a1=state.open?'營業中':(todayClosed?'今日公休':'休息中'),a2=state.open?li.children[1].textContent:nxt.replace(' 開始營業',' 開門');hs.innerHTML='';var s1=d.createElement('span');s1.textContent=a1;hs.appendChild(s1);if(a2){var s2=d.createElement('span');s2.className='nb';s2.textContent=a2;hs.appendChild(s2)}}
+  var hs=d.getElementById('heroHours');if(hs&&state){var nxt=state.text.split('　')[1]||'';var a1=state.open?'營業中':(todayClosed?'今日公休':'休息中'),a2=state.open?li.children[1].textContent:state.next;hs.innerHTML='';var s1=d.createElement('span');s1.textContent=a1;hs.appendChild(s1);if(a2){var s2=d.createElement('span');s2.className='nb';s2.textContent=a2;hs.appendChild(s2)}}
   if(closing&&'IntersectionObserver' in window){new IntersectionObserver(function(es){es.forEach(function(e){fab.classList.toggle('hold',e.isIntersecting);if(e.isIntersecting)closing.classList.add('in')})},{threshold:.35}).observe(closing)}
   /* 中文斷詞：標題級文字只在詞的邊界換行 */
-  (window.requestIdleCallback||function(f){setTimeout(f,1200)})(function(){if(window.Intl&&Intl.Segmenter){try{var seg=new Intl.Segmenter('zh-Hant',{granularity:'word'});d.querySelectorAll('h2.statement,.tile.type .vtext,.tagline,.closing h2').forEach(function(el){var w=d.createTreeWalker(el,NodeFilter.SHOW_TEXT),nodes=[];while(w.nextNode())nodes.push(w.currentNode);nodes.forEach(function(n){var parts=[];for(var it=seg.segment(n.nodeValue)[Symbol.iterator](),r=it.next();!r.done;r=it.next())parts.push(r.value.segment);if(parts.length<2)return;var f=d.createDocumentFragment();parts.forEach(function(tx,i){if(i)f.appendChild(d.createElement('wbr'));f.appendChild(d.createTextNode(tx))});n.parentNode.replaceChild(f,n)});el.classList.add('seg')})}catch(e){}}});
+  (window.requestIdleCallback||function(f){setTimeout(f,1200)})(function(){if(window.Intl&&Intl.Segmenter){try{var seg=new Intl.Segmenter('zh-Hant',{granularity:'word'});d.querySelectorAll('h2.statement,.tile.type .vtext,.tagline,.closing h2').forEach(function(el){var w=d.createTreeWalker(el,NodeFilter.SHOW_TEXT,{acceptNode:function(n){return n.parentNode.closest('.nm,.nb,.en')?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT}}),nodes=[];while(w.nextNode())nodes.push(w.currentNode);nodes.forEach(function(n){var parts=[];for(var it=seg.segment(n.nodeValue)[Symbol.iterator](),r=it.next();!r.done;r=it.next())parts.push(r.value.segment);if(parts.length<2)return;var f=d.createDocumentFragment();parts.forEach(function(tx,i){if(i)f.appendChild(d.createElement('wbr'));f.appendChild(d.createTextNode(tx))});n.parentNode.replaceChild(f,n)});el.classList.add('seg')})}catch(e){}}});
   /* reveal + counters */
   function count(el){var to=parseFloat(el.dataset.count),dec=+el.dataset.dec||0,t0=null;function step(ts){if(!t0)t0=ts;var p=Math.min((ts-t0)/1100,1),e=1-Math.pow(1-p,3);el.textContent=(to*e).toFixed(dec);if(p<1)requestAnimationFrame(step)}requestAnimationFrame(step)}
-  if(!reduce)d.querySelectorAll('[data-count]').forEach(count);
+  if(!reduce)setTimeout(function(){d.querySelectorAll('[data-count]').forEach(count)},1000);
   if('IntersectionObserver' in window&&!reduce){
     var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.1,rootMargin:'0px 0px -6% 0px'});
     d.querySelectorAll('[data-reveal]').forEach(function(el){io.observe(el)});
