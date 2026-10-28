@@ -119,6 +119,10 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
         await nojs.close();
       }
       if (name === 'desktop') {
+        // every hero motif shape finishes its draw-in (idle motion or the closed state must never leave a shape undrawn); the weave stays out of the type lane
+        await page.waitForTimeout(800);
+        r.motifDrawn = await page.evaluate(() => [...document.querySelectorAll('.hero .motif svg :is(path,circle,ellipse,rect)')].every(e => parseFloat(getComputedStyle(e).strokeDashoffset) === 0));
+        r.weaveMasked = await page.evaluate(() => { const w = document.querySelector('.weave'); if (!w || getComputedStyle(w).display === 'none') return true; return !!w.querySelector('rect[mask]') && !!w.querySelector('mask linearGradient, linearGradient'); });
         // anchor landing: after clicking a nav link the header is solid and visible, and the facts bar is not under a transparent nav
         await page.click('.nav ul a[href="#about"]'); await page.waitForTimeout(1600);
         r.anchorLanding = await page.evaluate(() => { const nav = document.getElementById('nav'); const cs = getComputedStyle(nav); return { solid: nav.classList.contains('solid'), hidden: nav.classList.contains('hide'), top: Math.round(nav.getBoundingClientRect().top), aboutTop: Math.round(document.getElementById('about').getBoundingClientRect().top) }; });
@@ -200,7 +204,7 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
       && fn.serviceLinksFocusable && Math.abs(fn.titleIndent) <= 2 && fn.modalFocusTrapped && !fn.factClipped && !fn.nbBroken && !fn.ctaOrphan && fn.visibleWithoutJs && v.scrollSpy === '#services' && c.h1DiffersFromBody && c.ogImage
       && v.anchorLanding && v.anchorLanding.solid && !v.anchorLanding.hidden && v.anchorLanding.top === 0
       && fn.overlayHoursSpans && v.heroGeom && (!v.heroGeom.band || v.heroGeom.overlapPct === 0) && v.heroGeom.bandAboveBar && v.factsDrift === 'none'
-      && fn.menuBtnClear && v.nmOneLine
+      && fn.menuBtnClear && v.nmOneLine && v.motifDrawn && v.weaveMasked
       && v.tiles && v.tiles.hoursMatch && v.tiles.typeClear && fn.bandVisibleMobile && fn.typeClearMobile && fn.lightbox
       && v.closingClear && Object.values(v.closingClear).every(Boolean)
       && v.nameClear && Object.values(v.nameClear).every(x => x.real === 0 && x.long === 0) && v.bandGap && Object.values(v.bandGap).every(g => g >= 24)

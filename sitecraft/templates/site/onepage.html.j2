@@ -109,13 +109,14 @@ h1,h2,.display{font-family:var(--display),var(--cjk-head),var(--body);font-weigh
 @media (hover:hover){.motif svg{transform:translate3d(calc(var(--mx)*-48px),calc(var(--my)*-32px),0) rotate(calc(var(--mx)*-2.5deg));transition:transform .9s var(--ease)}
 .hero>.wrap{transform:translate3d(calc(var(--mx)*10px),calc(var(--my)*6px),0);transition:transform .9s var(--ease)}}
 .motif .d{animation:drift 10s ease-in-out infinite alternate}
-.hero[data-open="closed"] .motif .d,.hero[data-open="closed"] .motif .idle{animation-play-state:paused}
+.hero[data-open="closed"] .motif .d{animation-play-state:paused}
+.js .hero[data-open="closed"] .motif svg .idle{animation-play-state:running,paused}
 .motif .idle{transform-box:fill-box;transform-origin:center}
-@media (prefers-reduced-motion:no-preference){.motif .idle-float{animation:draw 2.2s var(--ease) .25s forwards,idleFloat 4s ease-in-out 2.6s infinite alternate}.motif .idle-pulse{animation:draw 2.2s var(--ease) .25s forwards,idlePulse 3.2s ease-in-out calc(2.6s + var(--i,0)*.35s) infinite alternate}.motif .idle-rotate{animation:draw 2.2s var(--ease) .25s forwards,idleRotate 6s ease-in-out 2.6s infinite alternate}}
+@media (prefers-reduced-motion:no-preference){.js .motif svg .idle.idle-float{animation:draw 2.2s var(--ease) .25s forwards,idleFloat 4s ease-in-out 2.6s infinite alternate}.js .motif svg .idle.idle-pulse{animation:draw 2.2s var(--ease) .25s forwards,idlePulse 3.2s ease-in-out calc(2.6s + var(--i,0)*.35s) infinite alternate}.js .motif svg .idle.idle-rotate{animation:draw 2.2s var(--ease) .25s forwards,idleRotate 6s ease-in-out 2.6s infinite alternate}}
 @keyframes idleFloat{from{transform:translateY(0);opacity:.75}to{transform:translateY(-6px);opacity:1}}
 @keyframes idlePulse{from{transform:scale(1)}to{transform:scale(1.07)}}
 @keyframes idleRotate{from{transform:rotate(-4deg)}to{transform:rotate(4deg)}}
-.weave{position:absolute;inset:0;z-index:-1;display:none;pointer-events:none;-webkit-mask-image:linear-gradient(to right,transparent 45%,#000 70%);mask-image:linear-gradient(to right,transparent 45%,#000 70%)}
+.weave{position:absolute;inset:0;z-index:-1;display:none;pointer-events:none}
 .weave svg{width:100%;height:100%;color:#fff;opacity:.06;stroke:currentColor;fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
 @media (min-width:1440px){.hero[data-hero="side"] .weave{display:block}}
 .hero[data-open="open"] .motif svg{color:color-mix(in oklab,#fff 70%,var(--a))}
@@ -438,7 +439,7 @@ body.demo .fab{bottom:78px}
 <main id="main">
 <section class="hero" id="top" data-hero="{{ b.hero_layout }}" aria-label="{{ b.name }}">
   <div class="grain" aria-hidden="true"></div>
-  {% if b.hero_layout != "band" %}<div class="weave" aria-hidden="true"><svg><defs><pattern id="wv" width="150" height="150" patternUnits="userSpaceOnUse"><g transform="scale(.5)">{{ t.motif_b }}</g><g transform="translate(75 75) scale(.5)">{{ t.motif_b }}</g></pattern></defs><rect width="100%" height="100%" fill="url(#wv)"/></svg></div>{% endif %}
+  {% if b.hero_layout != "band" %}<div class="weave" aria-hidden="true"><svg><defs><pattern id="wv" width="150" height="150" patternUnits="userSpaceOnUse"><g transform="scale(.5)">{{ t.motif_b }}</g><g transform="translate(75 75) scale(.5)">{{ t.motif_b }}</g></pattern><linearGradient id="wg"><stop offset=".42" stop-color="#fff" stop-opacity="0"/><stop offset=".72" stop-color="#fff"/></linearGradient><radialGradient id="wh" cx=".73" cy=".5" r=".3"><stop offset=".35" stop-color="#000"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient><mask id="wm"><rect width="100%" height="100%" fill="url(#wg)"/><rect width="100%" height="100%" fill="url(#wh)"/></mask></defs><rect width="100%" height="100%" fill="url(#wv)" mask="url(#wm)"/></svg></div>{% endif %}
     <div class="wrap">
     <p class="eyebrow"><span>{{ b.category }}</span><span>{{ b.city }}{{ b.district }}</span></p>
     <h1 aria-label="{{ b.name }}" style="--len:{{ b.name_len }}">{% set ns = namespace(i=0) %}{% for line in b.name_lines %}{% if line.kind == "en" %}<span class="en">{% endif %}{% for w in line.tokens %}<span class="w" style="--i:{{ ns.i }}">{{ w }}</span>{% if line.kind == "en" and not loop.last %} {% endif %}{% set ns.i = ns.i + 1 %}{% endfor %}{% if line.kind == "en" %}</span>{% endif %}{% endfor %}</h1>
