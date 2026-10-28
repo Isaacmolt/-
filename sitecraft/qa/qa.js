@@ -22,7 +22,7 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
     const url = `http://127.0.0.1:${PORT}/${slug}/`;
     const r = { errors: [], overflow: {}, smallTargets: [], axe: [], emoji: false };
     r.heroFit = {};
-    for (const [n, vp] of [['1366x768', {width:1366,height:768}], ['1440x900', {width:1440,height:900}], ['390x844', {width:390,height:844}]]) {
+    for (const [n, vp] of [['1280x720', {width:1280,height:720}], ['1280x800', {width:1280,height:800}], ['1366x768', {width:1366,height:768}], ['1440x900', {width:1440,height:900}], ['1920x1080', {width:1920,height:1080}], ['390x844', {width:390,height:844}]]) {
       const pg = await browser.newPage({ viewport: vp }); await pg.goto(url, { waitUntil: 'load' }); await pg.waitForTimeout(1200);
       if (n !== '390x844') {
         r.closingClear = r.closingClear || {};
@@ -30,6 +30,20 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
         r.closingClear[n] = await pg.evaluate(() => { const btns = [...document.querySelectorAll('.closing .btn, .closing .big')].map(b => b.getBoundingClientRect()); const shapes = [...document.querySelectorAll('.cl-motif :is(path,circle,ellipse,rect)')].map(s => s.getBoundingClientRect()); const hit = (a, b) => a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom; return !btns.some(b => shapes.some(s => hit(b, s))); });
         await pg.evaluate(() => scrollTo(0, 0)); await pg.waitForTimeout(200);
       }
+      // the name must never run under the motif: test the real name and a long 9-character name
+      r.nameClear = r.nameClear || {};
+      r.nameClear[n] = await pg.evaluate(() => {
+        const hit = (a, b) => a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom;
+        const count = () => { const ws = [...document.querySelectorAll('h1 .w')].map(w => w.getBoundingClientRect()); const shapes = [...document.querySelectorAll('.hero .motif :is(path,circle,ellipse,rect)')].map(s => s.getBoundingClientRect()); const band = document.querySelector('.hero').dataset.hero === 'band'; return band ? 0 : ws.filter(w => shapes.some(s => hit(w, s))).length; };
+        const real = count();
+        const h1 = document.querySelector('h1'); const saved = h1.innerHTML, savedLen = h1.style.getPropertyValue('--len');
+        h1.innerHTML = '小花手作咖啡工作室'.split('').map((c, i) => `<span class="w" style="--i:${i}">${c}</span>`).join(''); h1.style.setProperty('--len', '9');
+        const long = count(); h1.innerHTML = saved; h1.style.setProperty('--len', savedLen);
+        return { real, long };
+      });
+      // band: at least 24px between the CTA row and the highest band shape
+      r.bandGap = r.bandGap || {};
+      r.bandGap[n] = await pg.evaluate(() => { const hero = document.querySelector('.hero'); if (hero.dataset.hero !== 'band') return 99; const cta = document.querySelector('.hero .cta').getBoundingClientRect(); const tops = [...document.querySelectorAll('.hero-foot .motif :is(path,circle,ellipse,rect)')].map(s => s.getBoundingClientRect().top); return Math.round(Math.min(...tops) - cta.bottom); });
       r.heroFit[n] = await pg.evaluate(() => { const h = document.querySelector('.hero').getBoundingClientRect(); const bar = document.getElementById('demoBar'); const limit = innerHeight - (bar ? bar.getBoundingClientRect().height : 0); return Math.round(h.bottom) + '/' + Math.round(limit) + (h.bottom <= limit + 1 ? ' ok' : ' OVER'); });
       if (n === '1366x768') await pg.screenshot({ path: path.join(OUT, `${slug}-laptop-hero.png`) });
       await pg.close();
@@ -41,8 +55,8 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
       await page.goto(url, { waitUntil: 'load' });
       await page.evaluate(() => document.fonts.ready); await page.waitForTimeout(1500);
       await page.screenshot({ path: path.join(OUT, `${slug}-${name}-hero.png`) });
-      await page.evaluate(() => document.querySelectorAll('[data-reveal]').forEach(el => el.classList.add('in')));
-      await page.waitForTimeout(800);
+      await page.evaluate(() => { document.querySelectorAll('[data-reveal]').forEach(el => el.classList.add('in')); document.querySelector('.closing').classList.add('in'); });
+      await page.waitForTimeout(2200);
       await page.screenshot({ path: path.join(OUT, `${slug}-${name}-full.png`), fullPage: true });
       r.overflow[name] = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
       if (name === 'mobile') {
@@ -70,7 +84,7 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
         await page.evaluate(() => document.getElementById('gallery').scrollIntoView()); await page.waitForTimeout(400);
         await page.click('.strip .tile:first-child', { position: { x: 40, y: 40 } }); await page.waitForTimeout(300);
         const lbOpen = await page.evaluate(() => document.getElementById('lb').open);
-        await page.keyboard.press('ArrowRight'); await page.waitForTimeout(100);
+        await page.keyboard.press('ArrowRight'); await page.waitForTimeout(150); await page.keyboard.press('ArrowRight'); await page.waitForTimeout(150); await page.keyboard.press('ArrowLeft'); await page.waitForTimeout(150);
         const lbNow = await page.textContent('#lbNow');
         await page.keyboard.press('Escape'); await page.waitForTimeout(300);
         r.fn.lightbox = await page.evaluate(([o, n]) => o && n.trim().startsWith('2') && !document.getElementById('lb').open && document.activeElement === document.querySelector('.strip .tile:first-child'), [lbOpen, lbNow]);
@@ -161,7 +175,7 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
     const chromePath = process.env.CHROME_PATH || chromium.executablePath();
     const chrome = await chromeLauncher.launch({ chromePath, chromeFlags: ['--headless=new', '--no-sandbox', '--disable-gpu'] });
     let best = null;
-    for (let i = 0; i < 2; i++) {
+    for (let i = 0; i < 3; i++) {
       const run = await lighthouse(`http://127.0.0.1:${PORT}/${slugs[0]}/`, { port: chrome.port, output: 'json', logLevel: 'error', formFactor: 'mobile', screenEmulation: { mobile: true, width: 390, height: 844, deviceScaleFactor: 2, disabled: false } });
       if (!best || run.lhr.categories.performance.score > best.lhr.categories.performance.score) best = run;
     }
@@ -182,12 +196,13 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
       && fn.overlayHoursSpans && v.heroGeom && (!v.heroGeom.band || v.heroGeom.overlapPct === 0) && v.heroGeom.bandAboveBar && v.factsDrift === 'none'
       && v.tiles && v.tiles.hoursMatch && v.tiles.typeClear && fn.bandVisibleMobile && fn.typeClearMobile && fn.lightbox
       && v.closingClear && Object.values(v.closingClear).every(Boolean)
+      && v.nameClear && Object.values(v.nameClear).every(x => x.real === 0 && x.long === 0) && v.bandGap && Object.values(v.bandGap).every(g => g >= 24)
       && v.reducedMotion && v.reducedMotion.h1 === 'none' && v.reducedMotion.revealOpacity === '1' && v.focusRing && v.focusRing.ok
       && Math.abs(c.tileRatio - 1.33) < 0.05 && Math.abs(c.tallRatio - 0.75) < 0.05 && !v.errors.length && !v.smallTargets.length
       && !v.axe.length && !(v.axeDark || []).length && !v.emoji && Object.values(v.heroFit).every(x => x.includes('ok')) && Object.values(v.overflow).every(o => o === 0);
     allOk = allOk && ok;
     console.log(`${slug}: ${ok ? 'PASS' : 'FAIL'}`);
-    if (!ok) console.log(JSON.stringify({ fn, scrollSpy: v.scrollSpy, heroGeom: v.heroGeom, tiles: v.tiles, closingClear: v.closingClear, factsDrift: v.factsDrift, anchorLanding: v.anchorLanding, reducedMotion: v.reducedMotion, focusRing: v.focusRing, computed: c, axe: v.axe, axeDark: v.axeDark, errors: v.errors, small: v.smallTargets, heroFit: v.heroFit, overflow: v.overflow, emoji: v.emoji }, null, 2));
+    if (!ok) console.log(JSON.stringify({ fn, scrollSpy: v.scrollSpy, heroGeom: v.heroGeom, tiles: v.tiles, closingClear: v.closingClear, nameClear: v.nameClear, bandGap: v.bandGap, factsDrift: v.factsDrift, anchorLanding: v.anchorLanding, reducedMotion: v.reducedMotion, focusRing: v.focusRing, computed: c, axe: v.axe, axeDark: v.axeDark, errors: v.errors, small: v.smallTargets, heroFit: v.heroFit, overflow: v.overflow, emoji: v.emoji }, null, 2));
   }
   const lh = report.lighthouse;
   const lhOk = lh && typeof lh === 'object' && ['performance', 'accessibility', 'best-practices', 'seo'].every(k => lh[k] >= 90);

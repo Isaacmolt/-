@@ -267,6 +267,15 @@ def name_lines(name: str) -> list[dict]:
     return lines
 
 
+def name_len_units(name: str) -> float:
+    """店名最長一行的「全形字數」，拉丁字母約算半形，用來依欄寬縮放標題。"""
+    best = 1.0
+    for line in name_lines(name):
+        units = sum(1.0 if line["kind"] == "zh" else 0.55 * len(tok) for tok in line["tokens"]) + (0.3 * (len(line["tokens"]) - 1) if line["kind"] == "en" else 0)
+        best = max(best, units)
+    return round(best, 2)
+
+
 def split_statement(text: str) -> tuple[str, str, str]:
     """把標語裡的最後一個短句標成強調色（用標點切）。"""
     text = text.strip().rstrip("。")
@@ -313,7 +322,7 @@ def art_tiles(palette: dict, seed: str, mset: dict, n: int = 6) -> list[str]:
         if not body:
             tiles.append(Markup(""))
             continue
-        tiles.append(Markup(f'<svg class="art" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true">{body}</svg>'))
+        tiles.append(Markup(f'<svg class="art" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g class="v">{body}</g></svg>'))
     return tiles
 
 
@@ -595,6 +604,8 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, 
         "weekday_hours": weekday_hours, "periods": periods, "today_hours": today_hours,
         "jsonld": jsonld, "favicon_svg": favicon_svg(theme["palette"]["pd"], initial),
         "type_ground": _mix(theme["palette"]["a_soft"], theme["palette"]["sf"], 0.55),
+        "ink2": _mix(theme["palette"]["a"], theme["palette"]["tx"], 0.55) if _lum(theme["palette"]["p"]) < 0.2 else theme["palette"]["p"],
+        "name_len": name_len_units(name),
         "initial": initial, "name_tokens": name_tokens(name), "name_lines": name_lines(name), "address_short": address_short,
         "address_html": address_html(address, lead.get("city", ""), lead.get("district", "")),
         "mode": theme.get("mode", "bold"), "hero_layout": theme.get("hero", "side"),
