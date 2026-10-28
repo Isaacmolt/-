@@ -100,12 +100,17 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
         const inside1 = await page.evaluate(() => !!document.activeElement.closest('#overlay'));
         await page.keyboard.press('Tab'); await page.keyboard.press('Tab'); await page.keyboard.press('Tab'); await page.keyboard.press('Tab'); await page.keyboard.press('Tab');
         const inside2 = await page.evaluate(() => !!document.activeElement.closest('#overlay') || document.activeElement === document.getElementById('menuBtn'));
+        for (let k = 0; k < 12; k++) await page.keyboard.press('Tab');
+        const inside3 = await page.evaluate(() => !!document.activeElement.closest('#overlay') || document.activeElement === document.getElementById('menuBtn'));
+        for (let k = 0; k < 4; k++) await page.keyboard.press('Shift+Tab');
+        const inside4 = await page.evaluate(() => !!document.activeElement.closest('#overlay') || document.activeElement === document.getElementById('menuBtn'));
         await page.keyboard.press('Escape'); await page.waitForTimeout(300);
-        r.fn.modalFocusTrapped = inside1 && inside2;
+        r.fn.modalFocusTrapped = inside1 && inside2 && inside3 && inside4;
         // overlay hours mirror the facts bar as separate spans (no glued string)
         await page.click('#menuBtn'); await page.waitForTimeout(400);
         r.fn.overlayHoursSpans = await page.evaluate(() => { const n = document.querySelectorAll('#ovHours > span').length; const t = document.getElementById('ovHours').textContent; return n >= 2 || (n === 1 && !/營業中\d|公休明天|休息中\d/.test(t)); });
         await page.keyboard.press('Escape'); await page.waitForTimeout(300);
+        r.fn.statusInline = await page.evaluate(() => { const i = document.querySelector('#heroStatus i'), t = document.querySelector('#heroHours > span'); if (!i || !t) return true; const a = i.getBoundingClientRect(), b = t.getBoundingClientRect(); return a.right <= b.left + 1 && a.top >= b.top - 2 && a.bottom <= b.bottom + 2; });
         r.fn.factClipped = await page.evaluate(() => [...document.querySelectorAll('.fact > span')].some(sp => sp.scrollWidth > sp.clientWidth + 1 && !sp.classList.contains('num')));
         // no-break spans must stay on one line (no CJK orphans)
         r.fn.nbBroken = await page.evaluate(() => [...document.querySelectorAll('.nb, .statement .nm .en')].some(el => { const lh = parseFloat(getComputedStyle(el).lineHeight) || 20; return el.getBoundingClientRect().height > lh * 1.5 || el.getClientRects().length > 1; }));
@@ -125,6 +130,14 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
         // self-hosted fonts: every declared face either loaded or was not needed; none failed
         r.fontFaces = await page.evaluate(() => [...document.fonts].map(f => f.status));
         r.weaveMasked = await page.evaluate(() => { const w = document.querySelector('.weave'); if (!w || getComputedStyle(w).display === 'none') return true; return !!w.querySelector('rect[mask]') && !!w.querySelector('mask linearGradient, linearGradient'); });
+        // filmstrip: a mouse drag must not open the lightbox; the counter reaches the end and the arrow disables there
+        await page.evaluate(() => document.getElementById('gallery').scrollIntoView()); await page.waitForTimeout(400);
+        { const tb = await page.locator('.strip .tile').first().boundingBox(); await page.mouse.move(tb.x + 60, tb.y + 60); await page.mouse.down(); await page.mouse.move(tb.x + 20, tb.y + 60, { steps: 4 }); await page.mouse.move(tb.x - 120, tb.y + 60, { steps: 6 }); await page.mouse.up(); await page.waitForTimeout(500); }
+        r.dragOpensLightbox = await page.evaluate(() => document.getElementById('lb').open);
+        if (r.dragOpensLightbox) await page.keyboard.press('Escape');
+        for (let k = 0; k < 8; k++) { await page.click('#nextTile', { force: true }); await page.waitForTimeout(350); }
+        r.stripEnd = await page.evaluate(() => ({ now: document.getElementById('tileNow').textContent, total: document.querySelectorAll('.strip .tile').length, nextDisabled: document.getElementById('nextTile').disabled }));
+        await page.evaluate(() => scrollTo(0, 0)); await page.waitForTimeout(300);
         // anchor landing: after clicking a nav link the header is solid and visible, and the facts bar is not under a transparent nav
         await page.click('.nav ul a[href="#about"]'); await page.waitForTimeout(1600);
         r.anchorLanding = await page.evaluate(() => { const nav = document.getElementById('nav'); const cs = getComputedStyle(nav); return { solid: nav.classList.contains('solid'), hidden: nav.classList.contains('hide'), top: Math.round(nav.getBoundingClientRect().top), aboutTop: Math.round(document.getElementById('about').getBoundingClientRect().top) }; });
@@ -132,7 +145,7 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
         // reduced motion honoured
         const rm = await browser.newPage({ viewport: vp, reducedMotion: 'reduce' });
         await rm.goto(url, { waitUntil: 'load' }); await rm.waitForTimeout(300);
-        r.reducedMotion = await rm.evaluate(() => ({ h1: getComputedStyle(document.querySelector('h1 .w')).animationName, reveal: getComputedStyle(document.querySelector('[data-reveal]')).transitionDuration, revealOpacity: getComputedStyle(document.querySelector('[data-reveal]')).opacity }));
+        r.reducedMotion = await rm.evaluate(() => ({ h1: getComputedStyle(document.querySelector('h1 .w')).animationName, draw: getComputedStyle(document.querySelector('.motif svg :is(path,circle,ellipse,rect)')).animationName, dash: getComputedStyle(document.querySelector('.motif svg :is(path,circle,ellipse,rect)')).strokeDashoffset, reveal: getComputedStyle(document.querySelector('[data-reveal]')).transitionDuration, revealOpacity: getComputedStyle(document.querySelector('[data-reveal]')).opacity }));
         await rm.close();
         // focus ring colour on a light section equals the ink token
         // keyboard-initiated focus so :focus-visible applies
@@ -151,13 +164,13 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
         await page.evaluate(() => scrollTo(0, 0)); await page.waitForTimeout(300);
         r.computed = await page.evaluate(() => {
           const ff = el => getComputedStyle(el).fontFamily;
-          const t = document.querySelector('.tile'), tall = document.querySelector('.tile.tall');
+          const t = document.querySelector('.tile:not(.tall)'), tall = document.querySelector('.tile.tall');
           const rb = t.getBoundingClientRect(), tb = tall.getBoundingClientRect();
           return { h1: ff(document.querySelector('h1')).split(',')[0], body: ff(document.body).split(',')[0], h1DiffersFromBody: ff(document.querySelector('h1')) !== ff(document.body),
                    tileRatio: +(rb.width / rb.height).toFixed(2), tallRatio: +(tb.width / tb.height).toFixed(2),
                    ogImage: !!document.querySelector('meta[property="og:image"]'), fontsLoaded: document.fonts.check('600 20px "Noto Serif TC"') || document.fonts.check('800 20px "Noto Sans TC"') };
         });
-        await page.addStyleTag({ content: '*,*::before,*::after{transition:none!important;animation:none!important;opacity:1}h1 .w,.tagline,.hero .cta,.hero .eyebrow,.hero-foot .fact,.strip .tile{opacity:1!important;transform:none!important}.motif svg *,.cl-motif *{stroke-dashoffset:0!important}' });
+        await page.addStyleTag({ content: '*,*::before,*::after{transition:none!important;animation:none!important;opacity:1}h1 .w,.tagline,.hero .cta,.hero .eyebrow,.hero-foot .fact,.strip .tile{opacity:1!important;transform:none!important}.hero .eyebrow::before{transform:none!important}.motif svg *,.cl-motif *{stroke-dashoffset:0!important}.js .closing .cl-motif{opacity:.22!important}' });
         await page.waitForTimeout(200);
         await page.addScriptTag({ content: axeSource });
         const res = await page.evaluate(async () => await axe.run(document, { runOnly: ['wcag2a', 'wcag2aa', 'best-practice'] }));
@@ -166,8 +179,8 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
         // dark mode contrast
         const dark = await browser.newPage({ viewport: vp, colorScheme: 'dark' });
         await dark.goto(url, { waitUntil: 'load' }); await dark.waitForTimeout(800);
-        await dark.addStyleTag({ content: '*,*::before,*::after{transition:none!important;animation:none!important;opacity:1}h1 .w,.tagline,.hero .cta,.hero .eyebrow,.hero-foot .fact,.strip .tile{opacity:1!important;transform:none!important}.motif svg *,.cl-motif *{stroke-dashoffset:0!important}' });
-        await dark.evaluate(() => document.querySelectorAll('[data-reveal]').forEach(el => el.classList.add('in')));
+        await dark.addStyleTag({ content: '*,*::before,*::after{transition:none!important;animation:none!important;opacity:1}h1 .w,.tagline,.hero .cta,.hero .eyebrow,.hero-foot .fact,.strip .tile{opacity:1!important;transform:none!important}.hero .eyebrow::before{transform:none!important}.motif svg *,.cl-motif *{stroke-dashoffset:0!important}.js .closing .cl-motif{opacity:.22!important}' });
+        await dark.evaluate(() => { document.querySelectorAll('[data-reveal]').forEach(el => el.classList.add('in')); document.querySelector('.closing').classList.add('in'); });
         await dark.waitForTimeout(200);
         await dark.screenshot({ path: path.join(OUT, `${slug}-desktop-dark.png`), fullPage: true });
         await dark.addScriptTag({ content: axeSource });
@@ -206,7 +219,7 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
       && fn.serviceLinksFocusable && Math.abs(fn.titleIndent) <= 2 && fn.modalFocusTrapped && !fn.factClipped && !fn.nbBroken && !fn.ctaOrphan && fn.visibleWithoutJs && v.scrollSpy === '#services' && c.h1DiffersFromBody && c.ogImage
       && v.anchorLanding && v.anchorLanding.solid && !v.anchorLanding.hidden && v.anchorLanding.top === 0
       && fn.overlayHoursSpans && v.heroGeom && (!v.heroGeom.band || v.heroGeom.overlapPct === 0) && v.heroGeom.bandAboveBar && v.factsDrift === 'none'
-      && fn.menuBtnClear && v.nmOneLine && v.motifDrawn && v.weaveMasked && v.fontFaces && v.fontFaces.length >= 2 && v.fontFaces.every(s => s !== 'error') && v.fontFaces.includes('loaded')
+      && fn.menuBtnClear && v.nmOneLine && v.motifDrawn && v.weaveMasked && fn.statusInline && !v.dragOpensLightbox && v.stripEnd && v.stripEnd.now === String(v.stripEnd.total) && v.stripEnd.nextDisabled && v.reducedMotion.draw === 'none' && parseFloat(v.reducedMotion.dash) === 0 && v.fontFaces && v.fontFaces.length >= 2 && v.fontFaces.every(s => s !== 'error') && v.fontFaces.includes('loaded')
       && v.tiles && v.tiles.hoursMatch && v.tiles.typeClear && fn.bandVisibleMobile && fn.typeClearMobile && fn.lightbox
       && v.closingClear && Object.values(v.closingClear).every(Boolean)
       && v.nameClear && Object.values(v.nameClear).every(x => x.real === 0 && x.long === 0) && v.bandGap && Object.values(v.bandGap).every(g => g >= 24)
