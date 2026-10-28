@@ -23,7 +23,7 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
     const r = { errors: [], overflow: {}, smallTargets: [], axe: [], emoji: false };
     r.heroFit = {};
     for (const [n, vp] of [['1280x720', {width:1280,height:720}], ['1280x800', {width:1280,height:800}], ['1366x768', {width:1366,height:768}], ['1440x900', {width:1440,height:900}], ['1920x1080', {width:1920,height:1080}], ['390x844', {width:390,height:844}]]) {
-      const pg = await browser.newPage({ viewport: vp }); await pg.goto(url, { waitUntil: 'load' }); await pg.waitForTimeout(1200);
+      const pg = await browser.newPage({ viewport: vp }); await pg.goto(url, { waitUntil: 'load' }); await pg.evaluate(() => document.fonts.ready); await pg.waitForTimeout(2200);
       if (n !== '390x844') {
         r.closingClear = r.closingClear || {};
         await pg.evaluate(() => document.querySelector('.closing').scrollIntoView()); await pg.waitForTimeout(300);
