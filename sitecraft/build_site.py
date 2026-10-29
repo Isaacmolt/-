@@ -359,9 +359,12 @@ def scene_tile(key: str, mset: dict, name: str, seed: str, theme_key: str = "def
     if key == "detail":
         return Markup('<svg class="art scene" viewBox="0 0 300 400" preserveAspectRatio="xMidYMid slice" aria-hidden="true">'
                       f'{scenes.detail(mset, drawable, theme_key, hashlib.md5(seed.encode()).hexdigest()[:6])}</svg>')
-    body = (scenes.interior(mset, drawable, theme_key) if key == "interior"
-            else scenes.street(mset, name, drawable, seed, theme_key, parts))
-    return Markup(f'<svg class="art scene" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true">{body}</svg>')
+    if key == "interior":
+        return Markup('<svg class="art scene" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true">'
+                      f'{scenes.interior(mset, drawable, theme_key)}</svg>')
+    # 街角畫成晚上：關於我們是白天的店面，這裡是亮著燈的同一條巷子
+    return Markup('<svg class="art scene night" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true">'
+                  f'{scenes.street(mset, name, drawable, seed, theme_key, parts, night=True)}</svg>')
 
 
 def map_art(seed: str) -> str:
@@ -507,7 +510,7 @@ def idle_classes(markup: str, idle: dict) -> str:
         el = mm.group(0)
         if n not in shapes:
             return el
-        add = f"idle idle-{kind}"
+        add = f"idle idle-{kind}" + (" eph" if idle.get("steam") else "")  # eph：蒸氣這類「休息時就不在」的筆畫
         cm = re.search(r"""class=(['"])(.*?)\1""", el)
         if cm:
             return el[:cm.start()] + f'class="{cm.group(2)} {add}"' + el[cm.end():]
@@ -546,7 +549,7 @@ def about_opening(text: str, name: str, loc: str) -> str:
     for nm in {name, name.replace(" ", "")}:
         for head, repl in ((f"{nm} 位於{loc}，是", f"在{loc}，我們是"), (f"{nm}位於{loc}，是", f"在{loc}，我們是"),
                            (f"{nm} 位於{loc}，提供", f"我們在{loc}提供"), (f"{nm}位於{loc}，提供", f"我們在{loc}提供"),
-                           (f"{nm} 位於{loc}，", f"我們在{loc}。"), (f"{nm}位於{loc}，", f"我們在{loc}。"),
+                           (f"{nm} 位於{loc}，", ""), (f"{nm}位於{loc}，", ""),
                            (f"{nm} 是{loc}", f"我們是{loc}"), (f"{nm}是{loc}", f"我們是{loc}")):
             if text.startswith(head):
                 return repl + text[len(head):]
@@ -869,7 +872,9 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, 
     labels = theme.get("gallery_labels") or ["店面", "服務區", "作品", "環境", "商品", "入口"]
     gallery_items = []
     if imgs:
-        for i, src in enumerate(imgs):
+        # 首屏與關於我們已經用了前兩張：照片夠多時，相簿就從第三張開始，同一張照片不出現兩次
+        shown = imgs[2:] if len(imgs) >= 5 else imgs
+        for i, src in enumerate(shown):
             tall = photo_tall(src, site_dir)
             gallery_items.append({"img": src, "art": "", "tall": (i % 3 == 1) if tall is None else tall, "type": False,
                                   "label": labels[i % len(labels)]})
@@ -958,6 +963,9 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, 
         "name_len": name_len_units(name),
         "has_photos": bool(imgs),
         "gallery_name": "店內環境" if imgs else "店的樣子",
+        # 三張以內的相簿在桌機剛好排滿欄寬（不需要捲）；--sum 是各磚寬高比的總和
+        "gallery_fit": len(gallery_items) <= 3,
+        "gallery_sum": round(sum(.75 if g_["tall"] else 4 / 3 for g_ in gallery_items), 3),
         "nav_labels": {"about": "關於我們", "services": content.get("nav_services") or theme.get("nav_services") or "服務項目",
                        "gallery": "店內環境" if imgs else "店的樣子", "info": "營業資訊"},
         "nav_services": content.get("nav_services") or theme.get("nav_services") or "服務項目",

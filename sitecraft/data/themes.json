@@ -65,7 +65,7 @@
     "gallery_title": "巷子裡的一張桌子",
     "signature": {
       "kind": "feature",
-      "label": "今日推薦"
+      "label": "店長推薦"
     },
     "services_lead": "豆子跟著季節換，甜點每天限量；想坐多久都可以。",
     "nav_services": "菜單",
@@ -496,7 +496,7 @@
     "gallery_title": "櫃子裡的甜點",
     "signature": {
       "kind": "feature",
-      "label": "今日推薦"
+      "label": "店長推薦"
     },
     "services_lead": "每天早上現做，賣完就沒了；整顆蛋糕可以預訂。",
     "nav_services": "菜單",

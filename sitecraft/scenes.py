@@ -389,7 +389,8 @@ def window(mset: dict, drawable, uid: str = "w") -> str:
             + f'<g class="sc-ln">{drawable(lines)}</g>')
 
 
-def street(mset: dict, name: str, drawable, seed: str = "", key: str = "default", parts: list[str] | None = None) -> str:
+def street(mset: dict, name: str, drawable, seed: str = "", key: str = "default", parts: list[str] | None = None,
+           night: bool = False) -> str:
     """街角：自己的店在兩棟鄰居中間（鄰居有鐵窗），門口停一台機車，路燈與小鳥。"""
     rnd = random.Random(seed + "street")
     shop = storefront(mset, name, drawable, ground=False, bg=False, key=key, parts=parts)
@@ -412,7 +413,11 @@ def street(mset: dict, name: str, drawable, seed: str = "", key: str = "default"
     tone = ('<g class="sc-tone" transform="translate(7 7)"><rect x="10" y="110" width="92" height="156"/>'
             '<rect x="268" y="128" width="124" height="138"/></g>'
             '<path class="acc" d="M288 250c0-14 9-22 22-22h10c4 0 6 3 6 7v15z"/>')
-    return ('<rect class="sc-bg" width="400" height="300"/><circle class="acc2" cx="340" cy="58" r="24"/>' + tone
+    sky = ""
+    if night:  # 晚上：月亮、幾顆星、路燈打下來的一道光
+        stars = "".join(f'<circle cx="{rnd.randint(20, 380)}" cy="{rnd.randint(14, 96)}" r="{rnd.choice((1, 1.3, 1.6))}"/>' for _ in range(14))
+        sky = f'<g class="star">{stars}</g><path class="beam" d="M82 148h14l30 118H52z"/>'
+    return ('<rect class="sc-bg" width="400" height="300"/><circle class="acc2" cx="340" cy="58" r="24"/>' + sky + tone
             + f'<g transform="translate({tx:.1f} {ty:.1f}) scale({sx})" style="--k:{1 / sx:.2f}">{shop}</g>'
             + f'<g class="sc-ln">{drawable(lines)}</g>')
 
