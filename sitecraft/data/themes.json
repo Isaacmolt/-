@@ -604,7 +604,7 @@
     "services_lead": "剪、染、燙、護，每一項都先聊過再開始。",
     "nav_services": "服務項目",
     "steps_style": "appt",
-    "info_title": "預約與交通"
+    "info_title": "預約時間與位置"
   },
   "beauty": {
     "label": "美容美甲",
@@ -699,7 +699,7 @@
     "services_lead": "美甲、美睫與臉部護理，器具一客一消毒。",
     "nav_services": "服務項目",
     "steps_style": "appt",
-    "info_title": "預約與交通"
+    "info_title": "預約時間與位置"
   },
   "pet": {
     "label": "寵物",
@@ -794,7 +794,10 @@
       "日期"
     ],
     "services_style": "chart",
+    "size_notes": ["10kg 以下", "10～25kg", "25kg 以上"],
+    "record_samples": ["豆豆", "today"],
     "size_cols": ["小型犬", "中型犬", "大型犬"],
+    "about_bubbles": true,
     "glow": "soft",
     "record_photo": "今天洗好了",
     "info_title": "帶牠來的時間與位置"
@@ -1367,7 +1370,7 @@
     "services_lead": "全身、腳底與經絡推拿，先問狀況再調整力道。",
     "nav_services": "療程",
     "steps_style": "appt",
-    "info_title": "預約與交通"
+    "info_title": "預約時間與位置"
   },
   "lodging": {
     "label": "住宿",

@@ -117,7 +117,7 @@ async function hoverContrast(pg) {
         await fz.evaluate(el => el.remove()); }
       await page.evaluate(() => scrollTo(0, document.documentElement.scrollHeight)); await page.waitForTimeout(900);
       r.footGap = r.footGap || [];
-      r.footGap.push(await page.evaluate(() => { const f = document.querySelector('footer').getBoundingClientRect(); const bar = document.getElementById('demoBar'), fab = document.querySelector('.fab'); let limit = bar ? bar.getBoundingClientRect().top : innerHeight; if (fab && getComputedStyle(fab).display !== 'none' && fab.classList.contains('show')) limit = Math.min(limit, fab.getBoundingClientRect().top); return Math.abs(f.bottom - limit) <= 1; }));
+      r.footGap.push(await page.evaluate(() => { const f = document.querySelector('footer').getBoundingClientRect(); const bar = document.getElementById('demoBar'), fab = document.querySelector('.fab'); let limit = bar && bar.getClientRects().length ? bar.getBoundingClientRect().top : innerHeight; if (fab && getComputedStyle(fab).display !== 'none' && fab.classList.contains('show')) limit = Math.min(limit, fab.getBoundingClientRect().top); return Math.abs(f.bottom - limit) <= 1; }));
       await page.evaluate(() => scrollTo(0, 0)); await page.waitForTimeout(400);
       r.overflow[name] = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
       if (name === 'mobile') {
@@ -163,7 +163,7 @@ async function hoverContrast(pg) {
         // phone action bar: once the hero buttons are gone it is pinned to the bottom edge, full width, every cell labelled,
         // and stays there through the services, the hours and the closing section
         r.fn.barFixed = [];
-        const barOk = () => { const f = document.querySelector('.fab'); if (!f) return true; const b = f.getBoundingClientRect(), bar = document.getElementById('demoBar'); const floor = bar ? bar.getBoundingClientRect().top : innerHeight; return f.classList.contains('show') && !f.inert && Math.abs(b.bottom - floor) <= 1 && b.left <= 0 && b.right >= innerWidth && [...f.querySelectorAll('a')].every(a => (a.querySelector('.t') || {}).textContent && a.querySelector('.t').getBoundingClientRect().width > 0); };
+        const barOk = () => { const f = document.querySelector('.fab'); if (!f) return true; const b = f.getBoundingClientRect(), bar = document.getElementById('demoBar'); const floor = bar && bar.getClientRects().length ? bar.getBoundingClientRect().top : innerHeight; return f.classList.contains('show') && !f.inert && Math.abs(b.bottom - floor) <= 1 && b.left <= 0 && b.right >= innerWidth && [...f.querySelectorAll('a')].every(a => (a.querySelector('.t') || {}).textContent && a.querySelector('.t').getBoundingClientRect().width > 0); };
         for (const sel of ['#services', '#info', 'footer']) {
           await page.evaluate(s => { const el = document.querySelector(s); el.scrollIntoView({ block: 'end' }); }, sel);
           // smooth scroll + the bar's slide-in transition: wait for it to settle (up to 3 s) instead of sampling at a fixed moment
