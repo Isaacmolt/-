@@ -58,11 +58,11 @@ _env = Environment(
 def default_copy(lead: dict, theme: dict) -> dict:
     fill = {"name": lead["name"], "city": lead["city"], "district": lead["district"] or "在地"}
     idx = int(hashlib.sha1(lead["place_id"].encode()).hexdigest()[:2], 16) % len(theme["taglines"])
-    about = theme["about"].format(**fill)
+    about = theme["about"] if isinstance(theme["about"], list) else [theme["about"]]
     return {
         "tagline": theme["taglines"][idx].format(**fill),
         "statement": theme.get("statement", "").format(**fill),
-        "about": [about],
+        "about": [p_.format(**fill) for p_ in about],
         "highlights": list(theme["highlights"]),
         "services": [dict(s) for s in theme["services"]],
     }
@@ -166,14 +166,15 @@ EMOJI_RE = re.compile("[\U0001F000-\U0001FAFF\u2600-\u27BF\u2B00-\u2BFF\u2300-\u
 
 
 def clean_content(content: dict) -> dict:
-    """文案一律不放 emoji：拿掉舊版的 services[].icon，所有字串去掉表情符號。"""
+    """文案一律不放 emoji：拿掉舊版的 services[].icon，所有字串去掉表情符號；對客人一律稱「你」。"""
     def walk(v):
         if isinstance(v, str):
-            return EMOJI_RE.sub("", v).strip() if EMOJI_RE.search(v) else v
+            v = EMOJI_RE.sub("", v).strip() if EMOJI_RE.search(v) else v
+            return v.replace("您", "你")  # 對客人說話統一用「你」（給老闆看的 _說明 不在這裡）
         if isinstance(v, list):
             return [walk(x) for x in v]
         if isinstance(v, dict):
-            return {k: walk(x) for k, x in v.items() if k != "icon"}
+            return {k: (x if k.startswith("_") else walk(x)) for k, x in v.items() if k != "icon"}
         return v
     return walk(content)
 
@@ -731,6 +732,13 @@ VOICE_OG = {
 }
 
 
+def latin_url(url: str, latin: str) -> str:
+    """沒有自架字型時的 Google Fonts 連結：拉丁字型換掉時，Fraunces 換成同一套 Bodoni Moda。"""
+    if latin == "bodoni":
+        return re.sub(r"family=Fraunces:[^&]*", "family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,600;1,6..96,400", url)
+    return url
+
+
 def _voice_font(spec, size):
     """變數字型設定軸；檔案不在就回 None。"""
     from PIL import ImageFont
@@ -812,6 +820,8 @@ def og_image(lead: dict, content: dict, theme: dict, out: Path) -> bool:
     zh = "".join(lines[0]["tokens"]) if lines and lines[0]["kind"] == "zh" else ""
     en = " ".join(next((ln["tokens"] for ln in lines if ln["kind"] == "en"), []))
     spec_zh, spec_en = VOICE_OG.get(mode, VOICE_OG["bold"])
+    if theme.get("latin") == "bodoni":
+        spec_en = ("BodoniModa-Italic[opsz,wght].ttf", {"Optical Size": 28, "Weight": 400})
     base = find_cjk_font()
     W, H = 1200, 630
     img = Image.new("RGB", (W, H), _hex(pal["pd"]))
@@ -1017,6 +1027,9 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, 
         "hours_style": theme.get("hours_style") or {"receipt": "board"}.get(theme.get("services_style", ""))
                        or {"appt": "ticket", "record": "card"}.get(theme.get("steps_style", ""), ""),
         "hours_card": theme.get("hours_card", "到店時間"),
+        "glow": theme.get("glow", ""),
+        # 橫幅首屏的大框：沙龍是一面拱形鏡（標題在鏡子裡）；themes.json 的 hero_frame 可指定
+        "hero_frame": theme.get("hero_frame") or ("arch" if theme.get("hero") == "band" and scenes.ROOM_OF.get(lead.get("theme") or "") == "salon" else ""),  # soft：強調色與主色色相差太遠時（綠底黃光），首屏角落的光改用主色的淡色
         "info_title": content.get("info_title") or theme.get("info_title") or "營業時間與位置",
         "disc": theme.get("disc", ""),
         "order": [k for k in (content.get("order") or theme.get("order") or ["about", "services", "gallery", "info"])
@@ -1040,7 +1053,8 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, 
         "services_lead": content.get("services_lead") or theme.get("services_lead") or "用實在的價格，認真做好每一件事。",
         "address_html": address_html(address, lead.get("city", ""), lead.get("district", "")),
         "mode": theme.get("mode", "bold"), "hero_layout": theme.get("hero", "side"),
-        "fonts_url": mode["url"], "fonts": fonts or [], "font_display": mode["display"],
+        "fonts_url": latin_url(mode["url"], theme.get("latin", "")), "fonts": fonts or [],
+        "font_display": fontkit.LATIN_FAMILY.get(theme.get("latin", ""), mode["display"]),
         "font_head": next((f["family"] for f in (fonts or []) if f.get("kind") == "head"), mode["head"]),
         "head_weight": mode["weight"],
         "statement_pre": pre, "statement_em": em, "statement_post": post, "statement_name": statement_name,
@@ -1103,7 +1117,7 @@ def build_one(lead: dict, cfg: dict, themes: dict, *, demo: bool = True, use_ai:
     fonts = None
     if self_host_fonts:
         # 先算出這一頁用到的字，切出自架字型，再重畫一次
-        fonts = fontkit.build_fonts(theme.get("mode", "bold"), html, site_dir)
+        fonts = fontkit.build_fonts(theme.get("mode", "bold"), html, site_dir, latin=theme.get("latin", ""))
         if fonts:
             html = render_site(lead, content, cfg, themes, demo=demo, og_png=og_ok, fonts=fonts, site_dir=site_dir)
     if not fonts:

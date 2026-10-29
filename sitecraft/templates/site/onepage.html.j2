@@ -57,7 +57,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 :focus-visible{outline:3px solid var(--ink);outline-offset:3px;border-radius:4px}
 .hero :focus-visible,.closing :focus-visible,.feature :focus-visible,.overlay :focus-visible,footer :focus-visible,.fab :focus-visible,.demo-bar :focus-visible,.nav:not(.solid) :focus-visible{outline-color:var(--a)}
 .skip{position:absolute;left:16px;top:-60px;background:var(--tx);color:var(--bg);padding:10px 16px;border-radius:8px;z-index:200;font-weight:700}
-.skip:focus{position:fixed;top:12px}
+.skip:focus{position:fixed;top:12px}.skip:focus-visible{outline:3px solid #fff;outline-offset:2px;box-shadow:0 0 0 6px #111}
 .wrap{width:min(1180px,100% - 48px);margin-inline:auto}
 @media (max-width:640px){.wrap{width:min(1180px,100% - 36px)}}
 .ico{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
@@ -69,9 +69,9 @@ h1,h2,.display{font-family:var(--display),var(--cjk-head),var(--body);font-weigh
 .label::after{content:"";height:1px;flex:1;max-width:160px;background:var(--line)}
 /* 區塊標籤的小圖：各類別一個簽名動作（剪刀剪兩下、咖啡冒煙、腳印走過去） */
 .label .lm :is(.snA,.snB,.lst){transform-box:view-box;transform-origin:100px 100px}
-.label.lm-trail::after{display:none}.trail{flex:1;max-width:180px;display:flex;justify-content:space-between;align-items:center;height:22px}.trail svg{width:15px;height:15px;fill:currentColor;stroke:none;opacity:.7;transform:rotate(90deg) translateX(var(--dy,0))}.trail svg:nth-child(odd){--dy:-3px}.trail svg:nth-child(even){--dy:3px}.trail svg .fine{display:none}
+.label.lm-trail::after{display:none}.trail{display:flex;gap:14px;align-items:center;height:24px;flex:none}.trail svg{width:18px;height:18px;fill:currentColor;stroke:none;opacity:.75;transform:rotate(90deg) translateX(var(--dy,0))}.trail svg:nth-child(odd){--dy:-3px}.trail svg:nth-child(even){--dy:3px}.trail svg .fine{display:none}
 @media (prefers-reduced-motion:no-preference){.js .trail svg{opacity:0}.js .label.in .trail svg{animation:pawIn .5s var(--ease) calc(.7s + var(--k)*.24s) forwards}.js .label.in .lm .snA{animation:snipA .26s ease-in-out 1.15s 4 alternate}.js .label.in .lm .snB{animation:snipB .26s ease-in-out 1.15s 4 alternate}.js .label.in .lm .lst{animation:steamUp 2.6s ease-in-out 1.3s infinite}}
-@keyframes pawIn{from{opacity:0;scale:.4}to{opacity:.7;scale:1}}@keyframes snipA{to{transform:rotate(-13deg)}}@keyframes snipB{to{transform:rotate(13deg)}}@keyframes steamUp{0%{transform:translateY(10px);opacity:0}35%{opacity:1}100%{transform:translateY(-26px);opacity:0}}
+@keyframes pawIn{from{opacity:0;scale:.4}to{opacity:.75;scale:1}}@keyframes snipA{to{transform:rotate(-13deg)}}@keyframes snipB{to{transform:rotate(13deg)}}@keyframes steamUp{0%{transform:translateY(10px);opacity:0}35%{opacity:1}100%{transform:translateY(-26px);opacity:0}}
 .label .lm{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:10;stroke-linecap:round;stroke-linejoin:round;flex:none;opacity:.9}
 .brand .mark :is(.fine,.acc2),.label .lm :is(.fine,.acc2){display:none}
 .brand .mark .acc,.label .lm .acc,.overlay .ov-motif .acc{fill:currentColor;stroke:none}
@@ -97,7 +97,7 @@ body[data-mode="bold"] .label b{font-family:var(--body);font-weight:700}
 .brand .mark svg{width:22px;height:22px;color:var(--pd);stroke:currentColor;fill:none;stroke-width:9;stroke-linecap:round;stroke-linejoin:round}
 .nav.solid .brand .mark svg{color:var(--bg)}
 .nav ul{display:flex;gap:var(--s6);font-size:var(--t-m);font-weight:500}
-.nav ul a{position:relative;padding:10px 0;display:inline-block;white-space:nowrap}
+.nav ul a{position:relative;padding:10px 0;display:inline-block;white-space:nowrap;min-width:44px;text-align:center}
 .nav ul a::after{content:"";position:absolute;left:0;right:0;bottom:4px;height:1.5px;background:currentColor;transform:scaleX(0);transform-origin:right;transition:transform .35s var(--ease)}
 .nav ul a:hover::after,.nav ul a:focus-visible::after,.nav ul a[aria-current="true"]::after{transform:scaleX(1);transform-origin:left}
 .nav .call{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 20px;white-space:nowrap;border-radius:999px;border:1.5px solid currentColor;font-weight:600;font-size:var(--t-s);transition:background .25s,color .25s}
@@ -144,6 +144,7 @@ body[data-mode="bold"] .label b{font-family:var(--body);font-weight:700}
 .hero[data-open="closed"] .motif .d{animation-play-state:paused}
 .js .hero[data-open="closed"] .motif svg .idle{animation-play-state:running,paused}
 .motif .idle{transform-box:fill-box;transform-origin:center}
+.hero[data-glow="soft"]::before{background:radial-gradient(48% 42% at 96% -4%,color-mix(in oklab,var(--p) 40%,#fff),transparent 70%);opacity:.28}
 .hero[data-disc="tint"] .motif .disc{fill:color-mix(in oklab,var(--p) 55%,#fff 30%);opacity:.32}
 .motif .disc{fill:var(--a);stroke:none;opacity:.55;transform-box:fill-box;transform-origin:center;translate:calc(var(--mx,0)*-18px) calc(var(--my,0)*-12px);transition:translate .8s var(--ease)}
 .motif .gl{stroke-width:.7;opacity:.7}
@@ -222,6 +223,7 @@ body[data-mode="editorial"] h1 .en{font-style:italic;font-weight:400}
 .btn-line{background:#06C755;color:#06200f}
 .btn-line::before{background:#2ee07a}
 .btn-line:hover{color:#06200f}
+.btn:not(.btn-line):hover{color:#15120f}
 .hero-foot{position:relative;z-index:0;margin-top:0;border-top:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.16)}
 .hero .hero-foot>.wrap{padding:0;position:relative;margin:0 auto}
 .facts{display:grid;grid-template-columns:repeat(var(--nf,4),minmax(0,1fr));gap:0}
@@ -248,6 +250,7 @@ body[data-mode="editorial"] h1 .en{font-style:italic;font-weight:400}
 @media (max-width:880px){.hero>.wrap{padding-top:96px;padding-bottom:20px;--lane:calc(100vw - 36px)}.hero[data-hero="side"]>.wrap{display:block;padding-bottom:calc(8px + 32vw)}.hero[data-hero="side"]>.wrap>.motif{position:absolute;transform:none;top:auto;bottom:-3vw;right:-12vw;width:62vw;-webkit-mask-image:linear-gradient(to bottom,transparent 4%,#000 42%);mask-image:linear-gradient(to bottom,transparent 4%,#000 42%)}.facts{grid-template-columns:1fr 1fr}.fact{padding:14px 0 14px var(--s4)}.fact>span,.fact>a{font-size:var(--t-m);white-space:normal;overflow:visible;line-height:1.45}.fact>a{margin:-6px 0}.fact .num{font-size:var(--t-m)}.fact:nth-child(odd){border-left:0;padding-left:0}.fact:nth-child(n+3){border-top:1px solid rgba(255,255,255,.14)}}
 @media (max-width:880px){.motif svg{opacity:.3}}
 @media (min-width:641px) and (max-width:880px){.hero[data-hero="side"]>.wrap>.motif{width:44vw;right:3vw}}
+@media (min-width:641px) and (max-width:880px) and (min-height:701px){.hero[data-hero="side"]>.wrap{padding-bottom:var(--s5)}.hero[data-hero="side"]>.wrap>.motif{position:relative;inset:auto;transform:none;width:clamp(200px,100svh - 700px,420px);margin:var(--s5) 0 0 auto;-webkit-mask-image:none;mask-image:none}}
 @media (min-width:881px){.hero[data-hero="band"]>.wrap{--lane:min(1180px,100vw - 48px)}}
 .hstat{display:none;align-items:center;gap:8px;margin:14px 0 0;font-size:var(--t-s);font-weight:600;color:#fff}
 .hstat i{flex:none;width:8px;height:8px;border-radius:50%;background:#6ee7a0}.hstat.off i{background:#fb7185}
@@ -283,7 +286,11 @@ body[data-mode="editorial"] h1 .en{font-style:italic;font-weight:400}
 .motif .scene .sc-bg{display:none}.motif .scene .sc-ln{stroke:currentColor}.js .motif .scene :is(.sc-paper,.sc-paper>*,.sc-tone,.sc-tone>*,.glow,.glow>*){stroke:none;stroke-dasharray:none;stroke-dashoffset:0}.motif .scene .sc-paper{fill:rgba(255,255,255,.05)}
 .motif .scene .sc-tone>*,.motif .scene path.sc-tone{fill:var(--a);opacity:.22}.motif .scene .acc{fill:var(--a)}.motif .scene .acc2{fill:var(--a);fill-opacity:.4}
 .hero[data-hero="band"] .hero-foot .motif{position:absolute;left:50%;right:auto;top:auto;bottom:100%;margin-bottom:calc(-6px - var(--sink,0px));transform:translateX(-50%);width:min(76vw,calc(var(--bh)*2));height:auto;aspect-ratio:2/1;z-index:-1;-webkit-mask-image:linear-gradient(to top,#000 75%,transparent);mask-image:linear-gradient(to top,#000 75%,transparent)}
-.hero[data-hero="band"] .motif svg{width:100%;height:100%;opacity:.62}
+.hero[data-hero="band"] .motif svg{width:100%;height:100%;opacity:.85}
+/* 沙龍：首屏是一面大拱形鏡，店名站在鏡子裡，鏡台場景在鏡子下緣 */
+.hero-frame{display:none}
+@media (min-width:641px) and (min-height:451px){.hero-frame.arch{display:block;position:absolute;z-index:-1;left:50%;top:84px;bottom:0;width:min(1080px,82vw);transform:translateX(-50%);border:1.5px solid color-mix(in oklab,var(--a) 55%,transparent);border-bottom:0;border-radius:540px 540px 0 0/540px 540px 0 0;pointer-events:none;background:linear-gradient(180deg,color-mix(in oklab,var(--a) 7%,transparent),transparent 60%)}.hero-frame.arch::before{content:"";position:absolute;inset:12px 12px 0;border:1px solid color-mix(in oklab,var(--a) 30%,transparent);border-bottom:0;border-radius:inherit}.hero-frame.arch::after{content:"";position:absolute;left:14%;top:16%;width:9%;height:22%;border-left:1px solid rgba(255,255,255,.14);transform:skewX(-28deg);box-shadow:18px 0 0 -0.5px rgba(255,255,255,.07)}.js .hero-frame.arch{opacity:0;animation:fade 1.4s var(--ease) .2s forwards}}
+@media (prefers-reduced-motion:reduce){.js .hero-frame.arch{animation:none;opacity:1}}
 .hero[data-hero="band"] .motif g.d>g:nth-of-type(2) :is(path,circle,ellipse,rect){animation-delay:.7s}
 .hero[data-hero="band"] .motif g.d>g:nth-of-type(3) :is(path,circle,ellipse,rect){animation-delay:1.1s}
 .hero[data-hero="band"]>.wrap{padding-bottom:calc(var(--bh) + 20px - var(--sink,0px))}
@@ -361,6 +368,7 @@ body[data-mode="mono"] .btn{border-radius:12px}
 .svc h3{grid-area:h}.svc p{grid-area:p;max-width:52ch}.svc .price{grid-area:pr;font-size:var(--t-xl);color:var(--ink);white-space:nowrap}.svc .arr{grid-area:a;align-self:center}
 .svc .ld{grid-area:ld;align-self:baseline;height:1px;margin:0 0 .3em;border-bottom:1px dotted color-mix(in srgb,var(--mu) 70%,transparent)}
 .svc li:not(:has(.price)) .ld{display:none}
+body[data-mode="editorial"] .svc:not(.tags):not(.receipt){max-width:920px}
 body:not([data-mode="editorial"]) .svc{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:var(--s4);border-top:0}
 body:not([data-mode="editorial"]) .svc li{border:1px solid var(--line);border-radius:var(--r);background:var(--bg)}
 body:not([data-mode="editorial"]) .svc li>a,body:not([data-mode="editorial"]) .svc li>div{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto auto 1fr auto auto;grid-template-areas:"h h" "p p" "x x" "pr pr" "a a";row-gap:var(--s2);align-items:start;align-content:start;padding:var(--s5);height:100%}
@@ -378,7 +386,7 @@ html body .svc.receipt.receipt li>a,html body .svc.receipt.receipt li>div{paddin
 @media (max-width:640px){div.receipt{margin-inline:-4px;padding:28px 18px 24px}}
 .sig.steps.appt{display:grid;grid-template-columns:132px minmax(0,1fr);padding:0;background:var(--bg);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;box-shadow:0 26px 50px rgba(0,0,0,.08);-webkit-mask:radial-gradient(circle 11px at 132px 0,transparent 98%,#000) top/100% 51% no-repeat,radial-gradient(circle 11px at 132px 100%,transparent 98%,#000) bottom/100% 51% no-repeat;mask:radial-gradient(circle 11px at 132px 0,transparent 98%,#000) top/100% 51% no-repeat,radial-gradient(circle 11px at 132px 100%,transparent 98%,#000) bottom/100% 51% no-repeat}
 .sig.steps.appt>*:not(.stub){grid-column:2;margin-inline:clamp(20px,4vw,44px)}.sig.steps.appt .sig-t{margin-top:34px}.sig.steps.appt ol{margin-bottom:26px}
-.sig.steps.appt .appt-cta{justify-self:start;margin-bottom:34px;background:var(--pd);color:#fff}
+.sig.steps.appt .appt-cta{justify-self:start;margin-bottom:34px;background:var(--pd);color:#fff}.sig.steps.appt .appt-cta:hover{color:#15120f}@media (prefers-color-scheme:dark){.sig.steps.appt .appt-cta{background:var(--a);color:#15120f}.sig.steps.appt .appt-cta::before{background:color-mix(in oklab,var(--a),#fff 35%)}}
 .appt .stub{grid-column:1;grid-row:1/span 4;background:var(--pd);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:space-between;gap:20px;padding:30px 0;position:relative}
 .appt .stub::after{content:"";position:absolute;top:16px;bottom:16px;right:-1px;border-right:2px dashed color-mix(in oklab,var(--bg) 60%,transparent)}
 .appt .stub-t{writing-mode:vertical-rl;letter-spacing:.6em;font-size:var(--t-s);font-weight:700;opacity:.88}
@@ -520,7 +528,7 @@ body[data-mode="bold"] .svc li:has(>a:focus-visible){outline-color:var(--a);outl
 .lb-nav{display:inline-flex;align-items:center;gap:6px}
 .lb-nav button{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;font-size:1.3rem}
 .lb-nav button:hover{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-.lb-nav #lbNow{font-family:var(--display);min-width:56px;text-align:center;color:var(--mu)}
+.lb-nav #lbNow{font-family:var(--display);min-width:56px;text-align:center;color:inherit;opacity:.82}
 .tile[role="button"]{cursor:zoom-in}
 .tile:focus-visible{outline-offset:-4px}
 /* info */
@@ -562,7 +570,7 @@ body[data-mode="bold"] .svc li:has(>a:focus-visible){outline-color:var(--a);outl
 .map-ph .addr{font-family:var(--cjk-head),var(--body);font-weight:var(--head-weight);font-size:clamp(1.3rem,2vw,1.7rem);line-height:1.3;max-width:20ch;word-break:keep-all;overflow-wrap:anywhere}
 .map-ph .row{display:flex;flex-wrap:wrap;gap:var(--s3) var(--s4);align-items:center}
 .map-ph .btn{background:var(--ink);color:var(--bg);min-height:48px;padding:0 var(--s5)}
-.map-ph .btn:hover{color:var(--tx)}
+.map-ph .btn:hover{color:#15120f}
 .map-ph .tlink{border-bottom-color:var(--line);color:var(--ink)}
 .map.loaded .map-ph{display:none}
 @media (max-width:880px){.info .cols{grid-template-columns:1fr}}
@@ -628,7 +636,7 @@ body.demo.bar-mini .fab{bottom:var(--barnow,40px)}
 .demo-bar strong{color:var(--a)}
 .demo-bar>span{text-wrap:balance}
 .demo-bar a{color:#0f1115;background:#fff;padding:7px 16px;border-radius:999px;font-weight:700;white-space:nowrap;min-height:34px;display:inline-flex;align-items:center}
-.demo-bar:not(.mini){min-height:46px}.demo-bar button{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:44px;height:44px;display:grid;place-items:center;opacity:.75}
+.demo-bar:not(.mini){min-height:46px}.demo-bar.mini button{top:0;bottom:0;height:auto;max-height:44px;transform:none;margin:auto 0}.demo-bar button{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:44px;height:44px;display:grid;place-items:center;opacity:.75}
 .demo-bar .short,.demo-bar .mt{display:none}
 .demo-bar.mini{padding-block:8px}
 .demo-bar.mini a{min-height:28px;padding:3px 12px}
@@ -682,7 +690,7 @@ body.demo.bar-mini .fab{bottom:var(--barnow,40px)}
 {% macro sec_about(n) %}
 <section class="about{% if not b.about_photo %} has-art{% endif %}" data-tone="{{ 'sf' if n is even else 'bg' }}" id="about">
   <div class="wrap">
-    <div class="label{% if b.label_motion %} lm-{{ b.label_motion }}{% endif %}" data-reveal><b>{{ "%02d" % n }}</b>關於我們<svg class="lm dw" viewBox="0 0 200 200" aria-hidden="true">{{ t.motif_label }}</svg>{% if b.label_motion == "trail" %}<span class="trail" aria-hidden="true">{% for k in range(5) %}<svg viewBox="20 30 160 130" style="--k:{{ k }}">{{ t.motif }}</svg>{% endfor %}</span>{% endif %}</div>
+    <div class="label{% if b.label_motion %} lm-{{ b.label_motion }}{% endif %}" data-reveal><b>{{ "%02d" % n }}</b>關於我們<svg class="lm dw" viewBox="0 0 200 200" aria-hidden="true">{{ t.motif_label }}</svg>{% if b.label_motion == "trail" %}<span class="trail" aria-hidden="true">{% for k in range(4) %}<svg viewBox="20 30 160 130" style="--k:{{ k }}">{{ t.motif }}</svg>{% endfor %}</span>{% endif %}</div>
     <div class="txt">
       <h2 class="statement" data-reveal style="--i:1">{% if b.statement_name %}<span class="nm">{% for line in b.name_lines %}{% if line.kind == "en" %}<span class="en">{{ line.tokens | join(" ") }}</span>{% else %}{{ line.tokens | join("") }}{% endif %}{% if not loop.last %} {% endif %}{% endfor %}</span><wbr>{% endif %}{% if b.statement_units %}<span class="un">{{ b.statement_pre }}</span><wbr><em class="un">{{ b.statement_em }}</em>{% else %}{{ b.statement_pre }}<em>{{ b.statement_em }}</em>{{ b.statement_post }}{% endif %}</h2>
       {% for para in b.about_paragraphs %}<p data-reveal style="--i:{{ loop.index + 1 }}">{{ para }}</p>{% endfor %}
@@ -700,7 +708,7 @@ body.demo.bar-mini .fab{bottom:var(--barnow,40px)}
 <section class="services" data-tone="{{ 'sf' if n is even else 'bg' }}" id="services">
   {{ weave("s") }}
   <div class="wrap">
-    <div class="label{% if b.label_motion %} lm-{{ b.label_motion }}{% endif %}" data-reveal><b>{{ "%02d" % n }}</b>{{ b.nav_services }}<svg class="lm dw" viewBox="0 0 200 200" aria-hidden="true">{{ t.motif_label }}</svg>{% if b.label_motion == "trail" %}<span class="trail" aria-hidden="true">{% for k in range(5) %}<svg viewBox="20 30 160 130" style="--k:{{ k }}">{{ t.motif }}</svg>{% endfor %}</span>{% endif %}</div>
+    <div class="label{% if b.label_motion %} lm-{{ b.label_motion }}{% endif %}" data-reveal><b>{{ "%02d" % n }}</b>{{ b.nav_services }}<svg class="lm dw" viewBox="0 0 200 200" aria-hidden="true">{{ t.motif_label }}</svg>{% if b.label_motion == "trail" %}<span class="trail" aria-hidden="true">{% for k in range(4) %}<svg viewBox="20 30 160 130" style="--k:{{ k }}">{{ t.motif }}</svg>{% endfor %}</span>{% endif %}</div>
     <h2 data-reveal style="--i:1">{{ b.services_title }}</h2>
     <p class="lead" data-reveal style="--i:2">{% if b.services_linked %}{{ b.services_lead }}{% else %}有其他需求也歡迎告訴我們。{% endif %}</p>
     {% set feat = b.signature if (b.signature and b.signature.kind == "feature") else none %}
@@ -751,7 +759,7 @@ body.demo.bar-mini .fab{bottom:var(--barnow,40px)}
   <div class="wrap">
     <div class="head">
       <div>
-        <div class="label{% if b.label_motion %} lm-{{ b.label_motion }}{% endif %}" data-reveal><b>{{ "%02d" % n }}</b>{{ b.gallery_name }}<svg class="lm dw" viewBox="0 0 200 200" aria-hidden="true">{{ t.motif_label }}</svg>{% if b.label_motion == "trail" %}<span class="trail" aria-hidden="true">{% for k in range(5) %}<svg viewBox="20 30 160 130" style="--k:{{ k }}">{{ t.motif }}</svg>{% endfor %}</span>{% endif %}</div>
+        <div class="label{% if b.label_motion %} lm-{{ b.label_motion }}{% endif %}" data-reveal><b>{{ "%02d" % n }}</b>{{ b.gallery_name }}<svg class="lm dw" viewBox="0 0 200 200" aria-hidden="true">{{ t.motif_label }}</svg>{% if b.label_motion == "trail" %}<span class="trail" aria-hidden="true">{% for k in range(4) %}<svg viewBox="20 30 160 130" style="--k:{{ k }}">{{ t.motif }}</svg>{% endfor %}</span>{% endif %}</div>
         <h2 data-reveal style="--i:1">{{ b.gallery_title }}</h2>
       </div>
       <div class="count" data-reveal style="--i:2">
@@ -776,7 +784,7 @@ body.demo.bar-mini .fab{bottom:var(--barnow,40px)}
 {% macro sec_info(n) %}
 <section class="info" data-tone="{{ 'sf' if n is even else 'bg' }}" id="info">
   <div class="wrap">
-    <div class="label{% if b.label_motion %} lm-{{ b.label_motion }}{% endif %}" data-reveal><b>{{ "%02d" % n }}</b>營業資訊<svg class="lm dw" viewBox="0 0 200 200" aria-hidden="true">{{ t.motif_label }}</svg>{% if b.label_motion == "trail" %}<span class="trail" aria-hidden="true">{% for k in range(5) %}<svg viewBox="20 30 160 130" style="--k:{{ k }}">{{ t.motif }}</svg>{% endfor %}</span>{% endif %}</div>
+    <div class="label{% if b.label_motion %} lm-{{ b.label_motion }}{% endif %}" data-reveal><b>{{ "%02d" % n }}</b>營業資訊<svg class="lm dw" viewBox="0 0 200 200" aria-hidden="true">{{ t.motif_label }}</svg>{% if b.label_motion == "trail" %}<span class="trail" aria-hidden="true">{% for k in range(4) %}<svg viewBox="20 30 160 130" style="--k:{{ k }}">{{ t.motif }}</svg>{% endfor %}</span>{% endif %}</div>
     <h2 class="info-h" data-reveal style="--i:1">{{ b.info_title }}</h2>
     <div class="cols">
       <div data-reveal style="--i:1">
@@ -814,7 +822,7 @@ body.demo.bar-mini .fab{bottom:var(--barnow,40px)}
   </div>
 </section>
 {% endmacro %}
-<section class="hero" id="top" data-hero="{{ b.hero_layout }}"{% if b.disc %} data-disc="{{ b.disc }}"{% endif %}{% if b.scrim %} data-scrim{% endif %}{% if b.hero_photo %} data-photo{% endif %} aria-label="{{ b.name }}">
+<section class="hero" id="top" data-hero="{{ b.hero_layout }}"{% if b.disc %} data-disc="{{ b.disc }}"{% endif %}{% if b.glow %} data-glow="{{ b.glow }}"{% endif %}{% if b.scrim %} data-scrim{% endif %}{% if b.hero_photo %} data-photo{% endif %} aria-label="{{ b.name }}">
   {% if b.hero_photo %}<figure class="hp" aria-hidden="true"><img src="{{ b.hero_photo }}" alt="" fetchpriority="high"></figure>{% endif %}
     <div class="wrap">
     <p class="eyebrow"><span>{{ b.category }}</span><span>{{ b.city }}{{ b.district }}</span></p>
@@ -830,6 +838,7 @@ body.demo.bar-mini .fab{bottom:var(--barnow,40px)}
     {% if b.hero_photo %}<figure class="hp-m" aria-hidden="true"><img src="{{ b.hero_photo }}" alt="" loading="lazy"></figure>{% endif %}
     {% if b.hero_layout != "band" and not b.hero_photo %}<div class="motif" aria-hidden="true"><svg viewBox="-10 -10 220 220"><g class="d">{{ t.motif_scene }}</g></svg></div>{% endif %}
   </div>
+  {% if b.hero_frame %}<div class="hero-frame {{ b.hero_frame }}" aria-hidden="true"></div>{% endif %}
   <div class="hero-foot">
     {% if b.hero_layout == "band" and not b.hero_photo %}<div class="motif" aria-hidden="true"><svg class="m1 scene" viewBox="0 0 600 300" preserveAspectRatio="xMidYMax meet"><g class="d">{{ t.motif_band }}</g></svg><svg class="m2" viewBox="-10 -10 220 220" preserveAspectRatio="xMidYMax meet"><g class="d">{{ t.motif_band2 }}</g></svg></div>{% endif %}
     <div class="wrap">
@@ -946,16 +955,16 @@ body.demo.bar-mini .fab{bottom:var(--barnow,40px)}
   function fmt(h,m){return (h<10?'0':'')+h+':'+(m<10?'0':'')+m}
   var state=null,todayClosed=!!(li&&li.children[1].classList.contains('closed'));
   if(periods&&periods.length){
-    var open=false,closeAt=null,nextOpen=null,overnight=false;
+    var open=false,closeAt=null,nextOpen=null,overnight=false,openP=null;
     periods.forEach(function(p){if(!p.open||!p.close)return;
       var om=p.open.hour*60+(p.open.minute||0),cm=p.close.hour*60+(p.close.minute||0);
-      if(p.open.day===day&&mins>=om&&(p.close.day!==day||mins<cm)){open=true;closeAt=p.close}
-      if(p.close.day===day&&p.open.day!==day&&mins<cm){open=true;closeAt=p.close;overnight=p.open.day}
+      if(p.open.day===day&&mins>=om&&(p.close.day!==day||mins<cm)){open=true;closeAt=p.close;openP=p}
+      if(p.close.day===day&&p.open.day!==day&&mins<cm){open=true;closeAt=p.close;overnight=p.open.day;openP=p}
     });
     if(!open){for(var k=0;k<=7&&!nextOpen;k++){var dd=(day+k)%7;periods.forEach(function(p){if(nextOpen||!p.open||p.open.day!==dd)return;var om=p.open.hour*60+(p.open.minute||0);if(k>0||om>mins)nextOpen={k:k,p:p.open}})}}
     hero.dataset.open=open?'open':'closed';if(closing)closing.dataset.open=hero.dataset.open;
     if(overnight!==false&&li){var py=d.querySelector('#hours li[data-day="'+overnight+'"]');if(py){li.classList.remove('today');py.classList.add('today');tg.textContent='現在';py.children[0].appendChild(tg);li=py}}
-    var cw=' 打烊';if(open&&closeAt){var cmn=closeAt.hour*60+(closeAt.minute||0);if(periods.some(function(p){return p.open&&p.open.day===closeAt.day&&p.open.hour*60+(p.open.minute||0)>cmn}))cw=closeAt.hour<17?' 午休':' 休息'}
+    var cw=' 打烊';if(open&&closeAt&&openP&&openP.open.day===closeAt.day){var cmn=closeAt.hour*60+(closeAt.minute||0);if(periods.some(function(p){return p.open&&p.open.day===closeAt.day&&p.open.hour*60+(p.open.minute||0)>cmn}))cw=closeAt.hour<17?' 午休':' 休息'}
     var wk='日一二三四五六',nextText=nextOpen?((nextOpen.k===0?'今天 ':nextOpen.k===1?'明天 ':(nextOpen.k===7?'下週':'週')+wk.charAt(nextOpen.p.day)+' ')+fmt(nextOpen.p.hour,nextOpen.p.minute||0)+' 開門'):'';
     state={open:open,nextK:nextOpen?nextOpen.k:null,nextDay:nextOpen?nextOpen.p.day:null,next:nextText,text:open?('營業中　'+(closeAt?fmt(closeAt.hour,closeAt.minute||0)+cw:'')):((todayClosed?'今日公休':'休息中')+(nextText?'　'+nextText:''))};
   }

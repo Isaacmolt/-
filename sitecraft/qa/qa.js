@@ -13,6 +13,26 @@ const OUT = path.join(__dirname, 'shots', round);
 fs.mkdirSync(OUT, { recursive: true });
 const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]/u;
 
+// hover state of the buttons below the hero: the text must stay readable on whatever slides in behind it (light and dark)
+async function hoverContrast(pg) {
+  const ids = await pg.evaluate(() => [...document.querySelectorAll('.btn')].filter(b => b.getBoundingClientRect().width > 0 && !b.closest('.hero, .overlay, .demo-bar')).map((b, i) => { b.dataset.hv = i; return i; }));
+  const out = [];
+  for (const i of ids) {
+    const el = pg.locator(`[data-hv="${i}"]`);
+    await el.scrollIntoViewIfNeeded(); await el.hover(); await pg.waitForTimeout(80);
+    out.push(await pg.evaluate(i => {
+      // computed colours may come back as oklab()/color-mix(): let a 1x1 canvas convert them to sRGB
+      const b = document.querySelector(`[data-hv="${i}"]`), cv = document.createElement('canvas').getContext('2d'), rgb = s => { cv.clearRect(0, 0, 1, 1); cv.fillStyle = '#000'; cv.fillStyle = s; cv.fillRect(0, 0, 1, 1); const d = cv.getImageData(0, 0, 1, 1).data; return [d[0], d[1], d[2], d[3]]; };
+      const L = c => { const [r, g, bb] = c.slice(0, 3).map(v => v / 255).map(v => v <= .03928 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4); return .2126 * r + .7152 * g + .0722 * bb; };
+      const pb = getComputedStyle(b, '::before'), cover = pb.transform === 'none' && rgb(pb.backgroundColor)[3] !== 0;
+      const fg = rgb(getComputedStyle(b).color), bg = rgb(cover ? pb.backgroundColor : getComputedStyle(b).backgroundColor);
+      const [x, y] = [L(fg), L(bg)].sort((m, n) => n - m);
+      return { t: b.textContent.trim().slice(0, 12), c: Math.round((x + .05) / (y + .05) * 100) / 100 };
+    }, i));
+  }
+  return out;
+}
+
 (async () => {
   const report = {};
   if (process.env.QA_REPORT) Object.assign(report, JSON.parse(fs.readFileSync(process.env.QA_REPORT, 'utf8')));
@@ -281,6 +301,7 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
         const res = await page.evaluate(async () => await axe.run(document, { runOnly: ['wcag2a', 'wcag2aa', 'best-practice'] }));
         r.axe = res.violations.map(v => ({ id: v.id, impact: v.impact, nodes: v.nodes.length, sample: v.nodes[0].target[0] }));
         r.emoji = EMOJI.test(await page.evaluate(() => document.documentElement.outerHTML));
+        r.btnHover = await hoverContrast(page);
         // dark mode contrast
         const dark = await browser.newPage({ viewport: vp, colorScheme: 'dark' });
         await dark.goto(url, { waitUntil: 'load' }); await dark.waitForTimeout(800);
@@ -290,6 +311,7 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
         await dark.screenshot({ path: path.join(OUT, `${slug}-desktop-dark.png`), fullPage: true });
         r.fabDark = await dark.evaluate(() => { const f = document.querySelector('.fab'); if (!f) return true; const cs = getComputedStyle(f); return /0px 0px 0px 1px/.test(cs.boxShadow) && cs.backgroundColor !== getComputedStyle(document.body).backgroundColor; });
         await dark.addScriptTag({ content: axeSource });
+        r.btnHoverDark = await hoverContrast(dark);
         const dres = await dark.evaluate(async () => await axe.run(document, { runOnly: ['wcag2aa'] }));
         r.axeDark = dres.violations.map(v => ({ id: v.id, nodes: v.nodes.length, sample: v.nodes[0].target[0] }));
         await dark.close();
@@ -328,7 +350,7 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
   const sysOk = !report.system.noHero.length && !report.system.darkAccent.length;
   console.log('system:', JSON.stringify(report.system), sysOk ? 'PASS' : 'FAIL');
   // known schedules: demo-cafe closes Mondays (Sunday evening points to Tuesday); _qa-edge runs Fri-Sat 17:00-02:00 and closes Sundays
-  const clockOk = (slug, c) => { if (!c || !Object.values(c).every(x => x.clWhole)) return false; if (slug === 'demo-cafe') return /週二 10:00 開門/.test(c.sun1900.text) && /^週二/.test(c.sun1900.title); if (slug === '_qa-edge') return !/今晚/.test(c.mon1200.title) && /^晚點/.test(c.thu1500.title) && /^今晚/.test(c.sat0100.title) && c.sun0130.today === '6' && c.sun0130.tag === '現在' && /營業中/.test(c.sun0130.text) && /02:00 打烊/.test(c.sun0130.text) && /14:00 午休/.test(c.thu1345.text); return true; };
+  const clockOk = (slug, c) => { if (!c || !Object.values(c).every(x => x.clWhole)) return false; if (slug === 'demo-cafe') return /週二 10:00 開門/.test(c.sun1900.text) && /^週二/.test(c.sun1900.title); if (slug === '_qa-edge') return !/今晚/.test(c.mon1200.title) && /^晚點/.test(c.thu1500.title) && /^今晚/.test(c.sat0100.title) && c.sun0130.today === '6' && c.sun0130.tag === '現在' && /營業中/.test(c.sun0130.text) && /02:00 打烊/.test(c.sun0130.text) && /14:00 午休/.test(c.thu1345.text) && /02:00 打烊/.test(c.sat0100.text); return true; };
   let allOk = sysOk;
   for (const slug of slugs) {
     const v = report[slug], fn = v.fn || {}, c = v.computed || {};
@@ -427,6 +449,7 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
       [`v.drift <= 20`, () => (v.drift <= 20)],
       [`v.leader`, () => (v.leader)],
       [`v.fabDark`, () => (v.fabDark)],
+      [`btnHover`, () => ([...(v.btnHover || []), ...(v.btnHoverDark || [])].every(x => x.c >= 4.5))],
       [`clockOk(slug, v.clock)`, () => (clockOk(slug, v.clock))],
       [`v.reducedMotion`, () => (v.reducedMotion)],
       [`v.reducedMotion.h1 === 'none'`, () => (v.reducedMotion.h1 === 'none')],
@@ -448,7 +471,7 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
     allOk = allOk && ok;
     console.log(`${slug}: ${ok ? 'PASS' : 'FAIL'}`);
     if (!ok) console.log('  failed checks: ' + failed.join(' | '));
-    if (!ok) console.log(JSON.stringify({ fn, scrollSpy: v.scrollSpy, heroGeom: v.heroGeom, tiles: v.tiles, closingClear: v.closingClear, nameClear: v.nameClear, bandGap: v.bandGap, kinsoku: v.kinsoku, drift: v.drift, leader: v.leader, featureRing: v.featureRing, copy: v.copy, navSolid: v.navSolid, ctaLabel: v.ctaLabel, navFocus: v.navFocus, seamless: v.seamless, stripFit: v.stripFit, stripScrolls: v.stripScrolls, rhythm: v.rhythm, rowLabels: v.rowLabels, dragBack: v.dragBack, fabDark: v.fabDark, clock: v.clock, layout: v.layout, ctaClear: v.ctaClear, mapClear: v.mapClear, landscapeMenu: v.landscapeMenu, factsDrift: v.factsDrift, anchorLanding: v.anchorLanding, reducedMotion: v.reducedMotion, focusRing: v.focusRing, computed: c, axe: v.axe, axeDark: v.axeDark, errors: v.errors, small: v.smallTargets, heroFit: v.heroFit, overflow: v.overflow, emoji: v.emoji }, null, 2));
+    if (!ok) console.log(JSON.stringify({ fn, scrollSpy: v.scrollSpy, heroGeom: v.heroGeom, tiles: v.tiles, closingClear: v.closingClear, nameClear: v.nameClear, bandGap: v.bandGap, kinsoku: v.kinsoku, drift: v.drift, leader: v.leader, featureRing: v.featureRing, copy: v.copy, navSolid: v.navSolid, ctaLabel: v.ctaLabel, navFocus: v.navFocus, seamless: v.seamless, stripFit: v.stripFit, stripScrolls: v.stripScrolls, rhythm: v.rhythm, rowLabels: v.rowLabels, dragBack: v.dragBack, fabDark: v.fabDark, btnHover: v.btnHover, btnHoverDark: v.btnHoverDark, clock: v.clock, layout: v.layout, ctaClear: v.ctaClear, mapClear: v.mapClear, landscapeMenu: v.landscapeMenu, factsDrift: v.factsDrift, anchorLanding: v.anchorLanding, reducedMotion: v.reducedMotion, focusRing: v.focusRing, computed: c, axe: v.axe, axeDark: v.axeDark, errors: v.errors, small: v.smallTargets, heroFit: v.heroFit, overflow: v.overflow, emoji: v.emoji }, null, 2));
   }
   const lh = report.lighthouse;
   const lhOk = lh && typeof lh === 'object' && ['performance', 'accessibility', 'best-practices', 'seo'].every(k => lh[k] >= 90);
