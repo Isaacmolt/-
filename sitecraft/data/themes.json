@@ -836,14 +836,14 @@
     "palette": {
       "p": "#FF6A1A",
       "pd": "#C44A08",
-      "a": "#111827",
+      "a": "#FFD166",
       "bg": "#FFFFFF",
       "sf": "#F4F4F5",
       "tx": "#111827",
       "mu": "#6B7280",
       "line": "#E5E7EB",
       "p_soft": "#FFE4D3",
-      "a_soft": "#E5E7EB"
+      "a_soft": "#FFF1CC"
     },
     "taglines": [
       "{district}最好動的地方",

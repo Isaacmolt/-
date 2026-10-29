@@ -22,7 +22,7 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
     const url = `http://127.0.0.1:${PORT}/${slug}/`;
     const r = { errors: [], overflow: {}, smallTargets: [], axe: [], emoji: false };
     r.heroFit = {};
-    for (const [n, vp] of [['700x900', {width:700,height:900}], ['820x1180', {width:820,height:1180}], ['1280x720', {width:1280,height:720}], ['1280x800', {width:1280,height:800}], ['1366x768', {width:1366,height:768}], ['1440x900', {width:1440,height:900}], ['1920x1080', {width:1920,height:1080}], ['360x640', {width:360,height:640}], ['375x667', {width:375,height:667}], ['390x844', {width:390,height:844}]]) {
+    for (const [n, vp] of [['700x900', {width:700,height:900}], ['820x1180', {width:820,height:1180}], ['1280x720', {width:1280,height:720}], ['1280x800', {width:1280,height:800}], ['1366x768', {width:1366,height:768}], ['1440x900', {width:1440,height:900}], ['1920x1080', {width:1920,height:1080}], ['1366x657', {width:1366,height:657}], ['1536x730', {width:1536,height:730}], ['1440x789', {width:1440,height:789}], ['320x568', {width:320,height:568}], ['360x640', {width:360,height:640}], ['375x667', {width:375,height:667}], ['390x844', {width:390,height:844}]]) {
       const pg = await browser.newPage({ viewport: vp }); await pg.goto(url, { waitUntil: 'load' }); await pg.evaluate(() => document.fonts.ready); await pg.waitForTimeout(2200);
       if (n === '1366x768') await pg.screenshot({ path: path.join(OUT, `${slug}-laptop-hero.png`) });  // capture before the probes below touch the DOM
       if (n !== '390x844') {
@@ -49,6 +49,8 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
       // band: at least 24px between the CTA row and the highest band shape
       r.bandGap = r.bandGap || {};
       r.bandGap[n] = await pg.evaluate(() => { const hero = document.querySelector('.hero'); if (hero.dataset.hero !== 'band') return 99; const cta = document.querySelector('.hero .cta').getBoundingClientRect(); const tops = [...document.querySelectorAll('.hero-foot .motif :is(path,circle,ellipse,rect)')].filter(s => s.closest('svg').getBoundingClientRect().width > 0).map(s => s.getBoundingClientRect().top); return Math.round(Math.min(...tops) - cta.bottom); });
+      r.ctaClear = r.ctaClear || {};
+      r.ctaClear[n] = await pg.evaluate(() => { const ctl = [...document.querySelectorAll('.hero .cta > *')].map(e => e.getBoundingClientRect()); const shapes = [...document.querySelectorAll('.hero .motif :is(path,circle,ellipse,rect)')].filter(s => s.closest('svg').getBoundingClientRect().width > 0).map(s => s.getBoundingClientRect()); const hit = (a, b) => a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom; return innerWidth > 640 || !ctl.some(c => shapes.some(s => hit(c, s))); });
       // map card: the pin sits in its drawing, never on the address
       r.mapClear = r.mapClear || {};
       r.mapClear[n] = await pg.evaluate(() => { const pin = document.querySelector('.map-ph .pin'), ad = document.querySelector('.map-ph .addr'); if (!pin || !ad) return true; return pin.getBoundingClientRect().bottom <= ad.getBoundingClientRect().top; });
@@ -65,7 +67,10 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
       if (name === 'desktop') r.nmOneLine = await page.evaluate(() => { const nm = document.querySelector('.statement .nm'); return !nm || nm.getClientRects().length === 1; });
       await page.evaluate(() => { document.querySelectorAll('[data-reveal]').forEach(el => el.classList.add('in')); document.querySelector('.closing').classList.add('in'); });
       await page.waitForTimeout(2200);
-      await page.screenshot({ path: path.join(OUT, `${slug}-${name}-full.png`), fullPage: true });
+      // Chromium's beyond-viewport capture drops finished SVG stroke animations: freeze them for the capture only
+      { const fz = await page.addStyleTag({ content: '.motif svg,.motif svg *,.motif .d{animation:none!important;transition:none!important;stroke-dashoffset:0!important}' }); await page.waitForTimeout(150);
+        await page.screenshot({ path: path.join(OUT, `${slug}-${name}-full.png`), fullPage: true });
+        await fz.evaluate(el => el.remove()); }
       r.overflow[name] = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
       if (name === 'mobile') {
         r.smallTargets = await page.evaluate(() => [...document.querySelectorAll('a,button')].filter(el => {
@@ -103,7 +108,10 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
           await page.click('.strip .tile:first-child', { position: { x: 40, y: 40 } }); await page.waitForTimeout(400);
           r.fn.lightbox = await page.evaluate(() => !document.getElementById('lb').open && !document.querySelector('.strip .tile[tabindex]'));
         }
-        r.fn.photoFull = await page.evaluate(() => { const hp = document.querySelector('.hero .hp'); if (!hp) return true; const a = hp.getBoundingClientRect(), h = document.querySelector('.hero').getBoundingClientRect(); return Math.abs(a.left) < 1 && Math.abs(a.width - innerWidth) < 1 && Math.abs(a.height - h.height) < 1; });
+        r.fn.photoFull = await page.evaluate(() => { const hp = document.querySelector('.hero .hp-m'); if (!hp) return true; const a = hp.getBoundingClientRect(), cta = document.querySelector('.hero .cta').getBoundingClientRect(); return a.width > innerWidth * .8 && a.height >= 100 && a.top >= cta.bottom; });
+        // the hidden quick-contact bar is not reachable by keyboard
+        await page.evaluate(() => scrollTo(0, 0)); await page.waitForTimeout(400);
+        r.fabSafe = await page.evaluate(() => { const f = document.querySelector('.fab'); return !f || (getComputedStyle(f).visibility === 'hidden' && f.inert === true); });
         r.fn.statementUnits = await page.evaluate(() => [...document.querySelectorAll('.statement .un')].every(el => el.getClientRects().length === 1));
         r.fn.factsLinks = await page.evaluate(() => [...document.querySelectorAll('.hero .fact')].filter(f => /電話|地址/.test(f.querySelector('b').textContent)).every(f => !!f.querySelector('a[href]')));
         r.fn.typeClearMobile = await page.evaluate(() => { const vt = document.querySelector('.tile.type .vtext'), cap = document.querySelector('.tile.type .cap'); if (!vt) return true; document.getElementById('gallery').scrollIntoView(); return vt.getBoundingClientRect().bottom <= cap.getBoundingClientRect().top + 1; });
@@ -242,14 +250,22 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
   } catch (e) { report.lighthouse = 'failed: ' + e.message.split('\n')[0]; }
   server.kill();
   fs.writeFileSync(path.join(OUT, 'report.json'), JSON.stringify(report, null, 2));
-  let allOk = true;
+  // system checks: every category has a composed hero scene; every accent reads on dark grounds (hero, demo bar, dark mode)
+  const motifs = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'motifs.json'), 'utf8'));
+  const themes = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'themes.json'), 'utf8'));
+  const lum = h => { const c = [0, 2, 4].map(i => parseInt(h.replace('#', '').slice(i, i + 2), 16) / 255).map(x => x <= .03928 ? x / 12.92 : ((x + .055) / 1.055) ** 2.4); return .2126 * c[0] + .7152 * c[1] + .0722 * c[2]; };
+  const contrast = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((m, n) => n - m); return (x + .05) / (y + .05); };
+  report.system = { noHero: Object.keys(motifs).filter(k => !k.startsWith('_') && !motifs[k].hero), darkAccent: Object.keys(themes).filter(k => !k.startsWith('_') && contrast(themes[k].palette.a, '#0f1115') < 4.5) };
+  const sysOk = !report.system.noHero.length && !report.system.darkAccent.length;
+  console.log('system:', JSON.stringify(report.system), sysOk ? 'PASS' : 'FAIL');
+  let allOk = sysOk;
   for (const slug of slugs) {
     const v = report[slug], fn = v.fn || {}, c = v.computed || {};
     const ok = fn.fabHiddenAtTop && fn.menuBtnOnTop && fn.menuClosedByTap && fn.galleryCounterAfter2Next === '3' && fn.galleryCounterAfterPrev === '2'
       && fn.serviceLinksFocusable && Math.abs(fn.titleIndent) <= 2 && fn.modalFocusTrapped && !fn.factClipped && !fn.nbBroken && !fn.ctaOrphan && fn.visibleWithoutJs && v.scrollSpy === '#services' && c.h1DiffersFromBody && c.ogImage
       && v.anchorLanding && v.anchorLanding.solid && !v.anchorLanding.hidden && v.anchorLanding.top === 0
       && fn.overlayHoursSpans && v.heroGeom && (!v.heroGeom.band || v.heroGeom.overlapPct === 0) && v.heroGeom.bandAboveBar && v.factsDrift === 'none'
-      && fn.menuBtnClear && v.nmOneLine && v.motifDrawn && v.weaveMasked && fn.statusInline && !v.dragOpensLightbox && v.stripEnd && v.stripEnd.now === String(v.stripEnd.total) && v.stripEnd.nextDisabled && v.stripPrev && v.stripPrev.moved && +v.stripPrev.now < v.stripEnd.total && v.lbCentred && fn.factsLinks && fn.statementUnits && fn.photoFull && v.statusRing && v.photos && v.landscapeMenu && v.landscapeMenu.firstBelowBrand && v.landscapeMenu.actsReachable && v.mapClear && Object.values(v.mapClear).every(Boolean) && v.reducedMotion.draw === 'none' && parseFloat(v.reducedMotion.dash) === 0 && v.fontFaces && v.fontFaces.length >= 2 && v.fontFaces.every(s => s !== 'error') && v.fontFaces.includes('loaded')
+      && fn.menuBtnClear && v.nmOneLine && v.motifDrawn && v.weaveMasked && fn.statusInline && !v.dragOpensLightbox && v.stripEnd && v.stripEnd.now === String(v.stripEnd.total) && v.stripEnd.nextDisabled && v.stripPrev && v.stripPrev.moved && +v.stripPrev.now < v.stripEnd.total && v.lbCentred && fn.factsLinks && fn.statementUnits && fn.photoFull && v.statusRing && v.photos && v.landscapeMenu && v.landscapeMenu.firstBelowBrand && v.landscapeMenu.actsReachable && v.mapClear && Object.values(v.mapClear).every(Boolean) && v.ctaClear && Object.values(v.ctaClear).every(Boolean) && v.fabSafe && v.reducedMotion.draw === 'none' && parseFloat(v.reducedMotion.dash) === 0 && v.fontFaces && v.fontFaces.length >= 2 && v.fontFaces.every(s => s !== 'error') && v.fontFaces.includes('loaded')
       && v.tiles && v.tiles.hoursMatch && v.tiles.typeClear && fn.bandVisibleMobile && fn.typeClearMobile && fn.lightbox
       && v.closingClear && Object.values(v.closingClear).every(Boolean)
       && v.nameClear && Object.values(v.nameClear).every(x => x.real === 0 && x.long === 0) && v.bandGap && Object.values(v.bandGap).every(g => g >= 24)

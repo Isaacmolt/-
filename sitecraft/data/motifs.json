@@ -27,6 +27,13 @@
       "shapes": [
         0
       ]
+    },
+    "hero": "<path class='fine' d='M-6 184H214'/><circle cx='78' cy='118' r='46'/><circle class='fine' cx='78' cy='118' r='38'/><path d='M124 112h56a7 7 0 0 1 0 14h-56'/><path d='M58 108c6-14 24-18 34-8 14-2 22 12 14 24-4 14-22 16-32 10-14 0-22-14-16-26z'/><circle class='acc' cx='80' cy='116' r='9'/><path d='M148 148h34v22a12 12 0 0 1-12 12h-10a12 12 0 0 1-12-12z'/><path d='M182 154h5a7 7 0 0 1 0 14h-5'/><path class='fine' d='M158 128c-4 5 4 9 0 14M172 128c-4 5 4 9 0 14'/><path class='fine' d='M14 184c4-6 40-6 44 0'/><ellipse class='fine' cx='36' cy='174' rx='16' ry='6'/>",
+    "hero_idle": {
+      "kind": "float",
+      "shapes": [
+        8
+      ]
     }
   },
   "restaurant": {
@@ -37,6 +44,13 @@
       "kind": "pulse",
       "shapes": [
         1
+      ]
+    },
+    "hero": "<path class='fine' d='M-6 184H214'/><circle cx='100' cy='130' r='42'/><circle class='fine' cx='100' cy='130' r='32'/><path class='acc2' d='M80 132c4-12 16-18 26-14 12-4 20 8 16 18-2 10-14 14-22 10-12 4-24-4-20-14z'/><path class='fine' d='M90 118c-3 4 3 7 0 11M104 116c-3 4 3 7 0 11'/><path d='M42 98v84M36 98v16a6 6 0 0 0 12 0V98'/><path d='M158 98c10 8 10 32 0 42v42'/><path d='M150 40h24l-3 34a9 9 0 0 1-18 0z'/><path class='acc' d='M152 54h20l-1.6 18a8 8 0 0 1-16.8 0z'/><path class='fine' d='M162 82v14M154 96h16'/>",
+    "hero_idle": {
+      "kind": "float",
+      "shapes": [
+        4
       ]
     }
   },
@@ -49,6 +63,13 @@
       "shapes": [
         3
       ]
+    },
+    "hero": "<path class='fine' d='M-6 184H214'/><path d='M40 110h120a60 60 0 0 1-120 0z'/><path class='acc2' d='M46 116h108a54 54 0 0 1-108 0z'/><path class='fine' d='M62 112c6-10 12 10 18 0s12 10 18 0 12 10 18 0 12 10 18 0'/><path class='acc' d='M116 108a14 14 0 0 1 28 0z'/><path d='M84 170h32M90 170l-4 12M110 170l4 12'/><path d='M150 34l-40 74M166 40l-46 70'/><path class='fine' d='M70 76c-5 7 5 12 0 18M86 72c-5 7 5 12 0 18'/>",
+    "hero_idle": {
+      "kind": "float",
+      "shapes": [
+        7
+      ]
     }
   },
   "hotpot": {
@@ -60,6 +81,13 @@
       "shapes": [
         3
       ]
+    },
+    "hero": "<path class='fine' d='M-6 184H214'/><path d='M40 96h120v40a26 26 0 0 1-26 26H66a26 26 0 0 1-26-26z'/><ellipse class='acc2' cx='100' cy='96' rx='60' ry='9'/><path d='M40 104H26a6 6 0 0 0 0 12h14M160 104h14a6 6 0 0 1 0 12h-14'/><circle class='fine' cx='78' cy='94' r='5'/><circle class='fine' cx='118' cy='92' r='6'/><path class='fine' d='M92 96l10-4M126 98l8 2'/><path class='fine' d='M70 70c-5 7 5 12 0 18M130 70c-5 7 5 12 0 18'/><path d='M62 172h76'/><path class='acc' d='M88 172c-5-6 0-13 5-15 0 6 6 9 4 15zM108 172c-5-6 0-13 5-15 0 6 6 9 4 15z'/>",
+    "hero_idle": {
+      "kind": "float",
+      "shapes": [
+        7
+      ]
     }
   },
   "dessert": {
@@ -70,6 +98,13 @@
       "kind": "pulse",
       "shapes": [
         1
+      ]
+    },
+    "hero": "<path class='fine' d='M-6 184H214'/><path d='M34 182h132'/><path d='M100 182v-10M74 172h52'/><rect x='50' y='108' width='100' height='64' rx='6'/><path d='M50 122c10 9 20 9 30 0s20 9 30 0 20 9 30 0 20 9 30 0'/><path class='fine' d='M50 148h100'/><circle class='acc' cx='100' cy='96' r='9'/><path class='fine' d='M100 87c2-8 8-12 14-12'/><path class='fine' d='M66 60v16M60 68h12M140 50v12M135 56h10'/>",
+    "hero_idle": {
+      "kind": "pulse",
+      "shapes": [
+        8
       ]
     }
   },
@@ -83,6 +118,11 @@
         0,
         1
       ]
+    },
+    "hero": "<path class='fine' d='M-6 184H214'/><path d='M118 34h44a22 22 0 0 1 22 22v86h-88V56a22 22 0 0 1 22-22z'/><path class='acc2' d='M120 44h40a14 14 0 0 1 14 14v76h-68V58a14 14 0 0 1 14-14z'/><path class='fine' d='M128 58c8-6 18-8 28-4'/><path d='M34 140h62'/><path d='M42 140V94a12 12 0 0 1 12-12h26a12 12 0 0 1 12 12v46'/><path d='M64 140v26M42 182h44M64 166l-18 16M64 166l18 16'/><path class='fine' d='M108 160h80'/><circle class='acc' cx='126' cy='156' r='3'/><circle class='acc' cx='140' cy='156' r='3'/>",
+    "hero_idle": {
+      "kind": "float",
+      "shapes": []
     }
   },
   "beauty": {
@@ -93,6 +133,13 @@
       "kind": "pulse",
       "shapes": [
         4
+      ]
+    },
+    "hero": "<path class='fine' d='M-6 184H214'/><rect x='58' y='44' width='28' height='42' rx='5'/><path d='M54 86h36'/><rect x='44' y='86' width='56' height='96' rx='16'/><path class='acc' d='M48 124h48v40a14 14 0 0 1-14 14H62a14 14 0 0 1-14-14z'/><path class='fine' d='M56 98v18'/><circle cx='150' cy='138' r='34'/><circle class='acc2' cx='150' cy='138' r='26'/><path class='fine' d='M136 122c6-6 14-8 22-6'/><path d='M150 172v10'/><path class='fine' d='M152 50v18M143 59h18M182 86v10M177 91h10M120 72v8M116 76h8'/>",
+    "hero_idle": {
+      "kind": "pulse",
+      "shapes": [
+        10
       ]
     }
   },
@@ -127,6 +174,13 @@
       "shapes": [
         0
       ]
+    },
+    "hero": "<path class='fine' d='M-6 184H214'/><rect x='40' y='52' width='84' height='126' rx='10'/><rect x='64' y='42' width='36' height='18' rx='5'/><path class='acc' d='M77 74h10v10h10v10H87v10H77V94H67V84h10z'/><path class='fine' d='M56 126h52M56 140h52M56 154h32'/><path d='M150 40v22c0 22 30 22 30 0V40'/><path d='M165 84v40c0 22-14 34-30 34'/><circle cx='130' cy='160' r='13'/><circle class='acc' cx='130' cy='160' r='6'/><path class='fine' d='M146 40h8M176 40h8'/>",
+    "hero_idle": {
+      "kind": "pulse",
+      "shapes": [
+        7
+      ]
     }
   },
   "gym": {
@@ -139,6 +193,11 @@
         1,
         2
       ]
+    },
+    "hero": "<path class='fine' d='M-6 184H214'/><path d='M56 112h88'/><rect x='30' y='86' width='16' height='52' rx='4'/><rect x='46' y='94' width='12' height='36' rx='3'/><rect x='154' y='86' width='16' height='52' rx='4'/><rect x='142' y='94' width='12' height='36' rx='3'/><path class='fine' d='M84 108v8M100 108v8M116 108v8'/><path d='M24 160c0-16 26-16 26 0'/><circle cx='37' cy='168' r='16'/><circle class='acc' cx='37' cy='170' r='6'/><rect x='160' y='134' width='24' height='50' rx='7'/><rect x='165' y='124' width='14' height='10' rx='2'/><rect class='acc' x='163' y='154' width='18' height='27' rx='5'/>",
+    "hero_idle": {
+      "kind": "float",
+      "shapes": []
     }
   },
   "florist": {
@@ -149,6 +208,14 @@
       "kind": "float",
       "shapes": [
         1
+      ]
+    },
+    "hero": "<path d='M64 114l36 72 36-72z'/><path class='fine' d='M74 114l26 52 26-52'/><path class='fine' d='M82 106l14 38M102 94v48M124 108l-16 36'/><circle cx='80' cy='90' r='17'/><circle class='acc' cx='80' cy='90' r='6'/><circle cx='104' cy='72' r='19'/><circle class='acc' cx='104' cy='72' r='7'/><circle cx='128' cy='94' r='16'/><circle class='acc' cx='128' cy='94' r='6'/><path d='M62 112c-18-4-30-18-28-34 16 2 28 14 30 30'/><path d='M138 112c18-4 30-18 28-34-16 2-28 14-30 30'/><path class='acc' d='M92 150h16l-3 9h-10z'/><path class='fine' d='M92 152c-10-8-18-2-12 4M108 152c10-8 18-2 12 4'/>",
+    "hero_idle": {
+      "kind": "rotate",
+      "shapes": [
+        9,
+        10
       ]
     }
   },
@@ -163,6 +230,13 @@
         1,
         2
       ]
+    },
+    "hero": "<path class='fine' d='M-6 184H214'/><path d='M24 150l14-32c4-8 10-12 18-12h70c8 0 16 4 20 10l16 24h12c6 0 10 4 10 10v10H24z'/><path class='fine' d='M56 116h30v22H46zM96 116h32l14 22H96z'/><circle cx='60' cy='168' r='15'/><circle class='acc' cx='60' cy='168' r='6'/><circle cx='150' cy='168' r='15'/><circle class='acc' cx='150' cy='168' r='6'/><path class='fine' d='M36 150h8M170 150h10'/><path d='M150 36a14 14 0 1 0 18 18l22 22a6 6 0 0 0 8-8l-22-22a14 14 0 0 0-18-18l8 8-4 6-6 2z'/>",
+    "hero_idle": {
+      "kind": "rotate",
+      "shapes": [
+        8
+      ]
     }
   },
   "education": {
@@ -174,6 +248,11 @@
       "shapes": [
         0
       ]
+    },
+    "hero": "<path class='fine' d='M-6 184H214'/><path d='M28 160c26-12 48-12 72 0 24-12 46-12 72 0V78c-26-12-48-12-72 0-24-12-46-12-72 0z'/><path d='M100 78v82'/><path class='fine' d='M42 96c16-6 30-6 44 0M42 112c16-6 30-6 44 0M42 128c16-6 30-6 44 0M114 96c16-6 30-6 44 0M114 112c16-6 30-6 44 0'/><path class='acc2' d='M48 40c-10-10-26 0-22 16 4 16 18 22 22 16 4 6 18 0 22-16 4-16-12-26-22-16z'/><path class='fine' d='M48 40c0-8 4-12 10-14'/><path d='M150 30l22 22-48 48-16 6 6-16z'/><path class='acc' d='M114 106l16-6-10-10z'/>",
+    "hero_idle": {
+      "kind": "float",
+      "shapes": []
     }
   },
   "wellness": {
@@ -184,6 +263,13 @@
       "kind": "float",
       "shapes": [
         0
+      ]
+    },
+    "hero": "<path class='fine' d='M-6 184H214'/><ellipse cx='80' cy='172' rx='42' ry='11'/><ellipse cx='80' cy='150' rx='32' ry='10'/><ellipse class='acc2' cx='80' cy='132' rx='22' ry='8'/><rect x='140' y='128' width='32' height='54' rx='5'/><path class='fine' d='M156 128v-8'/><path class='acc' d='M156 104c-7 9-7 15 0 17 7-2 7-8 0-17z'/><path class='fine' d='M40 96c10-30 34-44 60-46-4 26-24 44-56 50M52 90c12-12 26-22 40-28'/>",
+    "hero_idle": {
+      "kind": "float",
+      "shapes": [
+        7
       ]
     }
   },
@@ -196,6 +282,13 @@
       "shapes": [
         2
       ]
+    },
+    "hero": "<path class='fine' d='M-6 184H214'/><path d='M44 106l56-46 56 46'/><path d='M54 98v86h92V98'/><rect x='88' y='140' width='24' height='44' rx='2'/><rect class='acc' x='66' y='112' width='24' height='22' rx='2'/><rect class='acc' x='110' y='112' width='24' height='22' rx='2'/><path class='fine' d='M78 112v22M122 112v22'/><path d='M130 76V60h14v26'/><path class='fine' d='M180 184v-30M180 154c-10 0-16-10-12-20 0-12 24-12 24 0 4 10-2 20-12 20z'/><path class='fine' d='M30 50v10M25 55h10M60 34v8M56 38h8'/>",
+    "hero_idle": {
+      "kind": "pulse",
+      "shapes": [
+        9
+      ]
     }
   },
   "default": {
@@ -207,6 +300,11 @@
       "shapes": [
         0
       ]
+    },
+    "hero": "<path class='fine' d='M-6 184H214'/><path d='M40 92v92M160 92v92'/><path d='M30 70h140l-10 24H40z'/><path class='fine' d='M64 70l-4 24M100 70v24M136 70l4 24'/><rect class='acc' x='70' y='46' width='60' height='16' rx='4'/><rect x='92' y='116' width='32' height='68' rx='2'/><circle class='fine' cx='117' cy='150' r='2.5'/><rect x='52' y='112' width='30' height='30' rx='3'/><path class='fine' d='M67 112v30M52 127h30'/><path d='M170 168h22l-3 16h-16z'/><path class='fine' d='M181 168c-2-10-10-14-16-12 2 8 8 12 16 12zM181 168c2-12 10-16 16-14-2 8-8 14-16 14z'/>",
+    "hero_idle": {
+      "kind": "float",
+      "shapes": []
     }
   }
 }

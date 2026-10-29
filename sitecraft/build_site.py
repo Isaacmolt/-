@@ -845,17 +845,20 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, 
     }
     tpl = _env.get_template("onepage.html.j2")
     from markupsafe import Markup
-    band = "".join(f'<g transform="translate({x} 0) rotate({r} 100 100)">{drawable(mset.get(k, motif))}</g>'
-                   for x, r, k in ((0, -8, "a"), (300, 6, "b"), (600, -5, "c")))
+    # 橫幅：兩側是主圖騰與第三圖騰，中間是這一類的場景插畫（像一組靜物，不是三個圖示）
+    hero_art = idle_classes(drawable(mset["hero"]), mset.get("hero_idle") or {"shapes": []}) if mset.get("hero") else drawable(mset.get("b", motif))
+    band = (f'<g transform="translate(20 30) rotate(-8 100 100) scale(.78)">{drawable(motif)}</g>'
+            f'<g transform="translate(300 0)">{hero_art}</g>'
+            f'<g transform="translate(620 30) rotate(-5 100 100) scale(.78)">{drawable(mset.get("c", motif))}</g>')
     idle = mset.get("idle") or {"kind": "float", "shapes": [0]}
     band = '<circle class="disc" cx="400" cy="92" r="64"/>' + band
-    band2 = '<circle class="disc" cx="400" cy="84" r="62"/>' + "".join(
-        f'<g transform="translate({x} 0) rotate({r} 100 100)">{drawable(mset.get(k, motif))}</g>' for x, r, k in ((40, -8, "a"), (300, -5, "c")))
+    band2 = '<circle class="disc" cx="134" cy="76" r="58"/>' + hero_art
     closing_motif = motif if mset.get("hero") else mset.get("c", motif)
     return minify_css(tpl.render(b=b, t={**theme["palette"], "word": theme.get("word", "LOCAL"), "motif": Markup(motif),
                                          "motif_draw": Markup(drawable(motif)), "motif_idle": Markup(idle_classes(drawable(motif), idle)),
                                          "motif_scene": Markup(scene_markup(mset)),
                                          "motif_band2": Markup(band2), "motif_closing": Markup(drawable(closing_motif)),
+                                         "motif_about": Markup('<circle class="disc" cx="120" cy="70" r="52"/>' + drawable(mset.get("c", motif))),
                                          "motif_overlay": Markup(mset.get("b", motif)),
                                          "motif_b": Markup(mset.get("b", motif)), "motif_band": Markup(band)}, demo=demo))
 
