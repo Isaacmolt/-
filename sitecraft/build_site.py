@@ -676,6 +676,27 @@ def parse_hours(hours_json: str) -> tuple[list[dict], list[dict]]:
     return weekday, data.get("periods", [])
 
 
+def usual_hours(periods: list[dict]) -> tuple[str, str]:
+    """一週裡最常見的開門時間（每天第一段）與打烊時間（每天最後一段），給相簿圖說用；沒有營業時間就回傳空字串。"""
+    first, last = {}, {}
+    for p in periods:
+        o, c = p.get("open") or {}, p.get("close") or {}
+        if "day" not in o or "hour" not in o or "hour" not in c:
+            continue
+        om = o["hour"] * 60 + o.get("minute", 0)
+        cm = c["hour"] * 60 + c.get("minute", 0) + (1440 if c.get("day", o["day"]) != o["day"] else 0)
+        d = o["day"]
+        if d not in first or om < first[d]:
+            first[d] = om
+        if d not in last or cm > last[d]:
+            last[d] = cm
+    if not first:
+        return "", ""
+    pick = lambda vals: max(set(vals), key=lambda v: (vals.count(v), -v))
+    fmt = lambda m: f"{m // 60 % 24:02d}:{m % 60:02d}"
+    return fmt(pick(list(first.values()))), fmt(pick(list(last.values())))
+
+
 def opening_hours_spec(periods: list[dict]) -> list[dict]:
     spec = []
     for p in periods:
@@ -941,10 +962,16 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, 
     else:
         # 沒有照片：標語直排一張、三張場景插畫（吧台、街角、窗邊；不加圖說，不假裝是照片），店名定了再畫
         gallery_items.append({"img": "", "art": "", "tall": True, "type": True, "label": ""})
+        # 排成「店裡的一天」：開門前的近景、午後的店裡、打烊後的街角；圖說是這家店平常的開門與打烊時間
         # 橫幅版型的首屏已經畫了店裡，相簿就不再放同一張
-        keys = ("street", "detail") if theme.get("hero", "side") == "band" else ("interior", "street", "detail")
+        keys = ("detail", "street") if theme.get("hero", "side") == "band" else ("detail", "interior", "street")
+        opens, closes = usual_hours(periods)
+        when = {"detail": ("am", f"{opens} 開門" if opens else ""), "interior": ("pm", "午後"),
+                "street": ("night", f"{closes} 打烊" if closes else "")}
         for key in keys:
-            gallery_items.append({"img": "", "art": key, "tall": key == "detail", "type": False, "label": ""})
+            k, text = when[key]
+            gallery_items.append({"img": "", "art": key, "tall": key == "detail", "type": False, "label": "",
+                                  "when": text if opens else "", "when_k": k})
     mode = FONT_MODES.get(theme.get("mode", "bold"), FONT_MODES["bold"])
     fill = {"name": name, "city": lead.get("city", ""), "district": lead.get("district", "") or "在地"}
     statement = (content.get("statement") or theme.get("statement", "").format(**fill)).strip()
