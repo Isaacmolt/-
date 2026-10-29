@@ -59,5 +59,35 @@ def main() -> Path:
     return out
 
 
+def edge() -> Path:
+    """邊界案例站 sites/_qa-edge/：長店名、午晚兩段營業、週五六營業到凌晨、沒有 Google 評分、沒有 LINE、粗獷字型語氣（菜單板）。"""
+    import json as _json
+    leads = read_leads(SAMPLE_LEADS_FILE)
+    src = next(r for r in leads if r["slug"] == "demo-cafe")
+    periods, weekday = [], []
+    names = ["星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期日"]
+    for i, nm in enumerate(names):
+        g = (i + 1) % 7  # Google 的 day：0=星期日
+        if nm == "星期日":
+            weekday.append(f"{nm}: 休息")
+            continue
+        if nm in ("星期五", "星期六"):
+            periods.append({"open": {"day": g, "hour": 17, "minute": 0}, "close": {"day": (g + 1) % 7, "hour": 2, "minute": 0}})
+            weekday.append(f"{nm}: 17:00 – 02:00")
+        else:
+            periods += [{"open": {"day": g, "hour": 11, "minute": 0}, "close": {"day": g, "hour": 14, "minute": 0}},
+                        {"open": {"day": g, "hour": 17, "minute": 0}, "close": {"day": g, "hour": 21, "minute": 0}}]
+            weekday.append(f"{nm}: 11:00 – 14:00, 17:00 – 21:00")
+    lead = {**src, "slug": "_qa-edge", "demo_url": "", "theme": "hotpot", "category": "火鍋店",
+            "name": "小巷裡的老宅手作鍋物工作室 Alley House Hotpot", "rating": "", "review_count": "", "line_url": "",
+            "hours_json": _json.dumps({"weekday": weekday, "periods": periods}, ensure_ascii=False)}
+    site = SITES_DIR / "_qa-edge"
+    shutil.rmtree(site, ignore_errors=True)
+    out = build_one(lead, load_config(), load_themes(), demo=True)
+    print("fixture:", out)
+    return out
+
+
 if __name__ == "__main__":
     main()
+    edge()

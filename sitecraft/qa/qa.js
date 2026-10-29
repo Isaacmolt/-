@@ -51,10 +51,21 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
       r.bandGap[n] = await pg.evaluate(() => { const hero = document.querySelector('.hero'); if (hero.dataset.hero !== 'band') return 99; const cta = document.querySelector('.hero .cta').getBoundingClientRect(); const tops = [...document.querySelectorAll('.hero-foot .motif :is(path,circle,ellipse,rect)')].filter(s => s.closest('svg').getBoundingClientRect().width > 0).map(s => s.getBoundingClientRect().top); return Math.round(Math.min(...tops) - cta.bottom); });
       r.ctaClear = r.ctaClear || {};
       r.ctaClear[n] = await pg.evaluate(() => { const ctl = [...document.querySelectorAll('.hero .cta > *')].map(e => e.getBoundingClientRect()); const shapes = [...document.querySelectorAll('.hero .motif :is(path,circle,ellipse,rect)')].filter(s => s.closest('svg').getBoundingClientRect().width > 0).map(s => s.getBoundingClientRect()); const hit = (a, b) => a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom; return innerWidth > 640 || !ctl.some(c => shapes.some(s => hit(c, s))); });
+      // the brand mark stays square, hero names break only between word groups, facts never spill into the next cell,
+      // and on phones the hero picture is a real picture (at least 28% of the screen tall)
+      r.layout = r.layout || {};
+      r.layout[n] = await pg.evaluate(() => {
+        const m = document.querySelector('.brand .mark').getBoundingClientRect();
+        const pic = [...document.querySelectorAll('.hero .motif svg, .hero .hp-m')].find(e => e.getBoundingClientRect().width > 0);
+        const picH = pic ? pic.getBoundingClientRect().height : 0;
+        return { mark: Math.abs(m.width - m.height) < 1, words: [...document.querySelectorAll('h1 .wd')].every(w => w.getClientRects().length === 1),
+                 facts: [...document.querySelectorAll('.hero .fact')].every(f => f.scrollWidth <= f.clientWidth + 1),
+                 pic: innerWidth > 640 || picH >= innerHeight * .28 };
+      });
       // map card: the pin sits in its drawing, never on the address
       r.mapClear = r.mapClear || {};
       r.mapClear[n] = await pg.evaluate(() => { const pin = document.querySelector('.map-ph .pin'), ad = document.querySelector('.map-ph .addr'); if (!pin || !ad) return true; return pin.getBoundingClientRect().bottom <= ad.getBoundingClientRect().top; });
-      r.heroFit[n] = await pg.evaluate(() => { const h = document.querySelector('.hero').getBoundingClientRect(); const bar = document.getElementById('demoBar'); const limit = innerHeight - (bar ? bar.getBoundingClientRect().height : 0); return Math.round(h.bottom) + '/' + Math.round(limit) + (h.bottom <= limit + 1 ? ' ok' : ' OVER'); });
+      r.heroFit[n] = await pg.evaluate(() => { const h = innerWidth <= 640 ? document.querySelector('.hero .cta').getBoundingClientRect() : document.querySelector('.hero').getBoundingClientRect(); const bar = document.getElementById('demoBar'); const limit = innerHeight - (bar ? bar.getBoundingClientRect().height : 0); return Math.round(h.bottom) + '/' + Math.round(limit) + (h.bottom <= limit + 1 ? ' ok' : ' OVER'); });
       await pg.close();
     }
     for (const [name, vp] of [['desktop', { width: 1440, height: 900 }], ['mobile', { width: 390, height: 844 }]]) {
@@ -68,9 +79,13 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
       await page.evaluate(() => { document.querySelectorAll('[data-reveal]').forEach(el => el.classList.add('in')); document.querySelector('.closing').classList.add('in'); });
       await page.waitForTimeout(2200);
       // Chromium's beyond-viewport capture drops finished SVG stroke animations: freeze them for the capture only
-      { const fz = await page.addStyleTag({ content: '.motif svg,.motif svg *,.motif .d{animation:none!important;transition:none!important;stroke-dashoffset:0!important}' }); await page.waitForTimeout(150);
+      { const fz = await page.addStyleTag({ content: '.motif svg,.motif svg *,.motif .d,.dw [pathLength]{animation:none!important;transition:none!important;stroke-dashoffset:0!important}' }); await page.waitForTimeout(150);
         await page.screenshot({ path: path.join(OUT, `${slug}-${name}-full.png`), fullPage: true });
         await fz.evaluate(el => el.remove()); }
+      await page.evaluate(() => scrollTo(0, document.documentElement.scrollHeight)); await page.waitForTimeout(900);
+      r.footGap = r.footGap || [];
+      r.footGap.push(await page.evaluate(() => { const f = document.querySelector('footer').getBoundingClientRect(); const bar = document.getElementById('demoBar'); const limit = bar ? bar.getBoundingClientRect().top : innerHeight; return Math.abs(f.bottom - limit) <= 1; }));
+      await page.evaluate(() => scrollTo(0, 0)); await page.waitForTimeout(400);
       r.overflow[name] = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
       if (name === 'mobile') {
         r.smallTargets = await page.evaluate(() => [...document.querySelectorAll('a,button')].filter(el => {
@@ -115,7 +130,7 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
         r.fn.statementUnits = await page.evaluate(() => [...document.querySelectorAll('.statement .un')].every(el => el.getClientRects().length === 1));
         r.fn.factsLinks = await page.evaluate(() => [...document.querySelectorAll('.hero .fact')].filter(f => /電話|地址/.test(f.querySelector('b').textContent)).every(f => !!f.querySelector('a[href]')));
         r.fn.typeClearMobile = await page.evaluate(() => { const vt = document.querySelector('.tile.type .vtext'), cap = document.querySelector('.tile.type .cap'); if (!vt) return true; document.getElementById('gallery').scrollIntoView(); return vt.getBoundingClientRect().bottom <= cap.getBoundingClientRect().top + 1; });
-        r.fn.titleIndent = await page.evaluate(() => { const h = document.querySelector('h1'); const en = h.querySelector('.en'); if (!en) return 0; const zh = [...h.querySelectorAll(':scope > .w')]; const l = Math.min(...zh.map(w => w.getBoundingClientRect().left)), rr = Math.max(...zh.map(w => w.getBoundingClientRect().right)); const eb = en.getBoundingClientRect(); const enText = en.querySelector('.w'); const et = enText.getBoundingClientRect(); const last = en.querySelectorAll('.w'); const er = last[last.length - 1].getBoundingClientRect().right; return getComputedStyle(h).textAlign === 'center' ? Math.round(((et.left + er) / 2) - ((l + rr) / 2)) : Math.round(et.left - l); });
+        r.fn.titleIndent = await page.evaluate(() => { const h = document.querySelector('h1'); const en = h.querySelector('.en'); if (!en) return 0; const zh = [...h.querySelectorAll('.w')].filter(w => !w.closest('.en')); const l = Math.min(...zh.map(w => w.getBoundingClientRect().left)), rr = Math.max(...zh.map(w => w.getBoundingClientRect().right)); const eb = en.getBoundingClientRect(); const enText = en.querySelector('.w'); const et = enText.getBoundingClientRect(); const last = en.querySelectorAll('.w'); const er = last[last.length - 1].getBoundingClientRect().right; return getComputedStyle(h).textAlign === 'center' ? Math.round(((et.left + er) / 2) - ((l + rr) / 2)) : Math.round(et.left - l); });
         // modal focus: after opening, focus is inside the overlay and Tab stays inside
         await page.click('#menuBtn'); await page.waitForTimeout(500);
         const inside1 = await page.evaluate(() => !!document.activeElement.closest('#overlay'));
@@ -208,7 +223,7 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
                    tileRatio: +(rb.width / rb.height).toFixed(2), tallRatio: tall ? +(tb.width / tb.height).toFixed(2) : 0.75,
                    ogImage: !!document.querySelector('meta[property="og:image"]'), fontsLoaded: document.fonts.check('600 20px "Noto Serif TC"') || document.fonts.check('800 20px "Noto Sans TC"') };
         });
-        await page.addStyleTag({ content: '*,*::before,*::after{transition:none!important;animation:none!important;opacity:1}h1 .w,.tagline,.hero .cta,.hero .eyebrow,.hero-foot .fact,.strip .tile{opacity:1!important;transform:none!important}.hero .eyebrow::before{transform:none!important}.motif svg *,.cl-motif *{stroke-dashoffset:0!important}.js .closing .cl-motif{opacity:.22!important}' });
+        await page.addStyleTag({ content: '*,*::before,*::after{transition:none!important;animation:none!important;opacity:1}h1 .w,.tagline,.hero .cta,.hero .eyebrow,.hero-foot .fact,.strip .tile{opacity:1!important;transform:none!important}.hero .eyebrow::before{transform:none!important}.motif svg *,.cl-motif *,.dw [pathLength]{stroke-dashoffset:0!important}.js .closing .cl-motif{opacity:.22!important}' });
         await page.waitForTimeout(200);
         await page.addScriptTag({ content: axeSource });
         const res = await page.evaluate(async () => await axe.run(document, { runOnly: ['wcag2a', 'wcag2aa', 'best-practice'] }));
@@ -217,7 +232,7 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
         // dark mode contrast
         const dark = await browser.newPage({ viewport: vp, colorScheme: 'dark' });
         await dark.goto(url, { waitUntil: 'load' }); await dark.waitForTimeout(800);
-        await dark.addStyleTag({ content: '*,*::before,*::after{transition:none!important;animation:none!important;opacity:1}h1 .w,.tagline,.hero .cta,.hero .eyebrow,.hero-foot .fact,.strip .tile{opacity:1!important;transform:none!important}.hero .eyebrow::before{transform:none!important}.motif svg *,.cl-motif *{stroke-dashoffset:0!important}.js .closing .cl-motif{opacity:.22!important}' });
+        await dark.addStyleTag({ content: '*,*::before,*::after{transition:none!important;animation:none!important;opacity:1}h1 .w,.tagline,.hero .cta,.hero .eyebrow,.hero-foot .fact,.strip .tile{opacity:1!important;transform:none!important}.hero .eyebrow::before{transform:none!important}.motif svg *,.cl-motif *,.dw [pathLength]{stroke-dashoffset:0!important}.js .closing .cl-motif{opacity:.22!important}' });
         await dark.evaluate(() => { document.querySelectorAll('[data-reveal]').forEach(el => el.classList.add('in')); document.querySelector('.closing').classList.add('in'); });
         await dark.waitForTimeout(200);
         await dark.screenshot({ path: path.join(OUT, `${slug}-desktop-dark.png`), fullPage: true });
@@ -265,7 +280,7 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
       && fn.serviceLinksFocusable && Math.abs(fn.titleIndent) <= 2 && fn.modalFocusTrapped && !fn.factClipped && !fn.nbBroken && !fn.ctaOrphan && fn.visibleWithoutJs && v.scrollSpy === '#services' && c.h1DiffersFromBody && c.ogImage
       && v.anchorLanding && v.anchorLanding.solid && !v.anchorLanding.hidden && v.anchorLanding.top === 0
       && fn.overlayHoursSpans && v.heroGeom && (!v.heroGeom.band || v.heroGeom.overlapPct === 0) && v.heroGeom.bandAboveBar && v.factsDrift === 'none'
-      && fn.menuBtnClear && v.nmOneLine && v.motifDrawn && v.weaveMasked && fn.statusInline && !v.dragOpensLightbox && v.stripEnd && v.stripEnd.now === String(v.stripEnd.total) && v.stripEnd.nextDisabled && v.stripPrev && v.stripPrev.moved && +v.stripPrev.now < v.stripEnd.total && v.lbCentred && fn.factsLinks && fn.statementUnits && fn.photoFull && v.statusRing && v.photos && v.landscapeMenu && v.landscapeMenu.firstBelowBrand && v.landscapeMenu.actsReachable && v.mapClear && Object.values(v.mapClear).every(Boolean) && v.ctaClear && Object.values(v.ctaClear).every(Boolean) && v.fabSafe && v.reducedMotion.draw === 'none' && parseFloat(v.reducedMotion.dash) === 0 && v.fontFaces && v.fontFaces.length >= 2 && v.fontFaces.every(s => s !== 'error') && v.fontFaces.includes('loaded')
+      && fn.menuBtnClear && v.nmOneLine && v.motifDrawn && v.weaveMasked && fn.statusInline && !v.dragOpensLightbox && v.stripEnd && v.stripEnd.now === String(v.stripEnd.total) && v.stripEnd.nextDisabled && v.stripPrev && v.stripPrev.moved && +v.stripPrev.now < v.stripEnd.total && v.lbCentred && fn.factsLinks && fn.statementUnits && fn.photoFull && v.statusRing && v.photos && v.landscapeMenu && v.landscapeMenu.firstBelowBrand && v.landscapeMenu.actsReachable && v.mapClear && Object.values(v.mapClear).every(Boolean) && v.ctaClear && Object.values(v.ctaClear).every(Boolean) && v.fabSafe && v.layout && Object.values(v.layout).every(x => x.mark && x.words && x.facts && x.pic) && v.footGap && v.footGap.every(Boolean) && v.reducedMotion.draw === 'none' && parseFloat(v.reducedMotion.dash) === 0 && v.fontFaces && v.fontFaces.length >= 2 && v.fontFaces.every(s => s !== 'error') && v.fontFaces.includes('loaded')
       && v.tiles && v.tiles.hoursMatch && v.tiles.typeClear && fn.bandVisibleMobile && fn.typeClearMobile && fn.lightbox
       && v.closingClear && Object.values(v.closingClear).every(Boolean)
       && v.nameClear && Object.values(v.nameClear).every(x => x.real === 0 && x.long === 0) && v.bandGap && Object.values(v.bandGap).every(g => g >= 24)

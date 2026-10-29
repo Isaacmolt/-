@@ -302,6 +302,33 @@ def name_lines(name: str) -> list[dict]:
     return lines
 
 
+NAME_WORDS = sorted("""工作室 咖啡館 咖啡廳 咖啡 早午餐 早餐 餐廳 小吃 麵館 麵店 火鍋 鍋物 甜點 烘焙 蛋糕 美髮 髮型 髮廊 沙龍 設計 美容 美甲
+美睫 寵物 動物 醫院 診所 牙醫 健身 瑜珈 花店 花藝 汽車 機車 保養 維修 補習班 教室 書院 按摩 養生 民宿 旅店 商行 小館 食堂 生活 手作""".split(), key=len, reverse=True)
+
+
+def cjk_groups(chars: list[str]) -> list[list[str]]:
+    """把店名的中文字分成不可拆的詞組：「的」之後、常見行業詞前後才可以換行。"""
+    text = "".join(chars)
+    cuts = set()
+    i = 0
+    while i < len(text):
+        hit = next((w for w in NAME_WORDS if text.startswith(w, i)), None)
+        if hit:
+            cuts.update((i, i + len(hit)))
+            i += len(hit)
+            continue
+        if text[i] == "的":
+            cuts.add(i + 1)
+        i += 1
+    cuts = sorted(c for c in cuts if 0 < c < len(text))
+    groups, last = [], 0
+    for c in cuts + [len(text)]:
+        if c > last:
+            groups.append(chars[last:c])
+            last = c
+    return groups
+
+
 def name_len_units(name: str) -> float:
     """店名最長一行的「全形字數」，拉丁字母約算半形，用來依欄寬縮放標題。"""
     best = 1.0
@@ -338,7 +365,7 @@ def art_tiles(palette: dict, seed: str, mset: dict, n: int = 3) -> list[str]:
     def g(m, tx, ty, sc, color, width, extra=""):
         cls = "k" if color == pd else "pk"
         return (f'<g class="{cls}" transform="translate({tx} {ty}) scale({sc})" {stroke} stroke="{color}" '
-                f'stroke-width="{width}" {extra}>{m}</g>')
+                f'stroke-width="{width}" {extra}>{drawable(m)}</g>')
 
     specs = [
         (f'<rect class="g" width="400" height="300" fill="{asoft}"/>'
@@ -346,7 +373,9 @@ def art_tiles(palette: dict, seed: str, mset: dict, n: int = 3) -> list[str]:
          f'<path class="k" d="M40 252H360" stroke="{pd}" stroke-width="2" opacity=".35"/>'
          + g(A, 70, 20, 1.15, pd, 2.4) + g(C, 290, 180, .38, pd, 5, 'opacity=".7"')),               # 0 主圖騰 + 地平線 + 小圖騰
         f'<rect class="g2" width="400" height="300" fill="{soft}"/>'
-        + "".join(g(B, 14 + i * 118 + (60 if j % 2 else 0), -4 + j * 86, .42, p, 4, f'opacity="{".32" if (i + j) % 2 else ".52"}"') for i in range(4) for j in range(4)),  # 2 織紋（錯位）
+        f'<circle class="ac" cx="{rnd.randint(90, 130)}" cy="{rnd.randint(70, 100)}" r="{rnd.randint(60, 80)}" fill="{a}" opacity=".45"/>'
+        f'<path class="k" d="M30 258H370" stroke="{pd}" stroke-width="2" opacity=".35"/>'
+        + g(B, 120, 40, 1.1, pd, 2.4) + g(C, 40, 190, .34, pd, 5, 'opacity=".7"'),                    # 2 第二個場景：b 主角、c 配角
         f'<rect class="g" width="200" height="300" fill="{asoft}"/><rect class="g2" x="200" width="200" height="300" fill="{soft}"/>'
         + g(C, 100, 50, 1.0, pd, 2.6) + g(B, 20, 215, .32, pd, 5, 'opacity=".55"'),                 # 3 雙色底 + 兩個圖騰
     ]
@@ -620,6 +649,36 @@ def _voice_font(spec, size):
         return None
 
 
+def og_photo(content: dict, site_dir: Path):
+    """有老闆的照片就用第一張，裁成拱門框放在分享圖右側。"""
+    try:
+        from PIL import Image, ImageDraw
+    except ImportError:
+        return None
+    gallery = [g for g in content.get("gallery", []) if g]
+    if not gallery:
+        return None
+    src = gallery[0] if "/" in gallery[0] else f"img/{gallery[0]}"
+    try:
+        im = Image.open(site_dir / src).convert("RGB")
+    except Exception:  # noqa: BLE001
+        return None
+    w, h = 360, 450
+    r = im.width / im.height
+    if r > w / h:
+        nw = int(im.height * w / h); im = im.crop(((im.width - nw) // 2, 0, (im.width + nw) // 2, im.height))
+    else:
+        nh = int(im.width * h / w); im = im.crop((0, (im.height - nh) // 2, im.width, (im.height + nh) // 2))
+    im = im.resize((w, h))
+    mask = Image.new("L", (w, h), 0)
+    md = ImageDraw.Draw(mask)
+    md.rounded_rectangle((0, w // 2, w, h), radius=18, fill=255)
+    md.ellipse((0, 0, w, w), fill=255)
+    out = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    out.paste(im, (0, 0), mask)
+    return out
+
+
 def og_art(lead: dict, pal: dict):
     """分享圖右側畫上這一類的首屏插畫（需要 cairosvg；沒有就只留強調色圓）。"""
     try:
@@ -668,9 +727,13 @@ def og_image(lead: dict, content: dict, theme: dict, out: Path) -> bool:
     gd.ellipse((800, 60, 1160, 420), fill=ac + (150,))
     glow = glow.filter(ImageFilter.GaussianBlur(2))
     img = Image.alpha_composite(img.convert("RGBA"), glow)
-    art = og_art(lead, pal)
-    if art is not None:
-        img.alpha_composite(art, (700, 40))
+    photo = og_photo(content, out.parent)
+    if photo is not None:
+        img.alpha_composite(photo, (W - 80 - photo.width, (H - photo.height) // 2 - 20))
+    else:
+        art = og_art(lead, pal)
+        if art is not None:
+            img.alpha_composite(art, (700, 40))
     d = ImageDraw.Draw(img)
     zh_size = 128 if len(zh) <= 5 else 104 if len(zh) <= 7 else 84
     f_zh = _voice_font(spec_zh, zh_size) or (ImageFont.truetype(base, zh_size) if base else None)
@@ -828,6 +891,8 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, 
         "closing_closed": closing_closed(lead.get("theme") or "default"),
         "scrim": _lum(theme["palette"]["p"]) > 0.2,
         "initial": initial, "name_tokens": name_tokens(name), "name_lines": name_lines(name), "address_short": address_short,
+        "name_groups": [cjk_groups(ln["tokens"]) if ln["kind"] == "zh" else [[t] for t in ln["tokens"]] for ln in name_lines(name)],
+        "services_lead": content.get("services_lead") or theme.get("services_lead") or "點任一項即可直接詢問，有其他需求也歡迎告訴我們。",
         "address_html": address_html(address, lead.get("city", ""), lead.get("district", "")),
         "mode": theme.get("mode", "bold"), "hero_layout": theme.get("hero", "side"),
         "fonts_url": mode["url"], "fonts": fonts or [], "font_display": mode["display"],
@@ -847,17 +912,19 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, 
     from markupsafe import Markup
     # 橫幅：兩側是主圖騰與第三圖騰，中間是這一類的場景插畫（像一組靜物，不是三個圖示）
     hero_art = idle_classes(drawable(mset["hero"]), mset.get("hero_idle") or {"shapes": []}) if mset.get("hero") else drawable(mset.get("b", motif))
-    band = (f'<g transform="translate(20 30) rotate(-8 100 100) scale(.78)">{drawable(motif)}</g>'
+    band = (f'<g transform="translate(150 52) rotate(-8 100 100) scale(.7)">{drawable(motif)}</g>'
             f'<g transform="translate(300 0)">{hero_art}</g>'
-            f'<g transform="translate(620 30) rotate(-5 100 100) scale(.78)">{drawable(mset.get("c", motif))}</g>')
+            f'<g transform="translate(496 52) rotate(-5 100 100) scale(.7)">{drawable(mset.get("c", motif))}</g>')
     idle = mset.get("idle") or {"kind": "float", "shapes": [0]}
     band = '<circle class="disc" cx="400" cy="92" r="64"/>' + band
     band2 = '<circle class="disc" cx="134" cy="76" r="58"/>' + hero_art
     closing_motif = motif if mset.get("hero") else mset.get("c", motif)
+    closing_draw = idle_classes(drawable(closing_motif), mset.get("idle") or {"shapes": []}) if closing_motif is motif else drawable(closing_motif)
     return minify_css(tpl.render(b=b, t={**theme["palette"], "word": theme.get("word", "LOCAL"), "motif": Markup(motif),
                                          "motif_draw": Markup(drawable(motif)), "motif_idle": Markup(idle_classes(drawable(motif), idle)),
                                          "motif_scene": Markup(scene_markup(mset)),
-                                         "motif_band2": Markup(band2), "motif_closing": Markup(drawable(closing_motif)),
+                                         "motif_band2": Markup(band2), "motif_closing": Markup(closing_draw),
+                                         "motif_b_draw": Markup(drawable(mset.get("b", motif))),
                                          "motif_about": Markup('<circle class="disc" cx="120" cy="70" r="52"/>' + drawable(mset.get("c", motif))),
                                          "motif_overlay": Markup(mset.get("b", motif)),
                                          "motif_b": Markup(mset.get("b", motif)), "motif_band": Markup(band)}, demo=demo))

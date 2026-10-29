@@ -7,11 +7,12 @@
 cd sitecraft/qa
 npm install && npx playwright install chromium      # 只需一次
 python ../build_site.py --sample                       # 重新產生三個範例站
-python make_fixture.py                                 # 有照片的測試站 sites/_qa-photos/（不進 git、不部署）
-node qa.js demo-cafe,demo-hair,demo-pet,_qa-photos 回合名稱
+python make_fixture.py                                 # 測試站 sites/_qa-photos/（有照片）與 sites/_qa-edge/（邊界案例），不進 git、不部署
+node qa.js demo-cafe,demo-hair,demo-pet,_qa-photos,_qa-edge 回合名稱
 ```
 
-範例站沒有照片，所以另外建一個「有照片」的測試站，燈箱、照片圖說與 `img/` 路徑才會被測到。
+範例站沒有照片，所以另外建一個「有照片」的測試站，燈箱、照片圖說與 `img/` 路徑才會被測到；
+`_qa-edge` 是長店名、午晚兩段營業、營業到凌晨、沒有評分、沒有 LINE、粗獷字型語氣的組合。
 
 每個站點檢查：
 - 桌機 1440×900、筆電 1366×768、手機 390×844 截圖（首屏、整頁、選單、深色模式）
