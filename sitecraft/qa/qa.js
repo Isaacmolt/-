@@ -14,15 +14,17 @@ fs.mkdirSync(OUT, { recursive: true });
 const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]/u;
 
 (async () => {
+  const report = {};
+  if (process.env.QA_REPORT) Object.assign(report, JSON.parse(fs.readFileSync(process.env.QA_REPORT, 'utf8')));
+  else {
   const server = spawn('python3', ['-m', 'http.server', String(PORT), '--bind', '127.0.0.1'], { cwd: SITES, stdio: 'ignore' });
   await new Promise(r => setTimeout(r, 800));
   const browser = await chromium.launch();
-  const report = {};
   for (const slug of slugs) {
     const url = `http://127.0.0.1:${PORT}/${slug}/`;
     const r = { errors: [], overflow: {}, smallTargets: [], axe: [], emoji: false };
     r.heroFit = {};
-    for (const [n, vp] of [['700x900', {width:700,height:900}], ['820x1180', {width:820,height:1180}], ['1280x720', {width:1280,height:720}], ['1280x800', {width:1280,height:800}], ['1366x768', {width:1366,height:768}], ['1440x900', {width:1440,height:900}], ['1920x1080', {width:1920,height:1080}], ['1366x657', {width:1366,height:657}], ['1536x730', {width:1536,height:730}], ['1440x789', {width:1440,height:789}], ['320x568', {width:320,height:568}], ['360x640', {width:360,height:640}], ['375x667', {width:375,height:667}], ['390x844', {width:390,height:844}], ['844x390', {width:844,height:390}]]) {
+    for (const [n, vp] of [['700x900', {width:700,height:900}], ['820x1180', {width:820,height:1180}], ['900x800', {width:900,height:800}], ['1280x720', {width:1280,height:720}], ['1280x800', {width:1280,height:800}], ['1366x768', {width:1366,height:768}], ['1440x900', {width:1440,height:900}], ['1920x1080', {width:1920,height:1080}], ['1366x657', {width:1366,height:657}], ['1536x730', {width:1536,height:730}], ['1440x789', {width:1440,height:789}], ['320x568', {width:320,height:568}], ['360x640', {width:360,height:640}], ['375x667', {width:375,height:667}], ['390x844', {width:390,height:844}], ['844x390', {width:844,height:390}]]) {
       const pg = await browser.newPage({ viewport: vp }); await pg.goto(url, { waitUntil: 'load' }); await pg.evaluate(() => document.fonts.ready); await pg.waitForTimeout(2200);
       if (n === '1366x768') await pg.screenshot({ path: path.join(OUT, `${slug}-laptop-hero.png`) });  // capture before the probes below touch the DOM
       {
@@ -68,6 +70,8 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
                  tabletPics: innerWidth <= 640 || innerWidth > 880 || [document.querySelector('.hero .hp-m')].filter(Boolean).every(e => { const b = e.getBoundingClientRect(), want = document.querySelector('.hero').dataset.hero === 'side' ? 4 / 5 : 4 / 3; return b.width === 0 || Math.abs(b.width / b.height - want) < .06; }),
                  svcFit: [...document.querySelectorAll('.svc li')].every(li => { const a = li.querySelector(':scope > a, :scope > div'); if (!a) return true; if (a.scrollWidth > a.clientWidth + 1) return false; const p = li.querySelector('.price'), r = li.querySelector('.arr'); if (!p || !r) return true; const x = p.getBoundingClientRect(), y = r.getBoundingClientRect(); return !(x.left < y.right && y.left < x.right && x.top < y.bottom && y.top < x.bottom); }),
                  vtext: (v => !v || innerWidth > 640 || parseFloat(getComputedStyle(v).fontSize) >= 14)(document.querySelector('.tile.type .vtext')),
+                 nav: [...document.querySelectorAll('.nav ul a, .nav .call')].filter(a => a.getBoundingClientRect().width > 0).every(a => a.getClientRects().length === 1 && a.getBoundingClientRect().height < 50),
+                 hoursRows: [...document.querySelectorAll('#hours li')].every(li => { const n = li.children[1]; const lh = parseFloat(getComputedStyle(n).lineHeight) || 28; return n.getBoundingClientRect().height <= lh * (n.querySelector('.sep') ? 2 : 1) + 4; }),
                  bandArt: (m => !m || innerWidth <= 880 || innerHeight < 700 || m.getBoundingClientRect().height >= 140)(document.querySelector('.hero[data-hero="band"] .hero-foot .motif svg.m1')) };
       });
       // map card: the pin sits in its drawing, never on the address
@@ -160,7 +164,7 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
         r.fn.statusInline = await page.evaluate(() => { const i = document.querySelector('#heroStatus i'), t = document.querySelector('#heroHours > span'); if (!i || !t) return true; const a = i.getBoundingClientRect(), b = t.getBoundingClientRect(); return a.right <= b.left + 1 && a.top >= b.top - 2 && a.bottom <= b.bottom + 2; });
         r.fn.factClipped = await page.evaluate(() => [...document.querySelectorAll('.fact > span')].some(sp => sp.scrollWidth > sp.clientWidth + 1 && !sp.classList.contains('num')));
         // no-break spans must stay on one line (no CJK orphans)
-        r.fn.nbBroken = await page.evaluate(() => [...document.querySelectorAll('.nb, .statement .nm .en')].some(el => { const lh = parseFloat(getComputedStyle(el).lineHeight) || 20; return el.getBoundingClientRect().height > lh * 1.5 || el.getClientRects().length > 1; }));
+        r.fn.nbBroken = await page.evaluate(() => [...document.querySelectorAll('.nb, .statement .nm .en')].filter(el => !getComputedStyle(el).writingMode.startsWith('vertical')).some(el => { const lh = parseFloat(getComputedStyle(el).lineHeight) || 20; return el.getBoundingClientRect().height > lh * 1.5 || el.getClientRects().length > 1; }));
         r.fn.menuBtnClear = await page.evaluate(() => { const b = document.getElementById('menuBtn').getBoundingClientRect(); const shapes = [...document.querySelectorAll('.hero .motif :is(path,circle,ellipse,rect)')].map(s => s.getBoundingClientRect()); return !shapes.some(s => s.left < b.right && b.left < s.right && s.top < b.bottom && b.top < s.bottom); });
         // hero CTA row: no orphan control on phones (every control shares a row with another, or spans full width)
         r.fn.ctaOrphan = await page.evaluate(() => { const els = [...document.querySelectorAll('.hero .cta > *')]; const rows = {}; els.forEach(e => { const b = e.getBoundingClientRect(); const k = Math.round(b.top); (rows[k] = rows[k] || []).push(b.width); }); return Object.values(rows).some(ws => ws.length === 1 && ws[0] < 300); });
@@ -304,6 +308,7 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
   } catch (e) { report.lighthouse = 'failed: ' + e.message.split('\n')[0]; }
   server.kill();
   fs.writeFileSync(path.join(OUT, 'report.json'), JSON.stringify(report, null, 2));
+  }
   // system checks: every category has a composed hero scene; every accent reads on dark grounds (hero, demo bar, dark mode)
   const motifs = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'motifs.json'), 'utf8'));
   const themes = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'themes.json'), 'utf8'));
@@ -313,27 +318,126 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
   const sysOk = !report.system.noHero.length && !report.system.darkAccent.length;
   console.log('system:', JSON.stringify(report.system), sysOk ? 'PASS' : 'FAIL');
   // known schedules: demo-cafe closes Mondays (Sunday evening points to Tuesday); _qa-edge runs Fri-Sat 17:00-02:00 and closes Sundays
-  const clockOk = (slug, c) => { if (!c || !Object.values(c).every(x => x.clWhole)) return false; if (slug === 'demo-cafe') return /週二 10:00 開門/.test(c.sun1900.text); if (slug === '_qa-edge') return !/今晚/.test(c.mon1200.title) && /^晚點/.test(c.thu1500.title) && /^今晚/.test(c.sat0100.title) && c.sun0130.today === '6' && c.sun0130.tag === '現在' && /營業中/.test(c.sun0130.text) && /02:00 打烊/.test(c.sun0130.text); return true; };
+  const clockOk = (slug, c) => { if (!c || !Object.values(c).every(x => x.clWhole)) return false; if (slug === 'demo-cafe') return /週二 10:00 開門/.test(c.sun1900.text) && /^週二/.test(c.sun1900.title); if (slug === '_qa-edge') return !/今晚/.test(c.mon1200.title) && /^晚點/.test(c.thu1500.title) && /^今晚/.test(c.sat0100.title) && c.sun0130.today === '6' && c.sun0130.tag === '現在' && /營業中/.test(c.sun0130.text) && /02:00 打烊/.test(c.sun0130.text); return true; };
   let allOk = sysOk;
   for (const slug of slugs) {
     const v = report[slug], fn = v.fn || {}, c = v.computed || {};
-    const ok = fn.fabHiddenAtTop && fn.menuBtnOnTop && fn.menuClosedByTap && fn.galleryCounterAfter2Next === '3' && fn.galleryCounterAfterPrev === '2'
-      && fn.serviceLinksFocusable && Math.abs(fn.titleIndent) <= 2 && fn.modalFocusTrapped && !fn.factClipped && !fn.nbBroken && !fn.ctaOrphan && fn.visibleWithoutJs && v.scrollSpy === '#services' && c.h1DiffersFromBody && c.ogImage
-      && v.anchorLanding && v.anchorLanding.solid && !v.anchorLanding.hidden && v.anchorLanding.top === 0
-      && fn.overlayHoursSpans && v.heroGeom && (!v.heroGeom.band || v.heroGeom.overlapPct === 0) && v.heroGeom.bandAboveBar && v.factsDrift === 'none'
-      && fn.menuBtnClear && v.nmOneLine && v.motifDrawn && v.weaveMasked && fn.statusInline && !v.dragOpensLightbox && (!v.stripScrolls || (v.stripEnd && v.stripEnd.now === String(v.stripEnd.total) && v.stripEnd.nextDisabled && v.stripPrev && v.stripPrev.moved && +v.stripPrev.now < v.stripEnd.total)) && v.lbCentred && fn.factsLinks && fn.statementUnits && fn.photoFull && v.statusRing && v.photos && v.landscapeMenu && v.landscapeMenu.firstBelowBrand && v.landscapeMenu.actsReachable && v.mapClear && Object.values(v.mapClear).every(Boolean) && v.ctaClear && Object.values(v.ctaClear).every(Boolean) && v.fabSafe && v.layout && Object.values(v.layout).every(x => x.mark && x.words && x.facts && x.pic && x.brand && x.arch && x.tabletPics && x.factSlice && x.bandArt && x.svcFit && x.vtext)
-      && v.layout['1440x900'].h1px >= v.layout['1280x720'].h1px - 1 && v.layout['1920x1080'].h1px >= v.layout['1440x900'].h1px - 1
-      && v.featureRing && v.featureRing.ok && v.navSolid && v.ctaLabel && (v.dragBack || !v.stripScrolls) && v.stripFit && v.navFocus && v.seamless && v.rhythm && v.rowLabels && v.copy && v.copy.photoLine && v.copy.typeCap && v.copy.scenes && v.copy.sign && fn.fabUnder && v.footGap && v.footGap.every(Boolean) && v.reducedMotion.draw === 'none' && parseFloat(v.reducedMotion.dash) === 0 && v.fontFaces && v.fontFaces.length >= 2 && v.fontFaces.every(s => s !== 'error') && v.fontFaces.includes('loaded')
-      && v.tiles && v.tiles.hoursMatch && v.tiles.typeClear && fn.bandVisibleMobile && fn.typeClearMobile && fn.lightbox
-      && v.closingClear && Object.values(v.closingClear).every(Boolean)
-      && v.nameClear && Object.values(v.nameClear).every(x => x.real === 0 && x.long === 0) && v.bandGap && Object.values(v.bandGap).every(g => g >= 24)
-      && v.kinsoku && Object.values(v.kinsoku).every(k => k === 0)
-      && fn.overlayRow && fn.overlayRow.brandClear && fn.overlayRow.filled && fn.dotCentred && v.drift <= 20 && v.leader && v.fabDark && clockOk(slug, v.clock)
-      && v.reducedMotion && v.reducedMotion.h1 === 'none' && v.reducedMotion.revealOpacity === '1' && v.focusRing && v.focusRing.ok
-      && Math.abs(c.tileRatio - 1.33) < 0.05 && Math.abs(c.tallRatio - 0.75) < 0.05 && !v.errors.length && !v.smallTargets.length
-      && !v.axe.length && !(v.axeDark || []).length && !v.emoji && Object.values(v.heroFit).every(x => x.includes('ok')) && Object.values(v.overflow).every(o => o === 0);
+    const checks = [
+      [`fn.fabHiddenAtTop`, () => (fn.fabHiddenAtTop)],
+      [`fn.menuBtnOnTop`, () => (fn.menuBtnOnTop)],
+      [`fn.menuClosedByTap`, () => (fn.menuClosedByTap)],
+      [`fn.galleryCounterAfter2Next === '3'`, () => (fn.galleryCounterAfter2Next === '3')],
+      [`fn.galleryCounterAfterPrev === '2'`, () => (fn.galleryCounterAfterPrev === '2')],
+      [`fn.serviceLinksFocusable`, () => (fn.serviceLinksFocusable)],
+      [`Math.abs(fn.titleIndent) <= 2`, () => (Math.abs(fn.titleIndent) <= 2)],
+      [`fn.modalFocusTrapped`, () => (fn.modalFocusTrapped)],
+      [`!fn.factClipped`, () => (!fn.factClipped)],
+      [`!fn.nbBroken`, () => (!fn.nbBroken)],
+      [`!fn.ctaOrphan`, () => (!fn.ctaOrphan)],
+      [`fn.visibleWithoutJs`, () => (fn.visibleWithoutJs)],
+      [`v.scrollSpy === '#services'`, () => (v.scrollSpy === '#services')],
+      [`c.h1DiffersFromBody`, () => (c.h1DiffersFromBody)],
+      [`c.ogImage`, () => (c.ogImage)],
+      [`v.anchorLanding`, () => (v.anchorLanding)],
+      [`v.anchorLanding.solid`, () => (v.anchorLanding.solid)],
+      [`!v.anchorLanding.hidden`, () => (!v.anchorLanding.hidden)],
+      [`v.anchorLanding.top === 0`, () => (v.anchorLanding.top === 0)],
+      [`fn.overlayHoursSpans`, () => (fn.overlayHoursSpans)],
+      [`v.heroGeom`, () => (v.heroGeom)],
+      [`(!v.heroGeom.band || v.heroGeom.overlapPct === 0)`, () => ((!v.heroGeom.band || v.heroGeom.overlapPct === 0))],
+      [`v.heroGeom.bandAboveBar`, () => (v.heroGeom.bandAboveBar)],
+      [`v.factsDrift === 'none'`, () => (v.factsDrift === 'none')],
+      [`fn.menuBtnClear`, () => (fn.menuBtnClear)],
+      [`v.nmOneLine`, () => (v.nmOneLine)],
+      [`v.motifDrawn`, () => (v.motifDrawn)],
+      [`v.weaveMasked`, () => (v.weaveMasked)],
+      [`fn.statusInline`, () => (fn.statusInline)],
+      [`!v.dragOpensLightbox`, () => (!v.dragOpensLightbox)],
+      [`(!v.stripScrolls || (v.stripEnd && v.stripEnd.now === String(v.stripEn`, () => ((!v.stripScrolls || (v.stripEnd && v.stripEnd.now === String(v.stripEnd.total) && v.stripEnd.nextDisabled && v.stripPrev && v.stripPrev.moved && +v.stripPrev.now < v.stripEnd.total)))],
+      [`v.lbCentred`, () => (v.lbCentred)],
+      [`fn.factsLinks`, () => (fn.factsLinks)],
+      [`fn.statementUnits`, () => (fn.statementUnits)],
+      [`fn.photoFull`, () => (fn.photoFull)],
+      [`v.statusRing`, () => (v.statusRing)],
+      [`v.photos`, () => (v.photos)],
+      [`v.landscapeMenu`, () => (v.landscapeMenu)],
+      [`v.landscapeMenu.firstBelowBrand`, () => (v.landscapeMenu.firstBelowBrand)],
+      [`v.landscapeMenu.actsReachable`, () => (v.landscapeMenu.actsReachable)],
+      [`v.mapClear`, () => (v.mapClear)],
+      [`Object.values(v.mapClear).every(Boolean)`, () => (Object.values(v.mapClear).every(Boolean))],
+      [`v.ctaClear`, () => (v.ctaClear)],
+      [`Object.values(v.ctaClear).every(Boolean)`, () => (Object.values(v.ctaClear).every(Boolean))],
+      [`v.fabSafe`, () => (v.fabSafe)],
+      [`v.layout`, () => (v.layout)],
+      [`Object.values(v.layout).every(x => x.mark && x.words && x.facts && x.p`, () => (Object.values(v.layout).every(x => x.mark && x.words && x.facts && x.pic && x.brand && x.arch && x.tabletPics && x.factSlice && x.bandArt && x.svcFit && x.vtext && x.nav && x.hoursRows))],
+      [`v.layout['1440x900'].h1px >= v.layout['1280x720'].h1px - 1`, () => (v.layout['1440x900'].h1px >= v.layout['1280x720'].h1px - 1)],
+      [`v.layout['1920x1080'].h1px >= v.layout['1440x900'].h1px - 1`, () => (v.layout['1920x1080'].h1px >= v.layout['1440x900'].h1px - 1)],
+      [`v.featureRing`, () => (v.featureRing)],
+      [`v.featureRing.ok`, () => (v.featureRing.ok)],
+      [`v.navSolid`, () => (v.navSolid)],
+      [`v.ctaLabel`, () => (v.ctaLabel)],
+      [`(v.dragBack || !v.stripScrolls)`, () => ((v.dragBack || !v.stripScrolls))],
+      [`v.stripFit`, () => (v.stripFit)],
+      [`v.navFocus`, () => (v.navFocus)],
+      [`v.seamless`, () => (v.seamless)],
+      [`v.rhythm`, () => (v.rhythm)],
+      [`v.rowLabels`, () => (v.rowLabels)],
+      [`v.copy`, () => (v.copy)],
+      [`v.copy.photoLine`, () => (v.copy.photoLine)],
+      [`v.copy.typeCap`, () => (v.copy.typeCap)],
+      [`v.copy.scenes`, () => (v.copy.scenes)],
+      [`v.copy.sign`, () => (v.copy.sign)],
+      [`fn.fabUnder`, () => (fn.fabUnder)],
+      [`v.footGap`, () => (v.footGap)],
+      [`v.footGap.every(Boolean)`, () => (v.footGap.every(Boolean))],
+      [`v.reducedMotion.draw === 'none'`, () => (v.reducedMotion.draw === 'none')],
+      [`parseFloat(v.reducedMotion.dash) === 0`, () => (parseFloat(v.reducedMotion.dash) === 0)],
+      [`v.fontFaces`, () => (v.fontFaces)],
+      [`v.fontFaces.length >= 2`, () => (v.fontFaces.length >= 2)],
+      [`v.fontFaces.every(s => s !== 'error')`, () => (v.fontFaces.every(s => s !== 'error'))],
+      [`v.fontFaces.includes('loaded')`, () => (v.fontFaces.includes('loaded'))],
+      [`v.tiles`, () => (v.tiles)],
+      [`v.tiles.hoursMatch`, () => (v.tiles.hoursMatch)],
+      [`v.tiles.typeClear`, () => (v.tiles.typeClear)],
+      [`fn.bandVisibleMobile`, () => (fn.bandVisibleMobile)],
+      [`fn.typeClearMobile`, () => (fn.typeClearMobile)],
+      [`fn.lightbox`, () => (fn.lightbox)],
+      [`v.closingClear`, () => (v.closingClear)],
+      [`Object.values(v.closingClear).every(Boolean)`, () => (Object.values(v.closingClear).every(Boolean))],
+      [`v.nameClear`, () => (v.nameClear)],
+      [`Object.values(v.nameClear).every(x => x.real === 0 && x.long === 0)`, () => (Object.values(v.nameClear).every(x => x.real === 0 && x.long === 0))],
+      [`v.bandGap`, () => (v.bandGap)],
+      [`Object.values(v.bandGap).every(g => g >= 24)`, () => (Object.values(v.bandGap).every(g => g >= 24))],
+      [`v.kinsoku`, () => (v.kinsoku)],
+      [`Object.values(v.kinsoku).every(k => k === 0)`, () => (Object.values(v.kinsoku).every(k => k === 0))],
+      [`fn.overlayRow`, () => (fn.overlayRow)],
+      [`fn.overlayRow.brandClear`, () => (fn.overlayRow.brandClear)],
+      [`fn.overlayRow.filled`, () => (fn.overlayRow.filled)],
+      [`fn.dotCentred`, () => (fn.dotCentred)],
+      [`v.drift <= 20`, () => (v.drift <= 20)],
+      [`v.leader`, () => (v.leader)],
+      [`v.fabDark`, () => (v.fabDark)],
+      [`clockOk(slug, v.clock)`, () => (clockOk(slug, v.clock))],
+      [`v.reducedMotion`, () => (v.reducedMotion)],
+      [`v.reducedMotion.h1 === 'none'`, () => (v.reducedMotion.h1 === 'none')],
+      [`v.reducedMotion.revealOpacity === '1'`, () => (v.reducedMotion.revealOpacity === '1')],
+      [`v.focusRing`, () => (v.focusRing)],
+      [`v.focusRing.ok`, () => (v.focusRing.ok)],
+      [`Math.abs(c.tileRatio - 1.33) < 0.05`, () => (Math.abs(c.tileRatio - 1.33) < 0.05)],
+      [`Math.abs(c.tallRatio - 0.75) < 0.05`, () => (Math.abs(c.tallRatio - 0.75) < 0.05)],
+      [`!v.errors.length`, () => (!v.errors.length)],
+      [`!v.smallTargets.length`, () => (!v.smallTargets.length)],
+      [`!v.axe.length`, () => (!v.axe.length)],
+      [`!(v.axeDark || []).length`, () => (!(v.axeDark || []).length)],
+      [`!v.emoji`, () => (!v.emoji)],
+      [`Object.values(v.heroFit).every(x => x.includes('ok'))`, () => (Object.values(v.heroFit).every(x => x.includes('ok')))],
+      [`Object.values(v.overflow).every(o => o === 0)`, () => (Object.values(v.overflow).every(o => o === 0))]
+    ];
+    const failed = checks.filter(([, f]) => { try { return !f(); } catch (e) { return true; } }).map(([l]) => l);
+    const ok = failed.length === 0;
     allOk = allOk && ok;
     console.log(`${slug}: ${ok ? 'PASS' : 'FAIL'}`);
+    if (!ok) console.log('  failed checks: ' + failed.join(' | '));
     if (!ok) console.log(JSON.stringify({ fn, scrollSpy: v.scrollSpy, heroGeom: v.heroGeom, tiles: v.tiles, closingClear: v.closingClear, nameClear: v.nameClear, bandGap: v.bandGap, kinsoku: v.kinsoku, drift: v.drift, leader: v.leader, featureRing: v.featureRing, copy: v.copy, navSolid: v.navSolid, ctaLabel: v.ctaLabel, navFocus: v.navFocus, seamless: v.seamless, stripFit: v.stripFit, stripScrolls: v.stripScrolls, rhythm: v.rhythm, rowLabels: v.rowLabels, dragBack: v.dragBack, fabDark: v.fabDark, clock: v.clock, layout: v.layout, ctaClear: v.ctaClear, mapClear: v.mapClear, landscapeMenu: v.landscapeMenu, factsDrift: v.factsDrift, anchorLanding: v.anchorLanding, reducedMotion: v.reducedMotion, focusRing: v.focusRing, computed: c, axe: v.axe, axeDark: v.axeDark, errors: v.errors, small: v.smallTargets, heroFit: v.heroFit, overflow: v.overflow, emoji: v.emoji }, null, 2));
   }
   const lh = report.lighthouse;

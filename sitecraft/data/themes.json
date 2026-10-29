@@ -245,7 +245,8 @@
       "about",
       "gallery",
       "info"
-    ]
+    ],
+    "services_style": "tags"
   },
   "snack": {
     "label": "小吃",
@@ -417,7 +418,8 @@
       "about",
       "gallery",
       "info"
-    ]
+    ],
+    "services_style": "tags"
   },
   "dessert": {
     "label": "甜點烘焙",
@@ -781,7 +783,8 @@
       ]
     },
     "services_lead": "洗澡、美容到照護，依毛小孩的個性慢慢來。",
-    "nav_services": "服務項目"
+    "nav_services": "服務項目",
+    "disc": "tint"
   },
   "clinic": {
     "label": "診所",

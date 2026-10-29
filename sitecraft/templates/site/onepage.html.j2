@@ -85,16 +85,18 @@ body[data-mode="bold"] .label b{font-family:var(--body);font-weight:700}
 .nav .wrap{display:flex;align-items:center;justify-content:space-between;height:76px;gap:16px}
 .brand{display:flex;align-items:center;gap:12px;font-weight:700;font-size:1.05rem;letter-spacing:.02em;min-height:44px;min-width:0}
 .brand .bn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+@media (max-width:1180px){.brand .bn-en{display:none}}
+@media (min-width:881px) and (max-width:1100px){body.nav-wide .nav ul,body.nav-wide .nav .call{display:none}body.nav-wide .menu-btn{display:flex}}
 @media (max-width:640px){.brand .bn-en{display:none}.brand .bn.long{white-space:normal;word-break:keep-all;line-height:1.25;font-size:.92rem;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2}}
 .brand .mark{flex:none;width:36px;height:36px;border-radius:10px;background:currentColor;display:grid;place-items:center}
 .brand .mark svg{width:22px;height:22px;color:var(--pd);stroke:currentColor;fill:none;stroke-width:9;stroke-linecap:round;stroke-linejoin:round}
 .nav.solid .brand .mark svg{color:var(--bg)}
 .nav ul{display:flex;gap:var(--s6);font-size:var(--t-m);font-weight:500}
-.nav ul a{position:relative;padding:10px 0;display:inline-block}
+.nav ul a{position:relative;padding:10px 0;display:inline-block;white-space:nowrap}
 .nav ul a::after{content:"";position:absolute;left:0;right:0;bottom:4px;height:1.5px;background:currentColor;transform:scaleX(0);transform-origin:right;transition:transform .35s var(--ease)}
 .nav ul a:hover::after,.nav ul a:focus-visible::after,.nav ul a[aria-current="true"]::after{transform:scaleX(1);transform-origin:left}
-.nav .call{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 20px;border-radius:999px;border:1.5px solid currentColor;font-weight:600;font-size:var(--t-s);transition:background .25s,color .25s}
-.nav .call:hover{background:var(--a);border-color:var(--a);color:var(--tx)}
+.nav .call{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 20px;white-space:nowrap;border-radius:999px;border:1.5px solid currentColor;font-weight:600;font-size:var(--t-s);transition:background .25s,color .25s}
+.nav .call:hover{background:var(--a);border-color:var(--a);color:#15120f}
 .menu-btn.hide{transform:translateY(-150%)}
 .menu-btn{display:none;width:48px;height:48px;align-items:center;justify-content:center;border-radius:12px;border:1.5px solid rgba(255,255,255,.4);background:color-mix(in srgb,var(--pd) 55%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);position:fixed;top:10px;right:18px;z-index:120;color:#fff;transition:color .3s,background .3s}
 .menu-btn.solid{color:var(--tx);background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-color:var(--line)}
@@ -137,6 +139,7 @@ body[data-mode="bold"] .label b{font-family:var(--body);font-weight:700}
 .hero[data-open="closed"] .motif .d{animation-play-state:paused}
 .js .hero[data-open="closed"] .motif svg .idle{animation-play-state:running,paused}
 .motif .idle{transform-box:fill-box;transform-origin:center}
+.hero[data-disc="tint"] .motif .disc{fill:color-mix(in oklab,var(--p) 55%,#fff 30%);opacity:.32}
 .motif .disc{fill:var(--a);stroke:none;opacity:.55;transform-box:fill-box;transform-origin:center;translate:calc(var(--mx,0)*-18px) calc(var(--my,0)*-12px);transition:translate .8s var(--ease)}
 .motif .gl{stroke-width:.7;opacity:.7}
 .js .motif svg .disc{stroke-dashoffset:0;animation:discIn 1.6s var(--ease) .1s both}
@@ -159,6 +162,9 @@ body[data-mode="bold"] .label b{font-family:var(--body);font-weight:700}
 .closing[data-open="open"] .cl-motif{color:color-mix(in oklab,#fff 60%,var(--a))}
 .js .motif svg :is(path,circle,ellipse,rect){stroke-dasharray:1 2;stroke-dashoffset:1.01;animation:draw 2.2s var(--ease) .25s forwards}
 @keyframes draw{to{stroke-dashoffset:0}}
+@keyframes wash{from{opacity:0}}
+.js [data-reveal].in .dw.scene :is(.sc-tone,.sc-paper,.acc,.acc2,.star,.beam),.js [data-reveal].in .dw .scene :is(.sc-tone,.sc-paper,.acc,.acc2,.star,.beam){animation:wash .9s var(--ease) .75s both}
+.js .motif .scene :is(.sc-tone,.sc-paper,.acc,.acc2){animation:wash 1s var(--ease) 1.3s both}
 .drawn{stroke-dasharray:none!important}
 .js .dw [pathLength]:not(.acc):not(.acc2){stroke-dasharray:1 2;stroke-dashoffset:1.01}
 .js [data-reveal].in .dw [pathLength]:not(.acc):not(.acc2){animation:draw 1.8s var(--ease) forwards;animation-delay:calc(.2s + var(--i,0)*.07s)}
@@ -204,7 +210,7 @@ body[data-mode="editorial"] h1 .en{font-style:italic;font-weight:400}
 .btn-solid{background:#fff;color:var(--pd);box-shadow:0 14px 34px rgba(0,0,0,.22)}
 .btn-solid:hover{color:var(--tx)}
 .btn-ghost{border:1.5px solid rgba(255,255,255,.65);color:#fff}
-.btn-ghost:hover{color:var(--tx);border-color:var(--a)}
+.btn-ghost:hover{color:#15120f;border-color:var(--a)}
 .btn-line{background:#06C755;color:#06200f}
 .btn-line::before{background:#2ee07a}
 .btn-line:hover{color:#06200f}
@@ -265,7 +271,7 @@ body[data-mode="editorial"] h1 .en{font-style:italic;font-weight:400}
 .hero[data-hero="band"]::before{background:radial-gradient(70% 45% at 50% 100%,color-mix(in oklab,var(--a) 55%,transparent),transparent 70%)}
 .hero[data-hero="band"]{--bh:clamp(130px,100svh - 652px,300px)}
 .hero[data-hero="band"] h1 .en{font-size:.56em}.hero[data-hero="band"] .tagline{margin-top:2px}
-.motif .scene .sc-bg{display:none}.motif .scene .sc-ln{stroke:currentColor}.motif .scene .sc-paper{fill:rgba(255,255,255,.05)}
+.motif .scene .sc-bg{display:none}.motif .scene .sc-ln{stroke:currentColor}.js .motif .scene :is(.sc-paper,.sc-paper>*,.sc-tone,.sc-tone>*,.glow,.glow>*){stroke:none;stroke-dasharray:none;stroke-dashoffset:0}.motif .scene .sc-paper{fill:rgba(255,255,255,.05)}
 .motif .scene .sc-tone>*,.motif .scene path.sc-tone{fill:var(--a);opacity:.22}.motif .scene .acc{fill:var(--a)}.motif .scene .acc2{fill:var(--a);fill-opacity:.4}
 .hero[data-hero="band"] .hero-foot .motif{position:absolute;left:50%;right:auto;top:auto;bottom:100%;margin-bottom:-6px;transform:translateX(-50%);width:min(64vw,calc(var(--bh)*4/3));height:auto;aspect-ratio:4/3;z-index:-1;-webkit-mask-image:linear-gradient(to top,#000 75%,transparent);mask-image:linear-gradient(to top,#000 75%,transparent)}
 .hero[data-hero="band"] .motif svg{width:100%;height:100%;opacity:.62}
@@ -301,7 +307,7 @@ h2{font-size:clamp(2rem,4.4vw,3.6rem);margin-bottom:var(--s5)}
 .scene .sg{fill:var(--pd);stroke:none;font-family:var(--display),var(--cjk-head),var(--body);font-weight:var(--head-weight)}
 @media (prefers-color-scheme:dark){.scene .sc-bg{fill:color-mix(in oklab,var(--sf) 76%,var(--p))}.scene .sc-paper{fill:var(--sf)}.scene .sc-tone>*,.scene path.sc-tone{fill:color-mix(in oklab,var(--sf) 52%,var(--p))}.scene .sc-ln{stroke:color-mix(in oklab,var(--a) 55%,#fff)}.scene .sg{fill:color-mix(in oklab,var(--a) 40%,#fff)}}
 .about .ph.art .scene .sc-tone>*{fill:var(--a-soft)}
-.scene.night .sc-bg{fill:color-mix(in oklab,var(--pd) 80%,#0b0b14)}.scene.night .sc-ln{stroke:color-mix(in oklab,var(--a) 40%,#fff)}.scene.night .sc-tone>*{fill:color-mix(in oklab,var(--pd) 76%,#fff 10%)}.scene.night .sc-paper{fill:color-mix(in oklab,var(--a) 50%,#fff)}.scene.night .glow{opacity:.4}.scene.night .sg{fill:var(--pd)}.scene.night .acc2{fill:#fff;fill-opacity:.9}.scene.night .star{fill:#fff;opacity:.75}.scene .beam{display:none}.scene.night .beam{display:inline;fill:var(--a);opacity:.2}
+.scene.night .sc-bg,.scene.night rect.sc-bg{fill:color-mix(in oklab,var(--p) 26%,#0b0d16)!important}.scene.night .sc-ln{stroke:color-mix(in oklab,var(--a) 40%,#fff)!important}.scene.night .sc-tone>*{fill:color-mix(in oklab,var(--p) 30%,#20232e)!important}.scene.night .sc-paper{fill:color-mix(in oklab,var(--a) 50%,#fff)!important}.scene.night .glow{opacity:.4}.scene.night .sg{fill:#1b1712!important}.scene.night .acc2{fill:#fff;fill-opacity:.9}.scene.night .star{fill:#fff;opacity:.75}.scene .beam{display:none}.scene.night .beam{display:inline;fill:var(--a);opacity:.2}
 .scene .glow{fill:var(--a);opacity:0;transition:opacity 1.2s var(--ease)}body[data-open="open"] .scene .glow{opacity:.18}
 @keyframes swing{0%{transform:rotate(-16deg)}35%{transform:rotate(10deg)}62%{transform:rotate(-5deg)}82%{transform:rotate(2deg)}100%{transform:none}}
 .js .about [data-reveal].in .scene .plate{transform-box:fill-box;transform-origin:50% 0;animation:swing 1.6s var(--ease) 1.1s both}
@@ -349,6 +355,21 @@ body:not([data-mode="editorial"]) .svc{display:grid;grid-template-columns:repeat
 body:not([data-mode="editorial"]) .svc li{border:1px solid var(--line);border-radius:var(--r);background:var(--bg)}
 body:not([data-mode="editorial"]) .svc li>a,body:not([data-mode="editorial"]) .svc li>div{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto auto 1fr auto auto;grid-template-areas:"h h" "p p" "x x" "pr pr" "a a";row-gap:var(--s2);align-items:start;align-content:start;padding:var(--s5);height:100%}
 body:not([data-mode="editorial"]) .svc .ld{display:none}
+html body .svc.tags.tags{display:flex;flex-wrap:wrap;justify-content:center;gap:36px 28px;border:0;padding-top:40px;position:relative}
+html body .svc.tags.tags{background:none;color:var(--tx);border-radius:0;padding:40px 24px 8px;width:fit-content;max-width:100%;margin-inline:auto}html body .svc.tags.tags :is(h3,p){color:var(--tx)}html body .svc.tags.tags .arr{border-color:color-mix(in oklab,var(--pd) 30%,transparent);color:var(--tx)}
+html body .svc.tags.tags::before{content:"";position:absolute;top:8px;left:4%;right:4%;height:7px;border-radius:4px;background:color-mix(in oklab,var(--pd) 70%,var(--a))}
+html body .svc.tags.tags li{flex:0 0 auto;min-width:168px;border:1px solid color-mix(in oklab,var(--a) 40%,var(--line));border-radius:10px 10px 16px 16px;background:linear-gradient(180deg,color-mix(in oklab,var(--a-soft) 60%,var(--bg)),var(--a-soft));box-shadow:0 14px 28px rgba(0,0,0,.08);overflow:visible}
+html body .svc.tags.tags li::after{content:"";position:absolute;top:-33px;left:50%;width:1.5px;height:33px;background:color-mix(in oklab,var(--pd) 80%,transparent)}
+html body .svc.tags.tags li>a,html body .svc.tags.tags li>div{display:grid;grid-template-columns:auto auto;grid-template-rows:auto auto auto;grid-template-areas:"d t" "pr pr" "a a";justify-content:center;justify-items:center;column-gap:12px;row-gap:16px;padding:28px 18px 20px;height:100%}
+html body .svc.tags.tags h3{grid-area:t;writing-mode:vertical-rl;letter-spacing:.16em;font-size:clamp(1.6rem,2.4vw,2.2rem);line-height:1.2}
+html body .svc.tags.tags p{grid-area:d;writing-mode:vertical-rl;max-height:11.5em;font-size:var(--t-s);line-height:1.75;letter-spacing:.06em;opacity:.8;max-width:none}
+html body .svc.tags.tags .price{grid-area:pr;font-size:clamp(1.15rem,1.6vw,1.4rem);padding:0;margin:0;color:var(--ink)}
+html body .svc.tags.tags .arr{grid-area:a;justify-self:center;margin:0}
+html body .svc.tags.tags li::before{display:none}html body .svc.tags.tags li:hover h3,html body .svc.tags.tags li:hover p{transform:none}
+html body .svc.tags.tags li>a::before{content:"";position:absolute;top:12px;left:50%;width:9px;height:9px;margin-left:-4.5px;border-radius:50%;border:1.5px solid color-mix(in oklab,var(--pd) 70%,transparent);background:var(--bg)}
+html body .svc.tags.tags li{transition:transform .5s var(--ease)}html body .svc.tags.tags li:hover{transform:rotate(-1.5deg);transform-origin:50% -33px}
+@media (prefers-color-scheme:dark){html body .svc.tags.tags li{background:linear-gradient(180deg,color-mix(in oklab,var(--sf) 82%,var(--a)),color-mix(in oklab,var(--sf) 70%,var(--a)))}html body .svc.tags.tags .price{color:var(--a)}}
+@media (max-width:640px){html body .svc.tags.tags{flex-wrap:nowrap;justify-content:flex-start;overflow-x:auto;scroll-snap-type:x mandatory;gap:14px;width:auto;margin-inline:-18px;padding:40px 18px 12px;scrollbar-width:none}html body .svc.tags.tags::before{left:18px;right:auto;width:max(100%,calc(var(--n,3)*164px))}html body .svc.tags.tags li{min-width:0;flex:0 0 150px;scroll-snap-align:start}html body .svc.tags.tags h3{font-size:1.45rem}}
 body:not([data-mode="editorial"]) .svc .price{font-size:clamp(1.6rem,2.2vw,2rem);line-height:1.1;padding-left:0;align-self:end;margin-top:var(--s4)}
 body:not([data-mode="editorial"]) .svc .arr{grid-area:a;justify-self:start;align-self:end;margin-top:var(--s2)}
 body:not([data-mode="editorial"]) .svc li:hover h3,body:not([data-mode="editorial"]) .svc li:hover p{transform:none}
@@ -365,6 +386,7 @@ body:not([data-mode="editorial"]) .svc li:hover h3,body:not([data-mode="editoria
 .svc p{color:var(--tx);opacity:.78;font-size:var(--t-l)}
 .svc .arr{min-width:44px;height:44px;padding:0 14px 0 16px;border-radius:999px;border:1.5px solid var(--line);display:inline-flex;align-items:center;gap:8px;font-size:var(--t-xs);font-weight:700;letter-spacing:.04em;white-space:nowrap;transition:background .35s,color .35s}
 .svc .arr svg{transition:transform .45s var(--ease)}
+@media (hover:hover) and (pointer:fine){body:not(:has(.svc.tags)) .svc .arr{padding:0;width:44px;justify-content:center;gap:0;transition:background .35s,color .35s,width .45s var(--ease),padding .45s var(--ease)}body:not(:has(.svc.tags)) .svc .arr-t{max-width:0;overflow:hidden;opacity:0;transition:max-width .45s var(--ease),opacity .3s}body:not(:has(.svc.tags)) .svc li:hover .arr,body:not(:has(.svc.tags)) .svc li>a:focus-visible .arr{width:auto;padding:0 14px 0 16px;gap:8px}body:not(:has(.svc.tags)) .svc li:hover .arr-t,body:not(:has(.svc.tags)) .svc li>a:focus-visible .arr-t{max-width:8em;opacity:1}}
 .svc li:hover .arr,.svc li>a:focus-visible .arr{background:var(--ink);color:var(--bg);border-color:var(--ink)}.svc li:hover .arr svg,.svc li>a:focus-visible .arr svg{transform:rotate(-45deg)}
 @media (max-width:880px){body[data-mode="editorial"] .svc li>a,body[data-mode="editorial"] .svc li>div{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"h a" "p p" "pr pr";row-gap:var(--s2);padding:var(--s5) 0}body[data-mode="editorial"] .svc .ld{display:none}.svc .price{padding-left:0;font-size:var(--t-l)}.svc .arr{height:40px;padding:0 12px}.svc li:hover h3,.svc li:hover p{transform:none}body:not([data-mode="editorial"]) .svc{grid-template-columns:repeat(2,minmax(0,1fr))}body:not([data-mode="editorial"]) .svc .price{font-size:1.6rem}}
 @media (max-width:640px){body:not([data-mode="editorial"]) .svc{grid-template-columns:1fr}}
@@ -396,7 +418,7 @@ body[data-mode="bold"] .svc li:has(>a:focus-visible){outline-color:var(--a);outl
 .feature .sig-l::before{content:"";width:24px;height:2px;border-radius:2px;background:var(--a)}
 .feature h3{font-family:var(--display),var(--cjk-head);font-weight:var(--head-weight);font-size:clamp(2rem,4vw,3.2rem);line-height:1.15;max-width:14ch}
 .feature p{opacity:.88;max-width:40ch;font-size:var(--t-l)}
-@media (min-width:881px){.feature{grid-template-columns:minmax(0,1fr) minmax(0,.85fr);column-gap:var(--s7)}.feature>*:not(.sig-art){grid-column:1}.feature .sig-art{position:static;grid-column:2;grid-row:1/span 6;align-self:center;justify-self:center;transform:none;width:100%;max-width:420px;opacity:.95;z-index:0}}
+@media (min-width:881px){.feature{grid-template-columns:minmax(0,1fr) minmax(0,.85fr);column-gap:var(--s7)}.feature>*:not(.sig-art){grid-column:1}.feature .sig-art{position:static;grid-column:2;grid-row:1/span 6;align-self:center;justify-self:center;transform:none;width:100%;max-width:360px;opacity:.95;z-index:0}.feature{align-content:center}}
 .feature .num{font-size:clamp(1.4rem,2.4vw,1.9rem);color:color-mix(in oklab,var(--a),#fff 24%)}
 .feature .btn{margin-top:var(--s3)}
 .feature .sig-art .tone *{fill:var(--a);fill-opacity:.25;stroke:none}.feature .sig-art .tone .fine{display:none}.feature .sig-art .ln :is(.acc,.acc2){fill:var(--a);fill-opacity:.5;stroke:currentColor}
@@ -427,7 +449,7 @@ body[data-mode="bold"] .svc li:has(>a:focus-visible){outline-color:var(--a);outl
 .tile.type .vtext{writing-mode:vertical-rl;text-orientation:mixed;font-family:var(--cjk-head),var(--display),var(--body);font-weight:var(--head-weight);font-feature-settings:normal;font-size:min(2.2rem,calc((100cqh - 112px)/(var(--vl,6)*1.24)));letter-spacing:.22em;line-height:1.5;color:var(--ink);margin-bottom:44px}
 .tile.type .vc{display:block;white-space:nowrap}
 .tile .cap{max-width:calc(100% - 36px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tile.type .cap{white-space:normal;word-break:keep-all;line-height:1.35;border-radius:14px}
+.tile.type .cap{white-space:normal;word-break:keep-all;line-height:1.35;border-radius:14px}.tile.type .cap.long{white-space:nowrap;font-size:11px;letter-spacing:0!important}
 @media (max-width:640px){.tile.type .cap{font-size:var(--t-xs);letter-spacing:.06em;padding:5px 10px}.tile .cap-en{display:none}}
 .tile.type::before{content:"";position:absolute;left:22px;top:22px;bottom:72px;width:1px;background:var(--ink);opacity:.35}
 .tile .cap{color:var(--tx);background:color-mix(in srgb,var(--bg) 84%,transparent)}
@@ -463,7 +485,7 @@ body[data-mode="bold"] .svc li:has(>a:focus-visible){outline-color:var(--a);outl
 .hours li{display:flex;justify-content:space-between;align-items:center;gap:var(--s3);padding:var(--s4) 0;border-bottom:1px solid var(--line);font-size:var(--t-m)}
 .hours li.today{font-weight:700;color:var(--tx);box-shadow:inset 3px 0 0 var(--a);padding-left:12px}
 .hours li>span:first-child{white-space:nowrap}.hours li>.num{text-align:right}
-@media (max-width:480px){.hours .num .sep{display:none}.hours .num .nb{display:block}}
+@media (max-width:480px){.hours .num .sep,.hours .num wbr{display:none}.hours .num:has(.sep){display:flex;flex-direction:column;align-items:flex-end}}
 .hours .tag{white-space:nowrap;font-size:var(--t-xs);margin-left:var(--s2);letter-spacing:.1em;padding:3px 8px;border-radius:999px;background:var(--ink);color:var(--bg);vertical-align:middle;font-weight:600}
 .hours .closed{color:var(--mu)}
 .hours .num{font-size:var(--t-m)}
@@ -483,7 +505,7 @@ body[data-mode="bold"] .svc li:has(>a:focus-visible){outline-color:var(--a);outl
 .map iframe{position:absolute;inset:0;width:100%;height:100%;border:0;filter:saturate(.85)}
 @media (prefers-color-scheme:dark){.map iframe{filter:invert(.92) hue-rotate(180deg) saturate(.7)}}
 .map-ph{display:flex;flex-direction:column;gap:var(--s3);padding:0 var(--s5) var(--s5);color:var(--tx);flex:1}
-.map-ph .art{position:relative;flex:1;min-height:clamp(150px,20vw,240px);margin:0 calc(-1*var(--s5)) var(--s2)}
+.map{align-self:start}.map-ph .art{position:relative;flex:none;height:clamp(200px,24vw,300px);margin:0 calc(-1*var(--s5)) var(--s2)}
 .map-ph .art::after{content:"";position:absolute;inset:auto 0 0;height:45%;background:linear-gradient(transparent,var(--bg))}
 .map-ph .mapart{position:absolute;inset:0;width:100%;height:100%}
 .mapart .mb rect{fill:color-mix(in srgb,var(--ink) 7%,transparent)}
@@ -539,6 +561,7 @@ body.demo.bar-mini .fab{bottom:56px}
 .js [data-reveal]{opacity:0;transform:translateY(22px);transition:opacity .9s var(--ease),transform .9s var(--ease);transition-delay:calc(var(--i,0)*90ms)}
 [data-reveal].in,.js [data-reveal]:focus-within{opacity:1;transform:none}
 @media (prefers-reduced-motion:reduce){
+  .js [data-reveal].in .dw.scene :is(.sc-tone,.sc-paper,.acc,.acc2,.star,.beam),.js [data-reveal].in .dw .scene :is(.sc-tone,.sc-paper,.acc,.acc2,.star,.beam),.js .motif .scene :is(.sc-tone,.sc-paper,.acc,.acc2){animation:none}html body .svc.tags.tags li:hover{transform:none}
   .js .about [data-reveal].in .scene .plate{animation:none}.motif .disc{translate:none}
   .js [data-reveal]{opacity:1;transform:none;transition:none}
   .js h1 .w,.js .tagline,.js .hero .cta,.js .hero .eyebrow,.js .hero .eyebrow::before,.js .hero-foot .fact{animation:none;opacity:1;transform:none}
@@ -565,7 +588,7 @@ body.demo.bar-mini .fab{bottom:56px}
 </style>
 </head>
 {% macro weave(id, hole=false) %}<div class="weave" aria-hidden="true"><svg><defs><pattern id="wv{{ id }}" width="150" height="150" patternUnits="userSpaceOnUse"><g transform="scale(.5)">{{ t.motif_b }}</g><g transform="translate(75 75) scale(.5)">{{ t.motif_b }}</g></pattern><linearGradient id="wg{{ id }}"><stop offset=".42" stop-color="#fff" stop-opacity="0"/><stop offset=".72" stop-color="#fff"/></linearGradient>{% if hole %}<radialGradient id="wh{{ id }}" cx=".73" cy=".5" r=".3"><stop offset=".35" stop-color="#000"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>{% endif %}<mask id="wm{{ id }}"><rect width="100%" height="100%" fill="url(#wg{{ id }})"/>{% if hole %}<rect width="100%" height="100%" fill="url(#wh{{ id }})"/>{% endif %}</mask></defs><rect width="100%" height="100%" fill="url(#wv{{ id }})" mask="url(#wm{{ id }})"/></svg></div>{% endmacro %}
-<body data-mode="{{ b.mode }}"{% if demo %} class="demo"{% endif %}>
+<body data-mode="{{ b.mode }}" class="{% if demo %}demo{% endif %}{% if b.name_zh | length > 8 %} nav-wide{% endif %}">
 <a class="skip" href="#main">跳至主要內容</a>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
@@ -608,7 +631,7 @@ body.demo.bar-mini .fab{bottom:56px}
 {% macro sec_about(n) %}
 <section class="about{% if not b.about_photo %} has-art{% endif %}" data-tone="{{ 'sf' if n is even else 'bg' }}" id="about">
   <div class="wrap">
-    <div class="label" data-reveal><b>{{ "%02d" % n }}</b>關於我們<svg class="lm dw" viewBox="0 0 200 200" aria-hidden="true">{{ t.motif_b_draw }}</svg></div>
+    <div class="label" data-reveal><b>{{ "%02d" % n }}</b>關於我們<svg class="lm dw" viewBox="0 0 200 200" aria-hidden="true">{{ t.motif_draw }}</svg></div>
     <div class="txt">
       <h2 class="statement" data-reveal style="--i:1">{% if b.statement_name %}<span class="nm">{% for line in b.name_lines %}{% if line.kind == "en" %}<span class="en">{{ line.tokens | join(" ") }}</span>{% else %}{{ line.tokens | join("") }}{% endif %}{% if not loop.last %} {% endif %}{% endfor %}</span><wbr>{% endif %}{% if b.statement_units %}<span class="un">{{ b.statement_pre }}</span><wbr><em class="un">{{ b.statement_em }}</em>{% else %}{{ b.statement_pre }}<em>{{ b.statement_em }}</em>{{ b.statement_post }}{% endif %}</h2>
       {% for para in b.about_paragraphs %}<p data-reveal style="--i:{{ loop.index + 1 }}">{{ para }}</p>{% endfor %}
@@ -626,7 +649,7 @@ body.demo.bar-mini .fab{bottom:56px}
 <section class="services" data-tone="{{ 'sf' if n is even else 'bg' }}" id="services">
   {{ weave("s") }}
   <div class="wrap">
-    <div class="label" data-reveal><b>{{ "%02d" % n }}</b>{{ b.nav_services }}<svg class="lm dw" viewBox="0 0 200 200" aria-hidden="true">{{ t.motif_b_draw }}</svg></div>
+    <div class="label" data-reveal><b>{{ "%02d" % n }}</b>{{ b.nav_services }}<svg class="lm dw" viewBox="0 0 200 200" aria-hidden="true">{{ t.motif_draw }}</svg></div>
     <h2 data-reveal style="--i:1">{{ b.services_title }}</h2>
     <p class="lead" data-reveal style="--i:2">{% if b.services_linked %}{{ b.services_lead }}{% else %}有其他需求也歡迎告訴我們。{% endif %}</p>
     {% set feat = b.signature if (b.signature and b.signature.kind == "feature") else none %}
@@ -640,7 +663,7 @@ body.demo.bar-mini .fab{bottom:56px}
       {% if fi.href %}<a class="btn btn-solid" href="{{ fi.href }}"{% if fi.href.startswith('http') %} target="_blank" rel="noopener"{% endif %}>{{ b.feature_cta }}<svg class="ico"><use href="#i-arrow"/></svg></a>{% endif %}
     </div>
     {% endif %}
-    <ul class="svc">
+    <ul class="svc{% if b.services_style == "tags" %} tags{% endif %}" style="--n:{{ (b.services[1:] if feat else b.services) | length }}">
       {% for s in (b.services[1:] if feat else b.services) %}
       <li data-reveal style="--i:{{ loop.index0 }}">
         {% if s.href %}<a href="{{ s.href }}"{% if s.href.startswith('http') %} target="_blank" rel="noopener"{% endif %}>{% else %}<div>{% endif %}
@@ -666,7 +689,7 @@ body.demo.bar-mini .fab{bottom:56px}
   <div class="wrap">
     <div class="head">
       <div>
-        <div class="label" data-reveal><b>{{ "%02d" % n }}</b>{{ b.gallery_name }}<svg class="lm dw" viewBox="0 0 200 200" aria-hidden="true">{{ t.motif_b_draw }}</svg></div>
+        <div class="label" data-reveal><b>{{ "%02d" % n }}</b>{{ b.gallery_name }}<svg class="lm dw" viewBox="0 0 200 200" aria-hidden="true">{{ t.motif_draw }}</svg></div>
         <h2 data-reveal style="--i:1">{{ b.gallery_title }}</h2>
       </div>
       <div class="count" data-reveal style="--i:2">
@@ -681,7 +704,7 @@ body.demo.bar-mini .fab{bottom:56px}
       {% for g in b.gallery_items %}
       <div class="tile{% if g.tall %} tall{% endif %}{% if g.type %} type{% endif %}" style="--i:{{ loop.index0 }}">
         {% if g.img %}<img src="{{ g.img }}" alt="{{ b.name }} {{ g.label }}" loading="lazy" draggable="false">{% elif g.type %}<span class="vtext" style="--vl:{{ b.vlen }}">{% for c in b.vcols %}<span class="vc">{{ c }}</span>{% endfor %}</span>{% else %}<span class="dw">{{ g.art }}</span>{% endif %}
-        {% if g.img %}<span class="cap">{{ g.label }}</span>{% elif g.type %}<span class="cap">{% if b.name_lines[0].kind != "en" %}{% for g2 in b.name_groups[0] %}{{ g2 | join("") }}{% if not loop.last %}<wbr>{% endif %}{% endfor %}{% else %}{{ b.name_zh }}{% endif %}</span>{% endif %}
+        {% if g.img %}<span class="cap">{{ g.label }}</span>{% elif g.type %}<span class="cap{% if b.name_zh | length > 9 %} long{% endif %}">{% if b.name_lines[0].kind != "en" %}{% for g2 in b.name_groups[0] %}{{ g2 | join("") }}{% if not loop.last %}<wbr>{% endif %}{% endfor %}{% else %}{{ b.name_zh }}{% endif %}</span>{% endif %}
       </div>
       {% endfor %}
     </div>
@@ -691,7 +714,7 @@ body.demo.bar-mini .fab{bottom:56px}
 {% macro sec_info(n) %}
 <section class="info" data-tone="{{ 'sf' if n is even else 'bg' }}" id="info">
   <div class="wrap">
-    <div class="label" data-reveal><b>{{ "%02d" % n }}</b>營業資訊<svg class="lm dw" viewBox="0 0 200 200" aria-hidden="true">{{ t.motif_b_draw }}</svg></div>
+    <div class="label" data-reveal><b>{{ "%02d" % n }}</b>營業資訊<svg class="lm dw" viewBox="0 0 200 200" aria-hidden="true">{{ t.motif_draw }}</svg></div>
     <div class="cols">
       <div data-reveal style="--i:1">
         <div class="open-now"><span class="status" id="infoStatus"><i></i><span id="infoStatusText">營業時間</span></span></div>
@@ -724,7 +747,7 @@ body.demo.bar-mini .fab{bottom:56px}
   </div>
 </section>
 {% endmacro %}
-<section class="hero" id="top" data-hero="{{ b.hero_layout }}"{% if b.scrim %} data-scrim{% endif %}{% if b.hero_photo %} data-photo{% endif %} aria-label="{{ b.name }}">
+<section class="hero" id="top" data-hero="{{ b.hero_layout }}"{% if b.disc %} data-disc="{{ b.disc }}"{% endif %}{% if b.scrim %} data-scrim{% endif %}{% if b.hero_photo %} data-photo{% endif %} aria-label="{{ b.name }}">
   {% if b.hero_photo %}<figure class="hp" aria-hidden="true"><img src="{{ b.hero_photo }}" alt="" fetchpriority="high"></figure>{% endif %}
     <div class="wrap">
     <p class="eyebrow"><span>{{ b.category }}</span><span>{{ b.city }}{{ b.district }}</span></p>
@@ -864,12 +887,12 @@ body.demo.bar-mini .fab{bottom:56px}
     hero.dataset.open=open?'open':'closed';if(closing)closing.dataset.open=hero.dataset.open;
     if(overnight!==false&&li){var py=d.querySelector('#hours li[data-day="'+overnight+'"]');if(py){li.classList.remove('today');py.classList.add('today');tg.textContent='現在';py.children[0].appendChild(tg);li=py}}
     var wk='日一二三四五六',nextText=nextOpen?((nextOpen.k===0?'今天 ':nextOpen.k===1?'明天 ':(nextOpen.k===7?'下週':'週')+wk.charAt(nextOpen.p.day)+' ')+fmt(nextOpen.p.hour,nextOpen.p.minute||0)+' 開門'):'';
-    state={open:open,nextK:nextOpen?nextOpen.k:null,next:nextText,text:open?('營業中　'+(closeAt?fmt(closeAt.hour,closeAt.minute||0)+' 打烊':'')):((todayClosed?'今日公休':'休息中')+(nextText?'　'+nextText:''))};
+    state={open:open,nextK:nextOpen?nextOpen.k:null,nextDay:nextOpen?nextOpen.p.day:null,next:nextText,text:open?('營業中　'+(closeAt?fmt(closeAt.hour,closeAt.minute||0)+' 打烊':'')):((todayClosed?'今日公休':'休息中')+(nextText?'　'+nextText:''))};
   }
   ['heroStatus','infoStatus'].forEach(function(id){var el=d.getElementById(id);if(!el)return;if(!state){el.querySelector('i').style.display='none';return}el.classList.toggle('off',!state.open)});
   var ist=d.getElementById('infoStatusText');if(ist&&state)ist.textContent=state.text;
   var ch=d.getElementById('closingHours');if(ch&&state)ch.textContent=state.text;
-  var ct=d.getElementById('closingTitle');if(ct&&state&&!state.open&&ct.dataset.closed)ct.textContent=ct.dataset.closed.replace(/^下次/,state.nextK===0?'晚點':state.nextK===1?'明天':'下次');
+  var ct=d.getElementById('closingTitle');if(ct&&state&&!state.open&&ct.dataset.closed)ct.textContent=ct.dataset.closed.replace(/^下次/,state.nextK===0?'晚點':state.nextK===1?'明天':state.nextDay!=null?('週'+'日一二三四五六'.charAt(state.nextDay)):'下次');
   else if(ct&&state&&state.open&&mins>=300&&mins<15*60&&/今晚/.test(ct.textContent))ct.textContent=ct.textContent.replace('今晚','今天');
   if(state){d.body.dataset.open=state.open?'open':'closed';d.querySelectorAll('.scene .plate text').forEach(function(t){t.textContent=state.open?'營業中':'休息中'})}
   var hst=d.getElementById('heroStat');if(hst&&state){hst.querySelector('.hs-t').textContent=state.text;hst.classList.add('on');hst.classList.toggle('off',!state.open)}
@@ -879,10 +902,10 @@ body.demo.bar-mini .fab{bottom:56px}
   function fabState(){var on=!seen.cta&&!seen.closing&&!under&&!overlay.classList.contains('open');fab.classList.toggle('show',on);if('inert' in fab)fab.inert=!on}
   if(closing&&'IntersectionObserver' in window){new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting)closing.classList.add('in')})},{threshold:.35}).observe(closing);
     var fo=new IntersectionObserver(function(es){es.forEach(function(e){seen[e.target===heroCta?'cta':'closing']=e.isIntersecting});fabState()},{threshold:0});if(heroCta)fo.observe(heroCta);fo.observe(closing);
-    var hits=new Set(),uo=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting)hits.add(e.target);else hits.delete(e.target)});under=hits.size;fabState()},{rootMargin:'-78% 0px 0px 0px'});d.querySelectorAll('.svc li>a,.info .contact>*,.steps li,.feature,.hours li,.about .txt p,.about .hl li').forEach(function(el){uo.observe(el)})}
+    var hits=new Set(),uo=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting)hits.add(e.target);else hits.delete(e.target)});under=hits.size;fabState()},{rootMargin:'-78% 0px 0px 0px'});d.querySelectorAll('.svc li>a,.info .contact>*,.steps li,.feature,.hours li,.about .txt p,.about .hl li,main h2,main .label').forEach(function(el){uo.observe(el)})}
   fabState();
   /* 中文斷詞：標題級文字只在詞的邊界換行 */
-  (window.requestIdleCallback||function(f){setTimeout(f,1200)})(function(){if(window.Intl&&Intl.Segmenter){try{var seg=new Intl.Segmenter('zh-Hant',{granularity:'word'});d.querySelectorAll('h2.statement,.tagline,.closing h2,.about p,.svc p,.lead,.steps p,.feature p,.demo-bar>span:first-child').forEach(function(el){var body=el.tagName==='P';var w=d.createTreeWalker(el,NodeFilter.SHOW_TEXT,{acceptNode:function(n){return n.parentNode.closest('.nm,.nb,.en,.un')?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT}}),nodes=[];while(w.nextNode())nodes.push(w.currentNode);nodes.forEach(function(n){var parts=[],open=/[「『（【〈《]$|^[不沒別很太更最較只才就都也還再又各]$|^[每這那]?[一二兩三四五六七八九十幾]$|^.{1,2}、$/,pair={'毛小孩':1,'一對一':1},tail=/^[的之了著們]$/;for(var it=seg.segment(n.nodeValue)[Symbol.iterator](),r=it.next();!r.done;r=it.next()){var sg=r.value.segment;if(parts.length&&(!r.value.isWordLike||open.test(parts[parts.length-1])||pair[parts[parts.length-1]+sg]||tail.test(sg)))parts[parts.length-1]+=sg;else parts.push(sg)}if(parts.length<2)return;var tail=0,k=parts.length;if(body&&n===nodes[nodes.length-1]){var tx=n.nodeValue,cl=tx.length-1-Math.max(tx.lastIndexOf('，'),tx.lastIndexOf('、'),tx.lastIndexOf('；')),want=cl<=12&&cl<tx.length?cl:5;while(k>1&&tail<want){k--;tail+=parts[k].length}if(tail>12){k=parts.length;tail=0;while(k>1&&tail<5){k--;tail+=parts[k].length}}}var f=d.createDocumentFragment();parts.slice(0,k).forEach(function(tx,i){if(i)f.appendChild(d.createElement('wbr'));f.appendChild(d.createTextNode(tx))});if(k<parts.length){f.appendChild(d.createElement('wbr'));var g=d.createElement('span');g.className='nb';g.textContent=parts.slice(k).join('');f.appendChild(g)}n.parentNode.replaceChild(f,n)});el.classList.add('seg')});
+  (window.requestIdleCallback?function(f){requestIdleCallback(f,{timeout:400})}:function(f){setTimeout(f,300)})(function(){if(window.Intl&&Intl.Segmenter){try{var seg=new Intl.Segmenter('zh-Hant',{granularity:'word'});d.querySelectorAll('h2.statement,.tagline,.closing h2,.about p,.svc p,.lead,.steps p,.feature p,.demo-bar>span:first-child').forEach(function(el){var body=el.tagName==='P';var w=d.createTreeWalker(el,NodeFilter.SHOW_TEXT,{acceptNode:function(n){return n.parentNode.closest('.nm,.nb,.en,.un')?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT}}),nodes=[];while(w.nextNode())nodes.push(w.currentNode);nodes.forEach(function(n){var parts=[],open=/[「『（【〈《]$|^[不沒別很太更最較只才就都也還再又各]$|^[每這那]?[一二兩三四五六七八九十幾]$|^.{1,2}、$|^[\u4e00-\u9fff]$/,pair={'毛小孩':1,'一對一':1},tail=/^[的之了著們地得]$/,sgs=Array.from(seg.segment(n.nodeValue));for(var q=0;q<sgs.length;q++){var rv=sgs[q],sg=rv.segment,lone=rv.isWordLike&&/^[\u4e00-\u9fff]$/.test(sg)&&!(sgs[q+1]&&sgs[q+1].isWordLike);if(parts.length&&(!rv.isWordLike||open.test(parts[parts.length-1])||pair[parts[parts.length-1]+sg]||tail.test(sg)||lone))parts[parts.length-1]+=sg;else parts.push(sg)}if(parts.length<2)return;var tail=0,k=parts.length;if(body&&n===nodes[nodes.length-1]){var tx=n.nodeValue,cl=tx.length-1-Math.max(tx.lastIndexOf('，'),tx.lastIndexOf('、'),tx.lastIndexOf('；')),want=cl<=12&&cl<tx.length?cl:5;while(k>1&&tail<want){k--;tail+=parts[k].length}if(tail>12){k=parts.length;tail=0;while(k>1&&tail<5){k--;tail+=parts[k].length}}}var f=d.createDocumentFragment();parts.slice(0,k).forEach(function(tx,i){if(i)f.appendChild(d.createElement('wbr'));f.appendChild(d.createTextNode(tx))});if(k<parts.length){f.appendChild(d.createElement('wbr'));var g=d.createElement('span');g.className='nb';g.textContent=parts.slice(k).join('');f.appendChild(g)}n.parentNode.replaceChild(f,n)});el.classList.add('seg')});
     /* 直排標語只有一欄又太長：在詞的邊界切成兩欄 */
     d.querySelectorAll('.tile.type .vtext').forEach(function(vt){var cs=vt.querySelectorAll('.vc');if(cs.length!==1)return;var tx=cs[0].textContent;if(tx.length<8)return;var cut=[],at=0;for(var it=seg.segment(tx)[Symbol.iterator](),r=it.next();!r.done;r=it.next()){at+=r.value.segment.length;if(at<tx.length)cut.push(at)}if(!cut.length)return;var best=cut.reduce(function(a,c){return Math.abs(c-tx.length/2)<Math.abs(a-tx.length/2)?c:a});vt.innerHTML='';[tx.slice(0,best),tx.slice(best)].forEach(function(p){var sp=d.createElement('span');sp.className='vc';sp.textContent=p;vt.appendChild(sp)});vt.style.setProperty('--vl',Math.max(best,tx.length-best))})}catch(e){}}});
   /* reveal + counters */
@@ -926,7 +949,7 @@ body.demo.bar-mini .fab{bottom:56px}
     lb.addEventListener('click',function(e){if(e.target===lb)lb.close()});
     lb.addEventListener('keydown',function(e){if(e.key==='ArrowRight'){e.preventDefault();show(cur+1)}if(e.key==='ArrowLeft'){e.preventDefault();show(cur-1)}});
     lb.addEventListener('close',function(){if(opener){opener=slides[cur]||opener;opener.focus({preventScroll:true});go(tiles.indexOf(opener))}});
-    var swx=null;lbBody.addEventListener('pointerdown',function(e){swx=e.clientX});lbBody.addEventListener('pointerup',function(e){if(swx===null)return;var dx=e.clientX-swx;swx=null;if(Math.abs(dx)>40)show(cur+(dx<0?1:-1))});
+    var swx=null,im0=function(){return lbBody.querySelector('img')};lbBody.addEventListener('pointerdown',function(e){swx=e.clientX;var m=im0();if(m)m.style.transition='none'});lbBody.addEventListener('pointermove',function(e){if(swx===null||reduce)return;var m=im0();if(m)m.style.transform='translateX('+(e.clientX-swx)+'px)'});var swEnd=function(e){if(swx===null)return;var dx=e.clientX-swx;swx=null;var m=im0();if(m){m.style.transition='transform .35s var(--ease)';m.style.transform=''}if(Math.abs(dx)>40)show(cur+(dx<0?1:-1))};lbBody.addEventListener('pointerup',swEnd);lbBody.addEventListener('pointercancel',swEnd);
   }
   /* map loads on intent */
   var lm=d.getElementById('loadMap');if(lm)lm.addEventListener('click',function(){var f=d.createElement('iframe');f.src=lm.dataset.src;f.title=lm.dataset.title;f.referrerPolicy='no-referrer-when-downgrade';f.setAttribute('loading','lazy');var m=d.getElementById('map');m.appendChild(f);m.classList.add('loaded');f.focus()});

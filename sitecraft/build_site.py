@@ -969,6 +969,8 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, 
         "nav_labels": {"about": "關於我們", "services": content.get("nav_services") or theme.get("nav_services") or "服務項目",
                        "gallery": "店內環境" if imgs else "店的樣子", "info": "營業資訊"},
         "nav_services": content.get("nav_services") or theme.get("nav_services") or "服務項目",
+        "services_style": content.get("services_style") or theme.get("services_style") or "",
+        "disc": theme.get("disc", ""),
         "order": [k for k in (content.get("order") or theme.get("order") or ["about", "services", "gallery", "info"])
                   if k in ("about", "services", "gallery", "info")],
         "feature_cta": feature_cta(content.get("feature_cta") or theme.get("feature_cta") or "詢問這一項", line_url),
