@@ -62,7 +62,7 @@
     "hero": "side",
     "statement": "一杯咖啡的時間，在{district}慢下來",
     "services_title": "今天想喝點什麼",
-    "gallery_title": "巷子裡的一張桌子",
+    "gallery_title": "可以坐一下午的地方",
     "signature": {
       "kind": "feature",
       "label": "店長推薦"
@@ -604,7 +604,7 @@
         },
         {
           "title": "教你整理",
-          "desc": "回家也能自己吹出差不多的樣子"
+          "desc": "回家也能自己吹整，不用天天跑沙龍"
         }
       ]
     },
@@ -804,7 +804,8 @@
       "毛孩",
       "日期"
     ],
-    "info_title": "接送的時間與位置"
+    "record_photo": "今天洗好了",
+    "info_title": "帶牠來的時間與位置"
   },
   "clinic": {
     "label": "診所",
@@ -904,6 +905,7 @@
       "姓名",
       "日期"
     ],
+    "record_photo": "回診前的提醒",
     "info_title": "看診時間與位置"
   },
   "gym": {

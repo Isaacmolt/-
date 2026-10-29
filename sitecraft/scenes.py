@@ -250,9 +250,55 @@ def sauce_bar(mset: dict, drawable) -> str:
             + f'<g class="sc-ln">{drawable(lines)}</g>')
 
 
-def interior(mset: dict, drawable, key: str = "default") -> str:
-    """店裡：依類別換場景（吧台、髮廊鏡台、寵物美容台、鍋物餐桌）。"""
-    return {"salon": salon, "grooming": grooming, "dining": dining}.get(ROOM_OF.get(key, ""), counter)(mset, drawable)
+def interior(mset: dict, drawable, key: str = "default", wide: bool = False) -> str:
+    """店裡：依類別換場景（吧台、髮廊鏡台、寵物美容台、鍋物餐桌）。
+
+    wide=True 給橫幅首屏用：同一個房間（400x300）放在中間，左右各接 100 寬的一段（600x300），
+    舞台比較寬，標題下方不會只有一小塊插畫。"""
+    room = ROOM_OF.get(key, "")
+    core = {"salon": salon, "grooming": grooming, "dining": dining}.get(room, counter)(mset, drawable)
+    if not wide:
+        return core
+    core = core.replace('<rect class="sc-bg" width="400" height="300"/>', "")
+    left, right, tone, fills = _WINGS.get(room, _WINGS[""])
+    horizon = {"salon": 252, "grooming": 150, "dining": 150}.get(room)
+    lines = ('<path d="M0 266H100M500 266H600"/>'
+             + (f'<path class="fine" d="M0 {horizon}H100M500 {horizon}H600"/>' if horizon else "") + left + right)
+    return (f'<g class="sc-tone" transform="translate(7 7)">{tone}</g>' + fills
+            + f'<g transform="translate(100 0)">{core}</g>' + f'<g class="sc-ln">{drawable(lines)}</g>')
+
+
+# 橫幅舞台兩側（左翼 x 0–100、右翼 x 500–600，地板 y=266）：(左線條, 右線條, 偏移色塊, 強調色填色)
+_WINGS = {
+    "salon": (  # 左：接待櫃台、花瓶與吊燈；右：牆上層架的瓶罐，地上一籃毛巾
+        '<path class="fine" d="M50 0v52"/><path d="M38 64c0-8 5-12 12-12s12 4 12 12z"/>'
+        '<path d="M10 206h84"/><path d="M16 206v60M88 206v60"/><path class="fine" d="M16 226h72"/>'
+        '<path d="M28 206l-2-14h12l-2 14"/><path class="fine" d="M32 192c-2-10-8-16-14-18M32 192c2-12 8-18 16-20M32 192c0-10 2-18 6-22"/>'
+        '<path d="M60 206v-8a8 8 0 0 1 16 0v8"/><path class="fine" d="M68 190v-4"/>',
+        '<path class="fine" d="M550 0v52"/><path d="M538 64c0-8 5-12 12-12s12 4 12 12z"/>'
+        '<path d="M512 118h80"/><path class="fine" d="M522 118l6 8M582 118l-6 8"/>'
+        '<path d="M524 118v-22h9v22M526 96v-5h5"/><path d="M542 118v-28h10v28M544 90v-5h6"/><path d="M562 118v-18h12v18"/>'
+        '<path d="M520 266l6-34h56l6 34"/><path class="fine" d="M524 244h60"/>'
+        '<rect x="528" y="220" width="52" height="10" rx="5"/><rect x="534" y="210" width="40" height="10" rx="5"/>',
+        '<path d="M10 206h84v60H10z"/><path d="M520 266l6-34h56l6 34z"/>',
+        '<path class="acc" d="M38 64c0-8 5-12 12-12s12 4 12 12zM538 64c0-8 5-12 12-12s12 4 12 12z"/><rect class="acc2" x="528" y="220" width="52" height="10" rx="5"/>'),
+    "dining": (  # 左：通往廚房的門，掛著暖簾；右：飲料冰櫃
+        '<path d="M14 266V92h76v174"/><path d="M14 92h76v52H14"/><path class="fine" d="M39 92v52M65 92v52"/>'
+        '<path class="fine" d="M30 170c-4-8 4-12 0-20M52 166c-4-8 4-12 0-20M74 170c-4-8 4-12 0-20"/>',
+        '<rect x="516" y="132" width="66" height="134" rx="4"/><rect class="fine" x="524" y="140" width="50" height="96" rx="2"/>'
+        '<path class="fine" d="M524 172h50M524 204h50"/>'
+        '<path class="fine" d="M532 172v-16h6v16M546 172v-20h6v20M560 172v-14h6v14M532 204v-18h6v18M546 204v-14h6v14M560 204v-18h6v18"/>'
+        '<path d="M524 248h50"/>',
+        '<path d="M14 92h76v52H14z"/><rect x="516" y="132" width="66" height="134"/>',
+        '<path class="acc2" d="M14 92h76v52H14z"/>'),
+    "": (  # 左：一盆高高的龜背芋與小凳；右：立在地上的黑板菜單
+        '<path d="M22 266l4-34h36l4 34"/><path class="fine" d="M44 232c-2-30-14-50-30-60M44 232c0-34 6-58 22-74M44 232c4-26 18-40 36-44"/>'
+        '<path class="fine" d="M14 172c8-4 14 0 16 6M66 158c4-8 12-8 16-2M80 188c4-6 12-4 12 2"/>',
+        '<path d="M516 266l12-110h48l12 110"/><rect x="522" y="168" width="60" height="62" rx="3"/>'
+        '<path class="fine" d="M532 184h40M532 196h28M532 208h34M532 220h22"/><path class="fine" d="M528 248h48"/>',
+        '<path d="M22 266l4-34h36l4 34z"/><rect x="522" y="168" width="60" height="62"/>',
+        '<rect class="acc2" x="522" y="168" width="60" height="62" rx="3"/>'),
+}
 
 
 def counter(mset: dict, drawable) -> str:

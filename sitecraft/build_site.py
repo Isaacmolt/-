@@ -421,7 +421,8 @@ def alt_line(theme: dict, tagline: str, fill: dict) -> str:
 
 
 def vertical_columns(text: str) -> list[str]:
-    """直排標語按標點分欄（標點留在前一欄）；沒有標點就整句一欄，交給前端斷詞平衡。"""
+    """直排標語按標點分欄（標點留在前一欄）。沒有標點又長（8 字以上）時，在最靠近中間的「的／之」之後分兩欄
+    （「左營區毛小孩的／第二個家」），詞不會被拆開；找不到就整句一欄，字級自動縮小。"""
     cols, buf = [], ""
     for ch in text.strip().rstrip("。"):
         buf += ch
@@ -430,6 +431,12 @@ def vertical_columns(text: str) -> list[str]:
             buf = ""
     if buf:
         cols.append(buf)
+    if len(cols) == 1 and len(cols[0]) >= 8:
+        t = cols[0]
+        cuts = [i + 1 for i, ch in enumerate(t) if ch in "的之" and 3 <= i + 1 <= len(t) - 3]
+        if cuts:
+            at = min(cuts, key=lambda c: abs(c - len(t) / 2))
+            cols = [t[:at], t[at:]]
     return cols[:3] or [text]
 
 
@@ -502,21 +509,54 @@ def drawable(markup: str) -> str:
 
 def idle_classes(markup: str, idle: dict) -> str:
     """把指定序號的形狀加上閒置微動 class（蒸氣飄、刀刃開合、腳掌脈動）；原本有 class 就合併。"""
-    kind, shapes = idle.get("kind", "float"), set(idle.get("shapes", []))
+    kinds: dict[int, tuple[str, bool, int]] = {}
+    # 同一張圖可以有第二種微動（吹風機的風 + 剛洗好的閃光、熱水注入）；--i 讓同一種的幾筆錯開
+    for grp in [idle] + list(idle.get("extra", [])):
+        for k, i in enumerate(grp.get("shapes", [])):
+            kinds[i] = (grp.get("kind", "float"), bool(grp.get("steam")), k)
     n = -1
 
     def tag(mm: re.Match) -> str:
         nonlocal n
         n += 1
         el = mm.group(0)
-        if n not in shapes:
+        if n not in kinds:
             return el
-        add = f"idle idle-{kind}" + (" eph" if idle.get("steam") else "")  # eph：蒸氣這類「休息時就不在」的筆畫
+        kind, eph, k = kinds[n]
+        if k:
+            el = re.sub(r"^<(\w+)", lambda t: f'<{t.group(1)} style="--i:{k}"', el)
+        add = f"idle idle-{kind}" + (" eph" if eph else "")  # eph：蒸氣、熱水這類「休息時就不在」的筆畫
         cm = re.search(r"""class=(['"])(.*?)\1""", el)
         if cm:
             return el[:cm.start()] + f'class="{cm.group(2)} {add}"' + el[cm.end():]
         return el[:-2] + f' class="{add}"/>' if el.endswith("/>") else el[:-1] + f' class="{add}">'
     return re.sub(r"<(?:path|circle|ellipse|rect)\b[^>]*>", tag, markup)
+
+
+def label_icon(markup: str, idle: dict, key: str) -> tuple[str, str]:
+    """區塊標籤的小圖與它的簽名動作：剪刀（兩片刀刃開合）→ snip、會冒煙的杯子 → steam、寵物 → 腳印 trail。"""
+    kind, shapes = idle.get("kind"), list(idle.get("shapes", []))
+    if key == "pet":
+        return markup, "trail"
+    if kind == "rotate" and len(shapes) == 2:
+        tags, motion = {shapes[0]: "snA", shapes[1]: "snB"}, "snip"
+    elif kind == "float" and idle.get("steam"):
+        tags, motion = {i: "lst" for i in shapes}, "steam"
+    else:
+        return markup, ""
+    n = -1
+
+    def tag(mm: re.Match) -> str:
+        nonlocal n
+        n += 1
+        el = mm.group(0)
+        if n not in tags:
+            return el
+        cm = re.search(r"""class=(['"])(.*?)\1""", el)
+        if cm:
+            return el[:cm.start()] + f'class="{cm.group(2)} {tags[n]}"' + el[cm.end():]
+        return el[:-2] + f' class="{tags[n]}"/>' if el.endswith("/>") else el[:-1] + f' class="{tags[n]}">'
+    return re.sub(r"<(?:path|circle|ellipse|rect)\b[^>]*>", tag, markup), motion
 
 
 def _lum(c: str) -> float:
@@ -597,7 +637,7 @@ def closing_title(theme_key: str, name: str) -> str:
     return {
         "cafe": "今天，來喝一杯", "breakfast": "明天早餐，來這裡", "restaurant": "今晚，來這裡吃飯",
         "snack": "肚子餓了，就來", "hotpot": "今晚，吃鍋", "dessert": "給自己一點甜",
-        "hair": "預約你的下一個樣子", "beauty": "把時間留給自己", "pet": "毛小孩，交給我們",
+        "hair": "想換髮型，先來聊聊", "beauty": "把時間留給自己", "pet": "毛小孩，交給我們",
         "clinic": "預約看診", "gym": "從今天開始動", "florist": "把心意做成一束花",
         "auto": "車子有狀況，先打給我們", "education": "預約一堂免費試上", "wellness": "給身體一小時",
         "lodging": "下一趟，住這裡",
@@ -972,7 +1012,11 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, 
                        "gallery": "店內環境" if imgs else "店的樣子", "info": "營業資訊"},
         "nav_services": content.get("nav_services") or theme.get("nav_services") or "服務項目",
         "services_style": content.get("services_style") or theme.get("services_style") or "",
-        "steps_style": theme.get("steps_style", ""), "record_fields": theme.get("record_fields") or ["姓名", "日期"],
+        "steps_style": theme.get("steps_style", ""), "record_fields": theme.get("record_fields") or ["姓名", "日期"], "record_photo": theme.get("record_photo", ""),
+        # 營業時間的外框跟著招牌元件走：收據 → 黑板、預約卡 → 票根、照護紀錄 → 夾板卡（themes.json 可用 hours_style 覆寫）
+        "hours_style": theme.get("hours_style") or {"receipt": "board"}.get(theme.get("services_style", ""))
+                       or {"appt": "ticket", "record": "card"}.get(theme.get("steps_style", ""), ""),
+        "hours_card": theme.get("hours_card", "到店時間"),
         "info_title": content.get("info_title") or theme.get("info_title") or "營業時間與位置",
         "disc": theme.get("disc", ""),
         "order": [k for k in (content.get("order") or theme.get("order") or ["about", "services", "gallery", "info"])
@@ -1009,13 +1053,14 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, 
         "sitecraft_name": brand["sender_name"], "sitecraft_contact_href": contact_href,
         "price_twd": brand.get("price_twd", 860),
     }
+    lbl_markup, b["label_motion"] = label_icon(drawable(motif), mset.get("idle") or {}, lead.get("theme") or "default")
     tpl = _env.get_template("onepage.html.j2")
     from markupsafe import Markup
     # 橫幅：兩側是主圖騰與第三圖騰，中間是這一類的場景插畫（像一組靜物，不是三個圖示）
     key = lead.get("theme") or "default"
     hero_block = scene_markup(mset, key)
     # 橫幅版型：首屏下半部是這一類的店裡（一張有地平線、比例一致的完整場景）
-    band = scenes.interior(mset, drawable, key).replace('<rect class="sc-bg" width="400" height="300"/>', '')
+    band = scenes.interior(mset, drawable, key, wide=True)
     idle = mset.get("idle") or {"kind": "float", "shapes": [0]}
 
     band2 = hero_block
@@ -1029,6 +1074,8 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, 
                                          "motif_b_draw": Markup(drawable(mset.get("b", motif))),
                                          "motif_about": Markup(scenes.storefront(mset, b["name_zh"], drawable, bg=False, key=key, parts=b["name_parts"])),
                                          "motif_overlay": Markup(mset.get("b", motif)),
+                                         "motif_hero": Markup(drawable(mset.get("hero") or motif)),
+                                         "motif_label": Markup(lbl_markup),
                                          "motif_b": Markup(mset.get("b", motif)), "motif_band": Markup(band)}, demo=demo))
 
 
