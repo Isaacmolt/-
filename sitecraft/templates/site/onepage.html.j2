@@ -123,7 +123,8 @@ body[data-mode="bold"] .label b{font-family:var(--body);font-weight:700}
 .hero{position:relative;padding:0;min-height:100svh;display:flex;flex-direction:column;justify-content:center;color:#fff;overflow:hidden;isolation:isolate;
   background:linear-gradient(160deg,var(--p) 0%,var(--pd) 62%,color-mix(in oklab,var(--pd) 80%,#000) 100%)}
 .hero::before{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(48% 42% at 96% -4%,color-mix(in oklab,var(--a) 55%,transparent),transparent 70%)}
-.hero .grain{position:absolute;inset:0;z-index:-1;opacity:.16;mix-blend-mode:soft-light;pointer-events:none;background:var(--noise) 0 0/160px 160px}
+/* film grain as a pseudo-element: a full-hero background element would become the page's largest paint */
+.hero::after{content:"";position:absolute;inset:0;z-index:-1;opacity:.16;mix-blend-mode:soft-light;pointer-events:none;background:var(--noise) 0 0/160px 160px}
 .hero[data-scrim]::after{content:"";position:absolute;inset:0 0 auto 0;height:min(28vh,220px);z-index:-1;pointer-events:none;background:linear-gradient(to bottom,rgba(0,0,0,.34),rgba(0,0,0,.18) 55%,transparent)}
 .hero[data-scrim]::before{background:radial-gradient(48% 42% at 96% 30%,color-mix(in oklab,var(--a) 45%,transparent),transparent 70%)}
 .hero{--mx:0;--my:0}
@@ -710,7 +711,6 @@ body.demo.bar-mini .fab{bottom:56px}
 {% endmacro %}
 <section class="hero" id="top" data-hero="{{ b.hero_layout }}"{% if b.scrim %} data-scrim{% endif %}{% if b.hero_photo %} data-photo{% endif %} aria-label="{{ b.name }}">
   {% if b.hero_photo %}<figure class="hp" aria-hidden="true"><img src="{{ b.hero_photo }}" alt="" fetchpriority="high"></figure>{% endif %}
-  <div class="grain" aria-hidden="true"></div>
     <div class="wrap">
     <p class="eyebrow"><span>{{ b.category }}</span><span>{{ b.city }}{{ b.district }}</span></p>
     <h1 aria-label="{{ b.name }}" style="--len:{{ b.name_len }}">{% set ns = namespace(i=0) %}{% for line in b.name_lines %}{% if line.kind == "en" %}<span class="en">{% for w in line.tokens %}<span class="w" style="--i:{{ ns.i }}">{{ w }}</span>{% if not loop.last %} {% endif %}{% set ns.i = ns.i + 1 %}{% endfor %}</span>{% else %}{% for grp in b.name_groups[loop.index0] %}<span class="wd">{% for w in grp %}<span class="w" style="--i:{{ ns.i }}">{{ w }}</span>{% set ns.i = ns.i + 1 %}{% endfor %}</span>{% endfor %}{% endif %}{% endfor %}</h1>
