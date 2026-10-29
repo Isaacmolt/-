@@ -55,7 +55,7 @@ a{color:inherit;text-decoration:none}
 ul,ol{list-style:none}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 :focus-visible{outline:3px solid var(--ink);outline-offset:3px;border-radius:4px}
-.hero :focus-visible,.closing :focus-visible,.overlay :focus-visible,footer :focus-visible,.fab :focus-visible,.demo-bar :focus-visible,.nav:not(.solid) :focus-visible{outline-color:var(--a)}
+.hero :focus-visible,.closing :focus-visible,.feature :focus-visible,.overlay :focus-visible,footer :focus-visible,.fab :focus-visible,.demo-bar :focus-visible,.nav:not(.solid) :focus-visible{outline-color:var(--a)}
 .skip{position:absolute;left:16px;top:-60px;background:var(--tx);color:var(--bg);padding:10px 16px;border-radius:8px;z-index:200;font-weight:700}
 .skip:focus{top:12px}
 .wrap{width:min(1180px,100% - 48px);margin-inline:auto}
@@ -85,6 +85,7 @@ body[data-mode="bold"] .label b{font-family:var(--body);font-weight:700}
 .nav .wrap{display:flex;align-items:center;justify-content:space-between;height:76px;gap:16px}
 .brand{display:flex;align-items:center;gap:12px;font-weight:700;font-size:1.05rem;letter-spacing:.02em;min-height:44px;min-width:0}
 .brand .bn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+@media (max-width:640px){.brand .bn-en{display:none}.brand .bn.long{white-space:normal;word-break:keep-all;line-height:1.25;font-size:.92rem;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2}}
 .brand .mark{flex:none;width:36px;height:36px;border-radius:10px;background:currentColor;display:grid;place-items:center}
 .brand .mark svg{width:22px;height:22px;color:var(--pd);stroke:currentColor;fill:none;stroke-width:9;stroke-linecap:round;stroke-linejoin:round}
 .nav.solid .brand .mark svg{color:var(--bg)}
@@ -147,7 +148,7 @@ body[data-mode="bold"] .label b{font-family:var(--body);font-weight:700}
 @media (min-width:1440px){.hero[data-hero="side"] .weave{display:block}}
 .hero[data-open="open"] .motif svg{color:color-mix(in oklab,#fff 70%,var(--a))}
 .hero .hp-m{display:none}
-.hero .hp{margin:0;position:absolute;right:calc((100% - min(1180px,100% - 48px))/2);top:calc(50% - 52px);transform:translateY(-50%);width:min(34vw,480px);max-height:calc(100% - 230px);aspect-ratio:4/5;border-radius:999px 999px var(--r) var(--r);overflow:hidden;box-shadow:0 40px 80px rgba(0,0,0,.35);z-index:-1}
+.hero .hp{margin:0;position:absolute;right:calc((100% - min(1180px,100% - 48px))/2);top:calc(50% - 36px);transform:translateY(-50%);width:min(34vw,480px);max-height:calc(100% - 260px);aspect-ratio:4/5;border-radius:999px 999px var(--r) var(--r);overflow:hidden;box-shadow:0 40px 80px rgba(0,0,0,.35);z-index:-1}
 .hero .hp img{width:100%;height:100%;object-fit:cover}
 .hero[data-hero="band"] .hp,.hero .hp{isolation:isolate}
 .hero[data-hero="band"] .hp{inset:0;top:0;transform:none;width:auto;aspect-ratio:auto;border-radius:0;box-shadow:none;z-index:-2}
@@ -229,6 +230,11 @@ body[data-mode="editorial"] h1 .en{font-style:italic;font-weight:400}
 @media (max-width:880px){.hero>.wrap{padding-top:96px;padding-bottom:20px;--lane:calc(100vw - 36px)}.hero[data-hero="side"]>.wrap{display:block;padding-bottom:calc(8px + 32vw)}.hero[data-hero="side"]>.wrap>.motif{position:absolute;transform:none;top:auto;bottom:-3vw;right:-12vw;width:62vw;-webkit-mask-image:linear-gradient(to bottom,transparent 4%,#000 42%);mask-image:linear-gradient(to bottom,transparent 4%,#000 42%)}.facts{grid-template-columns:1fr 1fr}.fact{padding:14px 0 14px var(--s4)}.fact>span,.fact>a{font-size:var(--t-m);white-space:normal;overflow:visible;line-height:1.45}.fact>a{margin:-6px 0}.fact .num{font-size:var(--t-m)}.fact:nth-child(odd){border-left:0;padding-left:0}.fact:nth-child(n+3){border-top:1px solid rgba(255,255,255,.14)}}
 @media (max-width:880px){.motif svg{opacity:.3}}
 @media (min-width:641px) and (max-width:880px){.hero[data-hero="side"]>.wrap>.motif{width:44vw;right:3vw}}
+@media (min-width:881px){.hero[data-hero="band"]>.wrap{--lane:min(1180px,100vw - 48px)}}
+.hstat{display:none;align-items:center;gap:8px;margin:14px 0 0;font-size:var(--t-s);font-weight:600;color:#fff}
+.hstat i{flex:none;width:8px;height:8px;border-radius:50%;background:#6ee7a0}.hstat.off i{background:#f4a259}
+.hero[data-hero="band"] .hstat{justify-content:center}
+@media (max-width:640px){.hstat.on{display:flex}}
 @media (max-width:880px){.fact:last-child:nth-child(odd){grid-column:1/-1}}
 @media (min-width:641px) and (max-width:900px) and (max-height:450px){.hero>.wrap{padding-top:76px}.hero h1{font-size:clamp(2rem,9vh,2.8rem);margin:6px 0 4px}.hero .tagline{font-size:1.05rem;max-width:40ch}.hero .cta{margin-top:var(--s3)}.hero .cta .tlink{display:none}.hero[data-hero="side"]>.wrap>.motif{display:none}}
 .motif .m2{display:none}
@@ -258,7 +264,7 @@ body[data-mode="editorial"] h1 .en{font-style:italic;font-weight:400}
 @media (min-width:881px) and (max-height:820px){.hero[data-hero="band"] h1{font-size:clamp(2.6rem,2rem + 3.6vw,4.8rem);margin:10px 0 8px}.hero[data-hero="band"]{--bh:clamp(110px,100svh - 584px,200px)}.hero[data-hero="band"]>.wrap{padding-top:88px;padding-bottom:calc(var(--bh) + 16px)}.hero[data-hero="band"] .cta{margin-top:var(--s5)}}
 @media (min-width:881px) and (max-height:700px){.hero[data-hero="band"] h1{font-size:clamp(2.4rem,1.6rem + 3vw,4rem)}.hero[data-hero="band"] .tagline{font-size:1.2rem}.hero[data-hero="band"]>.wrap{padding-top:84px;padding-bottom:calc(var(--bh) + 14px)}.fact{padding-block:var(--s4)}}
 @media (max-width:880px){.hero[data-hero="band"] .hero-foot .motif{width:min(70vw,520px);max-width:none}.hero[data-hero="band"]>.wrap{padding-bottom:calc(min(70vw,520px)*220/580 + 28px)}.hero[data-hero="band"] .motif svg{opacity:.62}}
-@media (min-width:641px) and (max-width:880px){.hero .hp-m{height:clamp(150px,22svh,220px)}}
+@media (min-width:641px) and (max-width:880px){.hero .hp-m{height:auto;aspect-ratio:4/3;width:min(100%,440px,calc(22svh*4/3))}.hero[data-hero="band"] .hp-m{margin-inline:auto}}
 @media (max-width:640px){body .hero[data-hero="band"]>.wrap{padding-bottom:calc(66vw + 24px)}}
 /* ---------- sections ---------- */
 section:not(.hero){padding:clamp(var(--s9),10vw,var(--s10)) 0}
@@ -272,12 +278,23 @@ h2{font-size:clamp(2rem,4.4vw,3.6rem);margin-bottom:var(--s5)}
 .about .hl{margin-top:var(--s6)}
 .about .ph{margin:0 0 var(--s6);border-radius:var(--r);overflow:hidden;aspect-ratio:4/5}
 .about .ph img{width:100%;height:100%;object-fit:cover}
-.about .ph.art{aspect-ratio:1;background:var(--sf);display:grid;place-items:center;border:1px solid var(--line)}
+.about .ph.art{aspect-ratio:4/3;background:var(--sf);display:grid;place-items:center;border:1px solid var(--line)}
 .about .ph.art svg{width:92%;height:auto;color:var(--ink);stroke:currentColor;fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
-.about .ph.art .tone *{fill:var(--a-soft);stroke:none}.about .ph.art .tone .fine{display:none}
-@media (prefers-color-scheme:dark){.about .ph.art .tone *{fill:color-mix(in oklab,var(--a) 34%,var(--sf))}}
-.about .ph.art .ln :is(.acc){fill:var(--a);stroke:none}.about .ph.art .ln .acc2{fill:var(--a);fill-opacity:.35}.about .ph.art .fine{stroke-width:.8}
-@media (max-width:880px){.about .wrap{grid-template-columns:minmax(0,1fr);grid-template-areas:"lab" "txt" "side" "hl"}.about .side{position:static}.about .ph{aspect-ratio:4/3;margin:var(--s2) 0 0}.about .ph.art svg{width:auto;height:96%}}
+.scene{stroke-linecap:round;stroke-linejoin:round}
+.scene .sc-bg{fill:var(--a-soft);stroke:none}.scene .sc-paper{fill:var(--bg);stroke:none}
+.scene .sc-tone>*,.scene path.sc-tone{fill:color-mix(in oklab,var(--a) 32%,var(--a-soft));stroke:none}
+.scene .sc-ln{fill:none;stroke:var(--pd);--k:1;stroke-width:calc(2.2px*var(--k))}.scene .sc-ln g{stroke-width:calc(2.2px*var(--k))}.scene .sc-ln .fine{stroke-width:calc(1.2px*var(--k))}
+.scene .acc{fill:var(--a);stroke:none}.scene .acc2{fill:var(--a);fill-opacity:.35;stroke:none}
+.scene .sg{fill:var(--pd);stroke:none;font-family:var(--display),var(--cjk-head),var(--body);font-weight:var(--head-weight)}
+@media (prefers-color-scheme:dark){.scene .sc-bg{fill:color-mix(in oklab,var(--sf) 76%,var(--p))}.scene .sc-paper{fill:var(--sf)}.scene .sc-tone>*,.scene path.sc-tone{fill:color-mix(in oklab,var(--sf) 52%,var(--p))}.scene .sc-ln{stroke:color-mix(in oklab,var(--a) 55%,#fff)}.scene .sg{fill:color-mix(in oklab,var(--a) 40%,#fff)}}
+.about .ph.art .scene .sc-tone>*{fill:var(--a-soft)}
+.scene .glow{fill:var(--a);opacity:0;transition:opacity 1.2s var(--ease)}body[data-open="open"] .scene .glow{opacity:.18}
+.scene .plate{display:none}body[data-open] .about .scene .plate{display:inline}.scene .plate rect{fill:var(--pd);stroke:none}.scene .plate path{fill:none;stroke:var(--pd);stroke-width:1.2}
+.scene .plate text{fill:#fff;stroke:none;font-family:var(--body);font-weight:700;letter-spacing:.08em}body[data-open="closed"] .scene .plate rect{fill:var(--mu)}
+@media (prefers-color-scheme:dark){.scene .plate rect{fill:color-mix(in oklab,var(--a) 70%,#000)}}
+@media (prefers-color-scheme:dark){.about .ph.art .scene .sc-tone>*{fill:color-mix(in oklab,var(--sf) 60%,var(--p))}}
+@media (min-width:641px) and (max-width:880px){.about .ph.art{max-width:560px}}
+@media (max-width:880px){.about .wrap{grid-template-columns:minmax(0,1fr);grid-template-areas:"lab" "txt" "side" "hl"}.about .side{position:static}.about .ph,.about .ph.art{aspect-ratio:4/3;margin:var(--s2) 0 0}.about .ph.art svg{width:auto;height:96%}}
 body:not([data-mode="editorial"]) .about.has-art{position:relative;overflow:hidden}
 @media (min-width:881px){body:not([data-mode="editorial"]) .about.has-art .wrap{grid-template-columns:minmax(0,1fr);grid-template-areas:"lab" "txt" "hl"}body:not([data-mode="editorial"]) .about.has-art :is(.txt,.hl){max-width:min(620px,54%);position:relative;z-index:1}body:not([data-mode="editorial"]) .about.has-art h2.statement{font-size:clamp(2.2rem,4.4vw,3.6rem)}body:not([data-mode="editorial"]) .about.has-art .side{position:absolute;right:max(24px,(100vw - 1180px)/2 - 40px);top:clamp(60px,8vw,120px);width:min(40vw,560px);pointer-events:none}body:not([data-mode="editorial"]) .about.has-art .ph.art{background:none;border:0;aspect-ratio:1;border-radius:0}body:not([data-mode="editorial"]) .about.has-art .ph.art svg{width:100%}}
 .about .label{grid-column:1/-1}
@@ -365,7 +382,7 @@ body[data-mode="bold"] .svc li:has(>a:focus-visible){outline-color:var(--a);outl
 .feature .num{font-size:clamp(1.4rem,2.4vw,1.9rem);color:var(--a)}
 .feature .btn{margin-top:var(--s3)}
 .feature .sig-art .tone *{fill:var(--a);fill-opacity:.25;stroke:none}.feature .sig-art .tone .fine{display:none}.feature .sig-art .ln :is(.acc,.acc2){fill:var(--a);fill-opacity:.5;stroke:currentColor}
-@media (max-width:640px){.feature .sig-art{width:42%;top:-4%;right:-6%;bottom:auto;transform:none;opacity:.24}}
+@media (max-width:640px){.feature .sig-art{width:36%;top:16px;right:14px;bottom:auto;transform:none;opacity:.3}}
 
 /* gallery */
 .gallery .head{display:flex;justify-content:space-between;align-items:flex-end;gap:var(--s5);margin-bottom:var(--s6)}
@@ -397,7 +414,6 @@ body[data-mode="bold"] .svc li:has(>a:focus-visible){outline-color:var(--a);outl
 .tile::after{content:"";position:absolute;inset:0;background:var(--noise) 0 0/160px 160px;opacity:.14;mix-blend-mode:soft-light;pointer-events:none}
 .tile svg.art,.tile img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 1.2s var(--ease)}
 @media (prefers-color-scheme:dark){.tile .art rect.g{fill:color-mix(in oklab,var(--sf) 76%,var(--p))}.tile .art rect.g2{fill:color-mix(in oklab,var(--sf) 60%,var(--p))}.tile .art .k{stroke:color-mix(in oklab,var(--a) 55%,#fff)}.tile .art .pk{stroke:var(--a)}.tile .art circle.ac{opacity:.3}}
-.tile .art>g.v{transform-origin:200px 150px;transform:rotate(calc(var(--i,0)*-5deg)) scale(calc(1.06 + var(--i,0)*.06))}
 .tile:hover svg.art,.tile:hover img{transform:scale(1.04)}
 .tile .cap{position:absolute;left:var(--s4);bottom:var(--s4);font-size:var(--t-xs);letter-spacing:.12em;text-transform:uppercase;backdrop-filter:blur(8px);padding:6px 12px;border-radius:999px}
 @media (max-width:880px){.strip{--th:clamp(300px,36vw,420px)}.tile.type .cap{letter-spacing:.06em;font-size:var(--t-xs);max-width:calc(100% - 28px)}}
@@ -463,6 +479,7 @@ body[data-mode="bold"] .svc li:has(>a:focus-visible){outline-color:var(--a);outl
 /* closing */
 .closing{background:var(--pd);color:#fff;position:relative;overflow:hidden;isolation:isolate;border-top:1px solid var(--line)}
 .closing .cl-motif{position:absolute;right:-2vw;bottom:-1.5vw;width:36vw;max-width:520px;opacity:.22;z-index:-1;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+@media (max-width:640px){.closing .cl-motif{width:26vw;right:-3vw;bottom:-8vw}}
 .closing::before{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(50% 60% at 15% 100%,color-mix(in oklab,var(--p) 70%,transparent),transparent 70%)}
 .closing .wrap{display:grid;grid-template-columns:minmax(0,1fr) min(40vw,560px);gap:40px;align-items:end}
 @media (max-width:880px){.closing .wrap{grid-template-columns:1fr}}
@@ -542,11 +559,11 @@ body.demo.bar-mini .fab{bottom:56px}
 
 <header class="nav" id="nav">
   <div class="wrap">
-    <a class="brand" href="#top"><span class="mark" aria-hidden="true"><svg viewBox="0 0 200 200">{{ t.motif }}</svg></span><span class="bn">{{ b.name }}</span></a>
+    <a class="brand" href="#top"><span class="mark" aria-hidden="true"><svg viewBox="0 0 200 200">{{ t.motif }}</svg></span><span class="bn{% if b.name_zh | length > 8 %} long{% endif %}">{% if b.name_lines[0].kind != "en" %}{% for g in b.name_groups[0] %}{{ g | join("") }}{% if not loop.last %}<wbr>{% endif %}{% endfor %}{% else %}{{ b.name_zh }}{% endif %}{% if b.name_zh != b.name %}<span class="bn-en"> {{ b.name[(b.name_zh | length):] | trim }}</span>{% endif %}</span></a>
     <nav aria-label="主選單">
       <ul>
         <li><a href="#about">關於我們</a></li>
-        <li><a href="#services">服務項目</a></li>
+        <li><a href="#services">{{ b.nav_services }}</a></li>
         <li><a href="#gallery">{{ b.gallery_name }}</a></li>
         <li><a href="#info">營業資訊</a></li>
       </ul>
@@ -555,10 +572,10 @@ body.demo.bar-mini .fab{bottom:56px}
   </div>
 </header>
 <div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-label="選單" aria-hidden="true">
-  <span class="ov-brand">{{ b.name }}</span>
+  <span class="ov-brand">{{ b.name_zh }}</span>
   <svg class="ov-motif" viewBox="0 0 200 200" aria-hidden="true">{{ t.motif_overlay }}</svg>
   <a href="#about" style="--i:0">關於我們</a>
-  <a href="#services" style="--i:1">服務項目</a>
+  <a href="#services" style="--i:1">{{ b.nav_services }}</a>
   <a href="#gallery" style="--i:2">{{ b.gallery_name }}</a>
   <a href="#info" style="--i:3">營業資訊</a>
   <small><span id="ovHours"><span class="nb">{% if b.today_hours %}今日 {{ b.today_hours }}{% endif %}</span></span><i class="sep"></i><span class="nb">{{ b.address_short }}</span></small>
@@ -574,7 +591,6 @@ body.demo.bar-mini .fab{bottom:56px}
 <section class="hero" id="top" data-hero="{{ b.hero_layout }}"{% if b.scrim %} data-scrim{% endif %}{% if b.hero_photo %} data-photo{% endif %} aria-label="{{ b.name }}">
   {% if b.hero_photo %}<figure class="hp" aria-hidden="true"><img src="{{ b.hero_photo }}" alt="" fetchpriority="high"></figure>{% endif %}
   <div class="grain" aria-hidden="true"></div>
-  {% if b.hero_layout != "band" %}{{ weave("h", true) }}{% endif %}
     <div class="wrap">
     <p class="eyebrow"><span>{{ b.category }}</span><span>{{ b.city }}{{ b.district }}</span></p>
     <h1 aria-label="{{ b.name }}" style="--len:{{ b.name_len }}">{% set ns = namespace(i=0) %}{% for line in b.name_lines %}{% if line.kind == "en" %}<span class="en">{% for w in line.tokens %}<span class="w" style="--i:{{ ns.i }}">{{ w }}</span>{% if not loop.last %} {% endif %}{% set ns.i = ns.i + 1 %}{% endfor %}</span>{% else %}{% for grp in b.name_groups[loop.index0] %}<span class="wd">{% for w in grp %}<span class="w" style="--i:{{ ns.i }}">{{ w }}</span>{% set ns.i = ns.i + 1 %}{% endfor %}</span>{% endfor %}{% endif %}{% endfor %}</h1>
@@ -585,6 +601,7 @@ body.demo.bar-mini .fab{bottom:56px}
       {% elif b.phone_href %}<a class="btn btn-solid" href="{{ b.phone_href }}"><svg class="ico"><use href="#i-phone"/></svg>撥打電話</a>{% endif %}
       <a class="tlink" href="{{ b.maps_url }}" target="_blank" rel="noopener"><svg class="ico"><use href="#i-pin"/></svg>查看地圖</a>
     </div>
+    <p class="hstat" id="heroStat" aria-hidden="true"><i></i><span></span></p>
     {% if b.hero_photo %}<figure class="hp-m" aria-hidden="true"><img src="{{ b.hero_photo }}" alt="" loading="lazy"></figure>{% endif %}
     {% if b.hero_layout != "band" and not b.hero_photo %}<div class="motif" aria-hidden="true"><svg viewBox="-10 -10 220 220"><g class="d">{{ t.motif_scene }}</g></svg></div>{% endif %}
   </div>
@@ -613,7 +630,7 @@ body.demo.bar-mini .fab{bottom:56px}
       {% for h in b.highlights %}<li>{{ h }}</li>{% endfor %}
     </ol>
     <div class="side">
-      {% if b.about_photo %}<figure class="ph" data-reveal style="--i:2"><img src="{{ b.about_photo }}" alt="{{ b.name }}" loading="lazy"></figure>{% else %}<figure class="ph art" data-reveal style="--i:2" aria-hidden="true"><svg class="dw fit" viewBox="-10 -10 220 220">{{ t.motif_about }}</svg></figure>{% endif %}
+      {% if b.about_photo %}<figure class="ph" data-reveal style="--i:2"><img src="{{ b.about_photo }}" alt="{{ b.name }}" loading="lazy"></figure>{% else %}<figure class="ph art" data-reveal style="--i:2" aria-hidden="true"><svg class="dw fit scene" viewBox="0 0 400 300">{{ t.motif_about }}</svg></figure>{% endif %}
     </div>
   </div>
 </section>
@@ -621,7 +638,7 @@ body.demo.bar-mini .fab{bottom:56px}
 <section class="services" id="services">
   {{ weave("s") }}
   <div class="wrap">
-    <div class="label" data-reveal><b>02</b>服務項目<svg class="lm dw" viewBox="0 0 200 200" aria-hidden="true">{{ t.motif_b_draw }}</svg></div>
+    <div class="label" data-reveal><b>02</b>{{ b.nav_services }}<svg class="lm dw" viewBox="0 0 200 200" aria-hidden="true">{{ t.motif_b_draw }}</svg></div>
     <h2 data-reveal style="--i:1">{{ b.services_title }}</h2>
     <p class="lead" data-reveal style="--i:2">{% if b.services_linked %}{{ b.services_lead }}{% else %}有其他需求也歡迎告訴我們。{% endif %}</p>
     {% set feat = b.signature if (b.signature and b.signature.kind == "feature") else none %}
@@ -632,7 +649,7 @@ body.demo.bar-mini .fab{bottom:56px}
       <h3>{{ fi.title }}</h3>
       <p>{{ fi.desc }}</p>
       {% if fi.price %}<span class="num">{{ fi.price }}</span>{% endif %}
-      {% if fi.href %}<a class="btn btn-solid" href="{{ fi.href }}"{% if fi.href.startswith('http') %} target="_blank" rel="noopener"{% endif %}>詢問這一項<svg class="ico"><use href="#i-arrow"/></svg></a>{% endif %}
+      {% if fi.href %}<a class="btn btn-solid" href="{{ fi.href }}"{% if fi.href.startswith('http') %} target="_blank" rel="noopener"{% endif %}>{{ b.feature_cta }}<svg class="ico"><use href="#i-arrow"/></svg></a>{% endif %}
     </div>
     {% endif %}
     <ul class="svc">
@@ -676,7 +693,7 @@ body.demo.bar-mini .fab{bottom:56px}
       {% for g in b.gallery_items %}
       <div class="tile{% if g.tall %} tall{% endif %}{% if g.type %} type{% endif %}" style="--i:{{ loop.index0 }}">
         {% if g.img %}<img src="{{ g.img }}" alt="{{ b.name }} {{ g.label }}" loading="lazy" draggable="false">{% elif g.type %}<span class="vtext" style="--vl:{{ b.vlen }}">{% for c in b.vcols %}<span class="vc">{{ c }}</span>{% endfor %}</span>{% else %}<span class="dw">{{ g.art }}</span>{% endif %}
-        {% if g.img %}<span class="cap">{{ g.label }}</span>{% elif g.type %}<span class="cap">{{ b.name_zh }}{% if b.name_zh != b.name %}<span class="cap-en">{{ b.name[(b.name_zh | length):] }}</span>{% endif %}</span>{% endif %}
+        {% if g.img %}<span class="cap">{{ g.label }}</span>{% elif g.type %}<span class="cap">{{ b.name_zh }}</span>{% endif %}
       </div>
       {% endfor %}
     </div>
@@ -744,7 +761,7 @@ body.demo.bar-mini .fab{bottom:56px}
 
 <footer>
   <div class="wrap">
-    <p>© {{ b.year }} {{ b.name }}<i class="sep"></i>{{ b.city }}{{ b.district }}</p>
+    <p>© {{ b.year }} <span class="nb">{{ b.name_zh }}</span>{% if b.name_zh != b.name %} <span class="nb">{{ b.name[(b.name_zh | length):] | trim }}</span>{% endif %}<i class="sep"></i>{{ b.city }}{{ b.district }}</p>
     <div class="links">
       {% if b.facebook_url %}<a href="{{ b.facebook_url }}" target="_blank" rel="noopener">Facebook</a>{% endif %}
       {% if b.instagram_url %}<a href="{{ b.instagram_url }}" target="_blank" rel="noopener">Instagram</a>{% endif %}
@@ -759,7 +776,7 @@ body.demo.bar-mini .fab{bottom:56px}
 
 {% if demo %}
 <aside class="demo-bar" id="demoBar" aria-label="製作者提示">
-  <span><strong>{{ b.name }}</strong> 老闆您好，這是<span class="long"> {{ b.sitecraft_name }} </span>預先為您製作的網站草稿<span class="long">。</span><span class="short">，</span><strong>NT${{ b.price_twd }}</strong> 即可正式上線<span class="long">、換上您的照片</span>。</span>
+  <span><strong><span class="nb">{{ b.name_zh }}</span>{% if b.name_zh != b.name %} <span class="nb">{{ b.name[(b.name_zh | length):] | trim }}</span>{% endif %}</strong> 老闆您好，這是<span class="long"> <span class="nb">{{ b.sitecraft_name }}</span></span>預先為您製作的網站草稿<span class="long">。</span><span class="short">，</span><strong class="nb">NT${{ b.price_twd }}</strong> 即可正式上線{% if not b.has_photos %}<span class="long">、換上您的照片</span>{% endif %}。</span>
   <span class="mt">網站草稿・<strong>NT${{ b.price_twd }}</strong> 正式上線</span>
   {% if b.sitecraft_contact_href %}<a href="{{ b.sitecraft_contact_href }}">聯絡我們</a>{% endif %}
   <button type="button" aria-label="關閉提示" onclick="document.getElementById('demoBar').remove();document.body.classList.remove('demo')">×</button>
@@ -772,7 +789,7 @@ body.demo.bar-mini .fab{bottom:56px}
   /* nav: solid after hero, hide on scroll down */
   var nav=d.getElementById('nav'),hero=d.querySelector('.hero'),last=0,heroH=0,maxY=1,ticking=false,fab=d.querySelector('.fab')||{classList:{toggle:function(){}}};
   var btn=d.getElementById('menuBtn'),overlay=d.getElementById('overlay'),touch=matchMedia('(hover:none)').matches&&!reduce;
-  var db0=d.getElementById('demoBar');if(db0&&innerHeight<=700&&innerWidth<=880){db0.classList.add('mini');d.body.classList.add('bar-mini')}
+  var db0=d.getElementById('demoBar');if(db0&&innerWidth<=880){db0.classList.add('mini');d.body.classList.add('bar-mini')}
   var barSet=0;function measure(){var bar=d.getElementById('demoBar');if(bar){var bh=bar.offsetHeight;d.documentElement.style.setProperty('--barnow',bh+'px');if(!barSet||!bar.classList.contains('mini')){d.documentElement.style.setProperty('--bar',bh+'px');barSet=1}}heroH=hero.offsetHeight;maxY=Math.max(d.documentElement.scrollHeight-innerHeight,1)}
   var foot=d.querySelector('.hero-foot'),lock=0,lockT=null,closing=d.querySelector('.closing');
   function onScroll(){
@@ -824,15 +841,19 @@ body.demo.bar-mini .fab{bottom:56px}
   var ist=d.getElementById('infoStatusText');if(ist&&state)ist.textContent=state.text;
   var ch=d.getElementById('closingHours');if(ch&&state)ch.textContent=state.text;
   var ct=d.getElementById('closingTitle');if(ct&&state&&!state.open&&ct.dataset.closed)ct.textContent=ct.dataset.closed;
+  else if(ct&&state&&state.open&&mins<15*60&&/今晚/.test(ct.textContent))ct.textContent=ct.textContent.replace('今晚','今天');
+  if(state){d.body.dataset.open=state.open?'open':'closed';d.querySelectorAll('.scene .plate text').forEach(function(t){t.textContent=state.open?'營業中':'休息中'})}
+  var hst=d.getElementById('heroStat');if(hst&&state){hst.querySelector('span').textContent=state.text;hst.classList.add('on');hst.classList.toggle('off',!state.open)}
   var hs=d.getElementById('heroHours');if(hs&&state){var nxt=state.text.split('　')[1]||'';var a1=state.open?'營業中':(todayClosed?'今日公休':'休息中'),a2=state.open?(closeAt?fmt(closeAt.hour,closeAt.minute||0)+' 打烊':''):state.next;hs.innerHTML='';var s1=d.createElement('span');s1.textContent=a1;hs.appendChild(s1);if(a2){var s2=d.createElement('span');s2.className='nb';s2.textContent=a2;hs.appendChild(s2)}}
   /* quick contact: shows once the hero buttons scroll away, steps aside over the closing (which has its own) */
-  var heroCta=d.querySelector('.hero .cta'),seen={cta:true,closing:false};
-  function fabState(){var on=!seen.cta&&!seen.closing&&!overlay.classList.contains('open');fab.classList.toggle('show',on);if('inert' in fab)fab.inert=!on}
+  var heroCta=d.querySelector('.hero .cta'),seen={cta:true,closing:false},under=0;
+  function fabState(){var on=!seen.cta&&!seen.closing&&!under&&!overlay.classList.contains('open');fab.classList.toggle('show',on);if('inert' in fab)fab.inert=!on}
   if(closing&&'IntersectionObserver' in window){new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting)closing.classList.add('in')})},{threshold:.35}).observe(closing);
-    var fo=new IntersectionObserver(function(es){es.forEach(function(e){seen[e.target===heroCta?'cta':'closing']=e.isIntersecting});fabState()},{threshold:0});if(heroCta)fo.observe(heroCta);fo.observe(closing)}
+    var fo=new IntersectionObserver(function(es){es.forEach(function(e){seen[e.target===heroCta?'cta':'closing']=e.isIntersecting});fabState()},{threshold:0});if(heroCta)fo.observe(heroCta);fo.observe(closing);
+    var hits=new Set(),uo=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting)hits.add(e.target);else hits.delete(e.target)});under=hits.size;fabState()},{rootMargin:'-78% 0px 0px 0px'});d.querySelectorAll('.svc li>a,.info .contact>*').forEach(function(el){uo.observe(el)})}
   fabState();
   /* 中文斷詞：標題級文字只在詞的邊界換行 */
-  (window.requestIdleCallback||function(f){setTimeout(f,1200)})(function(){if(window.Intl&&Intl.Segmenter){try{var seg=new Intl.Segmenter('zh-Hant',{granularity:'word'});d.querySelectorAll('h2.statement,.tagline,.closing h2,.about p,.svc p,.lead,.steps p,.feature p').forEach(function(el){var body=el.tagName==='P';var w=d.createTreeWalker(el,NodeFilter.SHOW_TEXT,{acceptNode:function(n){return n.parentNode.closest('.nm,.nb,.en,.un')?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT}}),nodes=[];while(w.nextNode())nodes.push(w.currentNode);nodes.forEach(function(n){var parts=[],open=/[「『（【〈《]$|^[不沒別很太更最]$/;for(var it=seg.segment(n.nodeValue)[Symbol.iterator](),r=it.next();!r.done;r=it.next()){var sg=r.value.segment;if(parts.length&&(!r.value.isWordLike||open.test(parts[parts.length-1])))parts[parts.length-1]+=sg;else parts.push(sg)}if(parts.length<2)return;var tail=0,k=parts.length;if(body&&n===nodes[nodes.length-1]){var tx=n.nodeValue,cl=tx.length-1-Math.max(tx.lastIndexOf('，'),tx.lastIndexOf('、'),tx.lastIndexOf('；')),want=cl<=12&&cl<tx.length?cl:5;while(k>1&&tail<want){k--;tail+=parts[k].length}if(tail>12){k=parts.length;tail=0;while(k>1&&tail<5){k--;tail+=parts[k].length}}}var f=d.createDocumentFragment();parts.slice(0,k).forEach(function(tx,i){if(i)f.appendChild(d.createElement('wbr'));f.appendChild(d.createTextNode(tx))});if(k<parts.length){f.appendChild(d.createElement('wbr'));var g=d.createElement('span');g.className='nb';g.textContent=parts.slice(k).join('');f.appendChild(g)}n.parentNode.replaceChild(f,n)});el.classList.add('seg')});
+  (window.requestIdleCallback||function(f){setTimeout(f,1200)})(function(){if(window.Intl&&Intl.Segmenter){try{var seg=new Intl.Segmenter('zh-Hant',{granularity:'word'});d.querySelectorAll('h2.statement,.tagline,.closing h2,.about p,.svc p,.lead,.steps p,.feature p,.demo-bar>span:first-child').forEach(function(el){var body=el.tagName==='P';var w=d.createTreeWalker(el,NodeFilter.SHOW_TEXT,{acceptNode:function(n){return n.parentNode.closest('.nm,.nb,.en,.un')?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT}}),nodes=[];while(w.nextNode())nodes.push(w.currentNode);nodes.forEach(function(n){var parts=[],open=/[「『（【〈《]$|^[不沒別很太更最較]$/;for(var it=seg.segment(n.nodeValue)[Symbol.iterator](),r=it.next();!r.done;r=it.next()){var sg=r.value.segment;if(parts.length&&(!r.value.isWordLike||open.test(parts[parts.length-1])))parts[parts.length-1]+=sg;else parts.push(sg)}if(parts.length<2)return;var tail=0,k=parts.length;if(body&&n===nodes[nodes.length-1]){var tx=n.nodeValue,cl=tx.length-1-Math.max(tx.lastIndexOf('，'),tx.lastIndexOf('、'),tx.lastIndexOf('；')),want=cl<=12&&cl<tx.length?cl:5;while(k>1&&tail<want){k--;tail+=parts[k].length}if(tail>12){k=parts.length;tail=0;while(k>1&&tail<5){k--;tail+=parts[k].length}}}var f=d.createDocumentFragment();parts.slice(0,k).forEach(function(tx,i){if(i)f.appendChild(d.createElement('wbr'));f.appendChild(d.createTextNode(tx))});if(k<parts.length){f.appendChild(d.createElement('wbr'));var g=d.createElement('span');g.className='nb';g.textContent=parts.slice(k).join('');f.appendChild(g)}n.parentNode.replaceChild(f,n)});el.classList.add('seg')});
     /* 直排標語只有一欄又太長：在詞的邊界切成兩欄 */
     d.querySelectorAll('.tile.type .vtext').forEach(function(vt){var cs=vt.querySelectorAll('.vc');if(cs.length!==1)return;var tx=cs[0].textContent;if(tx.length<8)return;var cut=[],at=0;for(var it=seg.segment(tx)[Symbol.iterator](),r=it.next();!r.done;r=it.next()){at+=r.value.segment.length;if(at<tx.length)cut.push(at)}if(!cut.length)return;var best=cut.reduce(function(a,c){return Math.abs(c-tx.length/2)<Math.abs(a-tx.length/2)?c:a});vt.innerHTML='';[tx.slice(0,best),tx.slice(best)].forEach(function(p){var sp=d.createElement('span');sp.className='vc';sp.textContent=p;vt.appendChild(sp)});vt.style.setProperty('--vl',Math.max(best,tx.length-best))})}catch(e){}}});
   /* reveal + counters */

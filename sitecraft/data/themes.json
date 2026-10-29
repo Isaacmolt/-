@@ -67,7 +67,9 @@
       "kind": "feature",
       "label": "今日推薦"
     },
-    "services_lead": "想喝什麼、想坐多久，點任一項直接問我們。"
+    "services_lead": "想喝什麼、想坐多久，點任一項直接問我們。",
+    "nav_services": "菜單",
+    "feature_cta": "LINE 預留座位"
   },
   "breakfast": {
     "label": "早午餐",
@@ -138,7 +140,9 @@
       "kind": "feature",
       "label": "招牌"
     },
-    "services_lead": "點任一項就能先問，外帶內用都好。"
+    "services_lead": "點任一項就能先問，外帶內用都好。",
+    "nav_services": "菜單",
+    "feature_cta": "LINE 先點餐"
   },
   "restaurant": {
     "label": "餐廳",
@@ -221,7 +225,9 @@
       "kind": "feature",
       "label": "招牌菜"
     },
-    "services_lead": "想訂位或問今天的菜色，點任一項直接問。"
+    "services_lead": "想訂位或問今天的菜色，點任一項直接問。",
+    "nav_services": "菜單",
+    "feature_cta": "LINE 訂位"
   },
   "snack": {
     "label": "小吃",
@@ -305,7 +311,9 @@
       "kind": "feature",
       "label": "招牌"
     },
-    "services_lead": "點任一項直接問，外帶也可以先說。"
+    "services_lead": "點任一項直接問，外帶也可以先說。",
+    "nav_services": "菜單",
+    "feature_cta": "LINE 先點餐"
   },
   "hotpot": {
     "label": "火鍋",
@@ -377,7 +385,9 @@
       "kind": "feature",
       "label": "招牌湯底"
     },
-    "services_lead": "想訂位或問湯底，點任一項直接問。"
+    "services_lead": "想訂位或問湯底，點任一項直接問。",
+    "nav_services": "菜單",
+    "feature_cta": "LINE 訂位"
   },
   "dessert": {
     "label": "甜點烘焙",
@@ -458,7 +468,9 @@
       "kind": "feature",
       "label": "今日推薦"
     },
-    "services_lead": "想訂蛋糕或問今天還有什麼，點任一項直接問。"
+    "services_lead": "想訂蛋糕或問今天還有什麼，點任一項直接問。",
+    "nav_services": "菜單",
+    "feature_cta": "LINE 預訂"
   },
   "hair": {
     "label": "美髮",
@@ -548,7 +560,8 @@
         }
       ]
     },
-    "services_lead": "不確定適合什麼也沒關係，點任一項先聊聊。"
+    "services_lead": "不確定適合什麼也沒關係，點任一項先聊聊。",
+    "nav_services": "服務項目"
   },
   "beauty": {
     "label": "美容美甲",
@@ -640,7 +653,8 @@
         }
       ]
     },
-    "services_lead": "想看款式或問時段，點任一項直接問。"
+    "services_lead": "想看款式或問時段，點任一項直接問。",
+    "nav_services": "服務項目"
   },
   "pet": {
     "label": "寵物",
@@ -730,7 +744,8 @@
         }
       ]
     },
-    "services_lead": "不確定毛小孩適合哪一項，點任一項先問我們。"
+    "services_lead": "不確定毛小孩適合哪一項，點任一項先問我們。",
+    "nav_services": "服務項目"
   },
   "clinic": {
     "label": "診所",
@@ -823,7 +838,8 @@
         }
       ]
     },
-    "services_lead": "想預約或先問問題，點任一項直接聯絡。"
+    "services_lead": "想預約或先問問題，點任一項直接聯絡。",
+    "nav_services": "看診項目"
   },
   "gym": {
     "label": "健身運動",
@@ -914,7 +930,8 @@
         }
       ]
     },
-    "services_lead": "不知道從哪開始，點任一項先問我們。"
+    "services_lead": "不知道從哪開始，點任一項先問我們。",
+    "nav_services": "課程"
   },
   "florist": {
     "label": "花店",
@@ -1002,7 +1019,8 @@
         }
       ]
     },
-    "services_lead": "說說預算和場合，點任一項直接問。"
+    "services_lead": "說說預算和場合，點任一項直接問。",
+    "nav_services": "服務項目"
   },
   "auto": {
     "label": "車輛維修",
@@ -1096,7 +1114,8 @@
         }
       ]
     },
-    "services_lead": "車子有狀況，點任一項先問報價。"
+    "services_lead": "車子有狀況，點任一項先問報價。",
+    "nav_services": "服務項目"
   },
   "education": {
     "label": "教育補習",
@@ -1192,7 +1211,8 @@
         }
       ]
     },
-    "services_lead": "想了解課程或預約試上，點任一項直接問。"
+    "services_lead": "想了解課程或預約試上，點任一項直接問。",
+    "nav_services": "課程"
   },
   "wellness": {
     "label": "按摩放鬆",
@@ -1281,7 +1301,8 @@
         }
       ]
     },
-    "services_lead": "想預約或問哪一種適合您，點任一項直接問。"
+    "services_lead": "想預約或問哪一種適合您，點任一項直接問。",
+    "nav_services": "療程"
   },
   "lodging": {
     "label": "住宿",
@@ -1371,7 +1392,8 @@
         }
       ]
     },
-    "services_lead": "想問空房或交通，點任一項直接問。"
+    "services_lead": "想問空房或交通，點任一項直接問。",
+    "nav_services": "房型"
   },
   "default": {
     "label": "在地商家",
@@ -1450,6 +1472,7 @@
         }
       ]
     },
-    "services_lead": "點任一項即可直接詢問，有其他需求也歡迎告訴我們。"
+    "services_lead": "點任一項即可直接詢問，有其他需求也歡迎告訴我們。",
+    "nav_services": "服務項目"
   }
 }

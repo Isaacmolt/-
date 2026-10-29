@@ -34,6 +34,7 @@ from urllib.parse import quote
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 import fonts as fontkit
+import scenes
 
 from common import (
     LEADS_FILE, SAMPLE_LEADS_FILE, SITES_DIR, TEMPLATES_DIR, demo_url_for, env, fmt_rating,
@@ -348,39 +349,14 @@ def split_statement(text: str) -> tuple[str, str, str]:
     return "", text, ""
 
 
-def art_tiles(palette: dict, seed: str, mset: dict, n: int = 3) -> list[str]:
-    """
-    示意圖是一套系統：同一類別的三個圖騰（a 主圖、b 圖樣、c 對比底）組成三張圖：
-    場景、織紋、雙色拼接。同一家店每次產生都一樣。
-    """
+def scene_tile(key: str, mset: dict, name: str, seed: str) -> str:
+    """相簿的場景插畫磚：吧台、街角（橫式）、窗邊（直式）。"""
     from markupsafe import Markup
-    rnd = random.Random(seed)
-    p, pd, a, bg = palette["p"], palette["pd"], palette["a"], palette["bg"]
-    soft, asoft = palette["p_soft"], palette["a_soft"]
-    if _lum(p) < 0.2:  # 深色主色（如沙龍）：圖樣底改用強調色調過的表面色，避免機械推導出的冷紫
-        soft = _mix(a, palette["sf"], 0.14)
-    A, B, C = mset["a"], mset.get("b", mset["a"]), mset.get("c", mset["a"])
-    stroke = 'fill="none" stroke-linecap="round" stroke-linejoin="round"'
-
-    def g(m, tx, ty, sc, color, width, extra=""):
-        cls = "k" if color == pd else "pk"
-        return (f'<g class="{cls}" transform="translate({tx} {ty}) scale({sc})" {stroke} stroke="{color}" '
-                f'stroke-width="{width}" {extra}>{drawable(m)}</g>')
-
-    specs = [
-        (f'<rect class="g" width="400" height="300" fill="{asoft}"/>'
-         f'<circle class="ac" cx="{rnd.randint(280, 330)}" cy="{rnd.randint(50, 100)}" r="{rnd.randint(70, 100)}" fill="{a}" opacity=".55"/>'
-         f'<path class="k" d="M40 252H360" stroke="{pd}" stroke-width="2" opacity=".35"/>'
-         + g(A, 70, 20, 1.15, pd, 2.4) + g(C, 290, 180, .38, pd, 5, 'opacity=".7"')),               # 0 主圖騰 + 地平線 + 小圖騰
-        f'<rect class="g2" width="400" height="300" fill="{soft}"/>'
-        f'<circle class="ac" cx="{rnd.randint(90, 130)}" cy="{rnd.randint(70, 100)}" r="{rnd.randint(60, 80)}" fill="{a}" opacity=".45"/>'
-        f'<path class="k" d="M30 258H370" stroke="{pd}" stroke-width="2" opacity=".35"/>'
-        + g(B, 120, 40, 1.1, pd, 2.4) + g(C, 40, 190, .34, pd, 5, 'opacity=".7"'),                    # 2 第二個場景：b 主角、c 配角
-        f'<rect class="g" width="200" height="300" fill="{asoft}"/><rect class="g2" x="200" width="200" height="300" fill="{soft}"/>'
-        + g(C, 100, 50, 1.0, pd, 2.6) + g(B, 20, 215, .32, pd, 5, 'opacity=".55"'),                 # 3 雙色底 + 兩個圖騰
-    ]
-    return [Markup(f'<svg class="art" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g class="v">{body}</g></svg>')
-            for body in specs[:n]]
+    if key == "window":
+        return Markup('<svg class="art scene" viewBox="0 0 300 400" preserveAspectRatio="xMidYMid slice" aria-hidden="true">'
+                      f'{scenes.window(mset, drawable, hashlib.md5(seed.encode()).hexdigest()[:6])}</svg>')
+    body = scenes.counter(mset, drawable) if key == "counter" else scenes.street(mset, name, drawable, seed)
+    return Markup(f'<svg class="art scene" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true">{body}</svg>')
 
 
 def map_art(seed: str) -> str:
@@ -424,8 +400,9 @@ ACCENTS = {
     "blob": '<path class="disc" d="M94 36c30-22 80-8 88 30s-8 70-46 72-70-14-68-46 0-38 26-56z"/>',
     "sun": '<path class="disc" d="M70 150a64 64 0 0 1 128 0z"/>',
     "square": '<rect class="disc" x="90" y="28" width="96" height="96" rx="20" transform="rotate(8 138 76)"/>',
+    "crown": '<circle class="disc" cx="120" cy="64" r="34"/>',  # 寵物：小一點，壓在頭頂右上（狗頭在畫面中央）
 }
-ACCENT_OF = {"cafe": "circle", "hair": "arch", "pet": "blob", "breakfast": "sun", "restaurant": "circle", "snack": "blob",
+ACCENT_OF = {"cafe": "circle", "hair": "arch", "pet": "crown", "breakfast": "sun", "restaurant": "circle", "snack": "blob",
              "hotpot": "sun", "dessert": "arch", "beauty": "blob", "clinic": "square", "gym": "square", "florist": "arch",
              "auto": "sun", "education": "square", "wellness": "blob", "lodging": "arch", "default": "circle"}
 
@@ -523,6 +500,20 @@ def service_href(title: str, line_url: str, phone_href: str) -> str:
     if line_url:
         return line_url
     return phone_href or ""
+
+
+def about_opening(text: str, name: str, loc: str) -> str:
+    """介紹第一句不再用「店名 位於某區，」的公式：店名已經在頁面上出現很多次，改用「我們」開頭。"""
+    if not text or not loc:
+        return text
+    for nm in {name, name.replace(" ", "")}:
+        for head, repl in ((f"{nm} 位於{loc}，是", f"在{loc}，我們是"), (f"{nm}位於{loc}，是", f"在{loc}，我們是"),
+                           (f"{nm} 位於{loc}，提供", f"我們在{loc}提供"), (f"{nm}位於{loc}，提供", f"我們在{loc}提供"),
+                           (f"{nm} 位於{loc}，", f"在{loc}，"), (f"{nm}位於{loc}，", f"在{loc}，"),
+                           (f"{nm} 是{loc}", f"我們是{loc}"), (f"{nm}是{loc}", f"我們是{loc}")):
+            if text.startswith(head):
+                return repl + text[len(head):]
+    return text
 
 
 def statement_from(about: list[str], tagline: str) -> tuple[str, list[str]]:
@@ -833,7 +824,6 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, 
     motif = mset["a"]
     # gallery 可以只寫檔名（放在 sites/<slug>/img/），也可以寫相對路徑或網址
     imgs = [g if ("/" in g or g.startswith("data:")) else f"img/{g}" for g in content.get("gallery", []) if g]
-    arts = art_tiles(theme["palette"], lead["slug"], mset)
     labels = theme.get("gallery_labels") or ["店面", "服務區", "作品", "環境", "商品", "入口"]
     gallery_items = []
     if imgs:
@@ -842,10 +832,10 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, 
             gallery_items.append({"img": src, "art": "", "tall": (i % 3 == 1) if tall is None else tall, "type": False,
                                   "label": labels[i % len(labels)]})
     else:
-        # 沒有照片：標語直排一張、三張線條示意圖（不加圖說，不假裝是照片）
+        # 沒有照片：標語直排一張、三張場景插畫（吧台、街角、窗邊；不加圖說，不假裝是照片），店名定了再畫
         gallery_items.append({"img": "", "art": "", "tall": True, "type": True, "label": ""})
-        for i, art in enumerate(arts):
-            gallery_items.append({"img": "", "art": art, "tall": i == 2, "type": False, "label": ""})
+        for key in ("counter", "street", "window"):
+            gallery_items.append({"img": "", "art": key, "tall": key == "window", "type": False, "label": ""})
     mode = FONT_MODES.get(theme.get("mode", "bold"), FONT_MODES["bold"])
     fill = {"name": name, "city": lead.get("city", ""), "district": lead.get("district", "") or "在地"}
     statement = (content.get("statement") or theme.get("statement", "").format(**fill)).strip()
@@ -896,6 +886,9 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, 
     show_credit = demo or brand.get("show_credit_on_final_site", True)
     first_line = name_lines(name)[0] if name_lines(name) else {"kind": "en", "tokens": [name]}
     name_zh = "".join(first_line["tokens"]) if first_line["kind"] != "en" else name
+    for g_ in gallery_items:
+        if g_["art"] in ("counter", "street", "window"):
+            g_["art"] = scene_tile(g_["art"], mset, name_zh, lead["slug"])
     b = {
         "name": name, "slug": lead["slug"], "url": url,
         "category": lead.get("category") or theme["label"],
@@ -906,7 +899,8 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, 
         "rating": fmt_rating(lead.get("rating", "")), "stars": stars(lead.get("rating", "")),
         "review_count": lead.get("review_count", ""), "maps_url": maps_url,
         "embed_url": f"https://www.google.com/maps?q={quote(name + ' ' + address)}&hl=zh-TW&z=16&output=embed",
-        "tagline": content.get("tagline", ""), "about_paragraphs": about,
+        "tagline": content.get("tagline", ""),
+        "about_paragraphs": [about_opening(t_, name, city_district) if i_ == 0 else t_ for i_, t_ in enumerate(about)],
         "highlights": content.get("highlights", []), "services": services,
         "services_linked": any(s_["href"] for s_ in services),
         "og_image": (url.rstrip("/") + "/og.png") if og_png else "",
@@ -919,6 +913,8 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, 
         "name_len": name_len_units(name),
         "has_photos": bool(imgs),
         "gallery_name": "店內環境" if imgs else "店的樣子",
+        "nav_services": content.get("nav_services") or theme.get("nav_services") or "服務項目",
+        "feature_cta": content.get("feature_cta") or theme.get("feature_cta") or "詢問這一項",
         "gallery_title": (content.get("gallery_title") or (f"走進{name_zh}" if imgs
                           else theme.get("gallery_title", "{district}的一個角落").format(**fill))),
         "services_title": content.get("services_title") or theme.get("services_title") or "我們能為您做的",
@@ -969,7 +965,7 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, 
                                          "motif_feature": Markup(print_scene(mset.get("hero") or motif, ground=False)),
                                          "motif_band2": Markup(band2), "motif_closing": Markup(closing_draw),
                                          "motif_b_draw": Markup(drawable(mset.get("b", motif))),
-                                         "motif_about": Markup(print_scene(mset.get("b", motif), mset.get("c", motif))),
+                                         "motif_about": Markup(scenes.storefront(mset, b["name_zh"], drawable, bg=False)),
                                          "motif_overlay": Markup(mset.get("b", motif)),
                                          "motif_b": Markup(mset.get("b", motif)), "motif_band": Markup(band)}, demo=demo))
 

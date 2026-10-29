@@ -25,7 +25,7 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
     for (const [n, vp] of [['700x900', {width:700,height:900}], ['820x1180', {width:820,height:1180}], ['1280x720', {width:1280,height:720}], ['1280x800', {width:1280,height:800}], ['1366x768', {width:1366,height:768}], ['1440x900', {width:1440,height:900}], ['1920x1080', {width:1920,height:1080}], ['1366x657', {width:1366,height:657}], ['1536x730', {width:1536,height:730}], ['1440x789', {width:1440,height:789}], ['320x568', {width:320,height:568}], ['360x640', {width:360,height:640}], ['375x667', {width:375,height:667}], ['390x844', {width:390,height:844}], ['844x390', {width:844,height:390}]]) {
       const pg = await browser.newPage({ viewport: vp }); await pg.goto(url, { waitUntil: 'load' }); await pg.evaluate(() => document.fonts.ready); await pg.waitForTimeout(2200);
       if (n === '1366x768') await pg.screenshot({ path: path.join(OUT, `${slug}-laptop-hero.png`) });  // capture before the probes below touch the DOM
-      if (n !== '390x844') {
+      {
         r.closingClear = r.closingClear || {};
         await pg.evaluate(() => document.querySelector('.closing').scrollIntoView()); await pg.waitForTimeout(300);
         r.closingClear[n] = await pg.evaluate(() => { const btns = [...document.querySelectorAll('.closing .btn, .closing .big')].map(b => b.getBoundingClientRect()); const shapes = [...document.querySelectorAll('.cl-motif :is(path,circle,ellipse,rect)')].map(s => s.getBoundingClientRect()); const hit = (a, b) => a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom; return !btns.some(b => shapes.some(s => hit(b, s))); });
@@ -60,12 +60,16 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
         const picH = pic ? pic.getBoundingClientRect().height : 0;
         return { mark: Math.abs(m.width - m.height) < 1, words: [...document.querySelectorAll('h1 .wd')].every(w => w.getClientRects().length === 1),
                  facts: [...document.querySelectorAll('.hero .fact')].every(f => f.scrollWidth <= f.clientWidth + 1),
-                 pic: innerWidth > 640 || picH >= innerHeight * .28 };
+                 pic: innerWidth > 640 || picH >= innerHeight * .28,
+                 h1px: parseFloat(getComputedStyle(document.querySelector('h1')).fontSize),
+                 brand: (b => !b || b.scrollWidth <= b.clientWidth + 1)(document.querySelector('.brand .bn')),
+                 arch: (hp => !hp || getComputedStyle(hp).display === 'none' || hp.getBoundingClientRect().top >= document.getElementById('nav').getBoundingClientRect().bottom + 8)(document.querySelector('.hero .hp')),
+                 tabletPics: innerWidth <= 640 || innerWidth > 880 || [document.querySelector('.hero .hp-m'), document.querySelector('.about .ph')].filter(Boolean).every(e => { const b = e.getBoundingClientRect(); return b.width === 0 || Math.abs(b.width / b.height - 4 / 3) < .06; }) };
       });
       // map card: the pin sits in its drawing, never on the address
       r.mapClear = r.mapClear || {};
       r.mapClear[n] = await pg.evaluate(() => { const pin = document.querySelector('.map-ph .pin'), ad = document.querySelector('.map-ph .addr'); if (!pin || !ad) return true; return pin.getBoundingClientRect().bottom <= ad.getBoundingClientRect().top; });
-      r.heroFit[n] = await pg.evaluate(() => { const h = innerWidth <= 640 || innerHeight <= 450 ? document.querySelector('.hero .cta').getBoundingClientRect() : document.querySelector('.hero').getBoundingClientRect(); const bar = document.getElementById('demoBar'); const limit = innerHeight - (bar ? bar.getBoundingClientRect().height : 0); return Math.round(h.bottom) + '/' + Math.round(limit) + (h.bottom <= limit + 1 ? ' ok' : ' OVER'); });
+      r.heroFit[n] = await pg.evaluate(() => { const st = document.getElementById('heroStat'); const stOn = st && innerWidth <= 640 && getComputedStyle(st).display !== 'none'; const h = innerWidth <= 640 || innerHeight <= 450 ? (stOn ? st : document.querySelector('.hero .cta')).getBoundingClientRect() : document.querySelector('.hero').getBoundingClientRect(); const bar = document.getElementById('demoBar'); const limit = innerHeight - (bar ? bar.getBoundingClientRect().height : 0); return Math.round(h.bottom) + '/' + Math.round(limit) + (h.bottom <= limit + 1 ? ' ok' : ' OVER'); });
       await pg.close();
     }
     for (const [name, vp] of [['desktop', { width: 1440, height: 900 }], ['mobile', { width: 390, height: 844 }]]) {
@@ -124,6 +128,7 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
           r.fn.lightbox = await page.evaluate(() => !document.getElementById('lb').open && !document.querySelector('.strip .tile[tabindex]'));
         }
         r.fn.photoFull = await page.evaluate(() => { const hp = document.querySelector('.hero .hp-m'); if (!hp) return true; const a = hp.getBoundingClientRect(), cta = document.querySelector('.hero .cta').getBoundingClientRect(); return a.width > innerWidth * .8 && a.height >= 100 && a.top >= cta.bottom; });
+        r.fn.fabUnder = await page.evaluate(async () => { const f = document.querySelector('.fab'), a = document.querySelector('.svc li > a'); if (!f || !a) return true; scrollTo(0, a.getBoundingClientRect().top + scrollY - innerHeight + 110); await new Promise(r => setTimeout(r, 700)); return !f.classList.contains('show'); });
         // the hidden quick-contact bar is not reachable by keyboard
         await page.evaluate(() => scrollTo(0, 0)); await page.waitForTimeout(400);
         r.fabSafe = await page.evaluate(() => { const f = document.querySelector('.fab'); return !f || (getComputedStyle(f).visibility === 'hidden' && f.inert === true); });
@@ -180,6 +185,7 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
         { const before = await page.evaluate(() => document.getElementById('strip').scrollLeft); await page.click('#prevTile', { force: true }); await page.waitForTimeout(600);
           r.stripPrev = await page.evaluate(b => ({ now: document.getElementById('strip').dataset.at, moved: document.getElementById('strip').scrollLeft < b - 20 }), before); }
         r.leader = await page.evaluate(() => [...document.querySelectorAll('.svc li')].every(li => { const ld = li.querySelector('.ld'), pr = li.querySelector('.price'), h = li.querySelector('h3'); if (!ld || !pr || getComputedStyle(ld).display === 'none') return true; const a = ld.getBoundingClientRect(), p = pr.getBoundingClientRect(), t = h.getBoundingClientRect(); return a.width > 0 && Math.abs(p.left - a.right) <= 40 && Math.abs(a.left - t.right) <= 32 && a.top >= t.top && a.bottom <= t.bottom + 4; }));
+        r.copy = await page.evaluate(() => { const bar = document.getElementById('demoBar'), photos = !!document.querySelector('.strip img'), cap = document.querySelector('.tile.type .cap'); const sg = document.querySelector('.about .scene .sg'), board = sg && sg.closest('svg').querySelector('.sc-paper rect'); return { photoLine: !bar || !photos || !/換上您的照片/.test(bar.textContent), typeCap: !cap || cap.scrollWidth <= cap.clientWidth + 1, scenes: photos || document.querySelectorAll('.strip svg.art.scene').length === 3, sign: !sg || sg.getBBox().width <= board.getBBox().width - 8 }; });
         r.statusRing = await page.evaluate(() => { const st = document.querySelector('.fact>span.status'); return !st || getComputedStyle(st).overflow === 'visible'; });
         r.photos = await page.evaluate(() => { const has = !!document.querySelector('.strip img'); if (!has) return true; const hp = document.querySelector('.hero .hp img'), ap = document.querySelector('.about .ph img'); return !!hp && hp.naturalWidth > 0 && (!ap || ap.complete); });
         {
@@ -189,9 +195,9 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
           await ls.close();
         }
         r.clock = {};
-        for (const [k, when] of [['sun1900', '2026-11-01T11:00:00Z'], ['sun0130', '2026-10-31T17:30:00Z']]) {
+        for (const [k, when] of [['sun1900', '2026-11-01T11:00:00Z'], ['sun0130', '2026-10-31T17:30:00Z'], ['mon1200', '2026-11-02T04:00:00Z']]) {
           const ck = await browser.newPage({ viewport: { width: 1280, height: 800 } }); await ck.clock.setFixedTime(new Date(when)); await ck.goto(url, { waitUntil: 'load' }); await ck.waitForTimeout(300);
-          r.clock[k] = await ck.evaluate(() => { const li = document.querySelector('#hours li.today'); return { text: document.getElementById('infoStatusText') ? document.getElementById('infoStatusText').textContent : '', today: li ? li.dataset.day : null, tag: li && li.querySelector('.tag') ? li.querySelector('.tag').textContent : '' }; });
+          r.clock[k] = await ck.evaluate(() => { const li = document.querySelector('#hours li.today'); return { title: document.getElementById('closingTitle').textContent, text: document.getElementById('infoStatusText') ? document.getElementById('infoStatusText').textContent : '', today: li ? li.dataset.day : null, tag: li && li.querySelector('.tag') ? li.querySelector('.tag').textContent : '' }; });
           await ck.close();
         }
         // lightbox sits in the middle of the window
@@ -215,6 +221,9 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
         await page.evaluate(() => { document.addEventListener('keydown', () => document.querySelector('.svc li > a').focus(), { once: true }); });
         await page.keyboard.press('Shift'); await page.waitForTimeout(100);
         r.focusRing = await page.evaluate(() => { const a = document.querySelector('.svc li > a'); const fv = a.matches(':focus-visible'); const ring = getComputedStyle(a).outlineStyle === 'none' ? a.closest('li') : a; const oc = getComputedStyle(ring).outlineColor; const ink = getComputedStyle(document.documentElement).getPropertyValue(document.body.dataset.mode === 'bold' ? '--a' : '--pd').trim();  /* the bold menu board is dark, so its ring is the accent */ const h = ink.replace('#',''); const rgb = `rgb(${parseInt(h.slice(0,2),16)}, ${parseInt(h.slice(2,4),16)}, ${parseInt(h.slice(4,6),16)})`; a.blur(); return { focusVisible: fv, outline: oc, ink: rgb, ok: fv && oc === rgb }; });
+        await page.evaluate(() => { document.addEventListener('keydown', () => { const a = document.querySelector('.feature .btn'); if (a) a.focus(); }, { once: true }); });
+        await page.keyboard.press('Shift'); await page.waitForTimeout(100);
+        r.featureRing = await page.evaluate(() => { const a = document.querySelector('.feature .btn'); if (!a) return { ok: true }; const fv = a.matches(':focus-visible'), cs = getComputedStyle(a); const ring = cs.outlineColor, card = getComputedStyle(a.closest('.feature')).backgroundColor, active = document.activeElement === a; a.blur(); return { ok: fv && active && parseFloat(cs.outlineWidth) >= 2 && ring !== card, fv, active, width: cs.outlineWidth, ring, card }; });
         // band hero: motif never overlaps the title box; parallax never moves the facts bar
         r.heroGeom = await page.evaluate(() => { const h = document.querySelector('h1').getBoundingClientRect(); const m = (document.querySelector('.hero .motif') || document.querySelector('.hero .hp')).getBoundingClientRect(); const band = document.querySelector('.hero').dataset.hero === 'band' && !!document.querySelector('.hero .motif'); const bar = document.querySelector('.hero-foot').getBoundingClientRect(); const ox = Math.max(0, Math.min(h.right, m.right) - Math.max(h.left, m.left)); const oy = Math.max(0, Math.min(h.bottom, m.bottom) - Math.max(h.top, m.top)); return { band, overlapPct: Math.round(100 * ox * oy / (h.width * h.height)), bandAboveBar: !band || Math.round(m.bottom) <= Math.round(bar.top) + 8 }; });
         r.tiles = await page.evaluate(() => { const th = document.getElementById('tileHours'), hh = document.getElementById('heroHours'); const vt = document.querySelector('.tile.type .vtext'), cap = document.querySelector('.tile.type .cap'); const today = document.querySelector('#hours li.today'); const nb = document.querySelector('#heroHours .nb'); const tt = th ? th.textContent.trim() : ''; return { hoursMatch: !th || !today || tt === today.children[1].textContent.trim() || (nb && tt === nb.textContent.trim()), typeClear: !vt || vt.getBoundingClientRect().bottom <= cap.getBoundingClientRect().top + 1 }; });
@@ -285,7 +294,7 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
   const sysOk = !report.system.noHero.length && !report.system.darkAccent.length;
   console.log('system:', JSON.stringify(report.system), sysOk ? 'PASS' : 'FAIL');
   // known schedules: demo-cafe closes Mondays (Sunday evening points to Tuesday); _qa-edge runs Fri-Sat 17:00-02:00 and closes Sundays
-  const clockOk = (slug, c) => { if (!c) return false; if (slug === 'demo-cafe') return /週二 10:00 開門/.test(c.sun1900.text); if (slug === '_qa-edge') return c.sun0130.today === '6' && c.sun0130.tag === '現在' && /營業中/.test(c.sun0130.text) && /02:00 打烊/.test(c.sun0130.text); return true; };
+  const clockOk = (slug, c) => { if (!c) return false; if (slug === 'demo-cafe') return /週二 10:00 開門/.test(c.sun1900.text); if (slug === '_qa-edge') return !/今晚/.test(c.mon1200.title) && c.sun0130.today === '6' && c.sun0130.tag === '現在' && /營業中/.test(c.sun0130.text) && /02:00 打烊/.test(c.sun0130.text); return true; };
   let allOk = sysOk;
   for (const slug of slugs) {
     const v = report[slug], fn = v.fn || {}, c = v.computed || {};
@@ -293,7 +302,9 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
       && fn.serviceLinksFocusable && Math.abs(fn.titleIndent) <= 2 && fn.modalFocusTrapped && !fn.factClipped && !fn.nbBroken && !fn.ctaOrphan && fn.visibleWithoutJs && v.scrollSpy === '#services' && c.h1DiffersFromBody && c.ogImage
       && v.anchorLanding && v.anchorLanding.solid && !v.anchorLanding.hidden && v.anchorLanding.top === 0
       && fn.overlayHoursSpans && v.heroGeom && (!v.heroGeom.band || v.heroGeom.overlapPct === 0) && v.heroGeom.bandAboveBar && v.factsDrift === 'none'
-      && fn.menuBtnClear && v.nmOneLine && v.motifDrawn && v.weaveMasked && fn.statusInline && !v.dragOpensLightbox && v.stripEnd && v.stripEnd.now === String(v.stripEnd.total) && v.stripEnd.nextDisabled && v.stripPrev && v.stripPrev.moved && +v.stripPrev.now < v.stripEnd.total && v.lbCentred && fn.factsLinks && fn.statementUnits && fn.photoFull && v.statusRing && v.photos && v.landscapeMenu && v.landscapeMenu.firstBelowBrand && v.landscapeMenu.actsReachable && v.mapClear && Object.values(v.mapClear).every(Boolean) && v.ctaClear && Object.values(v.ctaClear).every(Boolean) && v.fabSafe && v.layout && Object.values(v.layout).every(x => x.mark && x.words && x.facts && x.pic) && v.footGap && v.footGap.every(Boolean) && v.reducedMotion.draw === 'none' && parseFloat(v.reducedMotion.dash) === 0 && v.fontFaces && v.fontFaces.length >= 2 && v.fontFaces.every(s => s !== 'error') && v.fontFaces.includes('loaded')
+      && fn.menuBtnClear && v.nmOneLine && v.motifDrawn && v.weaveMasked && fn.statusInline && !v.dragOpensLightbox && v.stripEnd && v.stripEnd.now === String(v.stripEnd.total) && v.stripEnd.nextDisabled && v.stripPrev && v.stripPrev.moved && +v.stripPrev.now < v.stripEnd.total && v.lbCentred && fn.factsLinks && fn.statementUnits && fn.photoFull && v.statusRing && v.photos && v.landscapeMenu && v.landscapeMenu.firstBelowBrand && v.landscapeMenu.actsReachable && v.mapClear && Object.values(v.mapClear).every(Boolean) && v.ctaClear && Object.values(v.ctaClear).every(Boolean) && v.fabSafe && v.layout && Object.values(v.layout).every(x => x.mark && x.words && x.facts && x.pic && x.brand && x.arch && x.tabletPics)
+      && v.layout['1440x900'].h1px >= v.layout['1280x720'].h1px - 1 && v.layout['1920x1080'].h1px >= v.layout['1440x900'].h1px - 1
+      && v.featureRing && v.featureRing.ok && v.copy && v.copy.photoLine && v.copy.typeCap && v.copy.scenes && v.copy.sign && fn.fabUnder && v.footGap && v.footGap.every(Boolean) && v.reducedMotion.draw === 'none' && parseFloat(v.reducedMotion.dash) === 0 && v.fontFaces && v.fontFaces.length >= 2 && v.fontFaces.every(s => s !== 'error') && v.fontFaces.includes('loaded')
       && v.tiles && v.tiles.hoursMatch && v.tiles.typeClear && fn.bandVisibleMobile && fn.typeClearMobile && fn.lightbox
       && v.closingClear && Object.values(v.closingClear).every(Boolean)
       && v.nameClear && Object.values(v.nameClear).every(x => x.real === 0 && x.long === 0) && v.bandGap && Object.values(v.bandGap).every(g => g >= 24)
@@ -304,7 +315,7 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
       && !v.axe.length && !(v.axeDark || []).length && !v.emoji && Object.values(v.heroFit).every(x => x.includes('ok')) && Object.values(v.overflow).every(o => o === 0);
     allOk = allOk && ok;
     console.log(`${slug}: ${ok ? 'PASS' : 'FAIL'}`);
-    if (!ok) console.log(JSON.stringify({ fn, scrollSpy: v.scrollSpy, heroGeom: v.heroGeom, tiles: v.tiles, closingClear: v.closingClear, nameClear: v.nameClear, bandGap: v.bandGap, kinsoku: v.kinsoku, drift: v.drift, leader: v.leader, fabDark: v.fabDark, clock: v.clock, layout: v.layout, ctaClear: v.ctaClear, mapClear: v.mapClear, landscapeMenu: v.landscapeMenu, factsDrift: v.factsDrift, anchorLanding: v.anchorLanding, reducedMotion: v.reducedMotion, focusRing: v.focusRing, computed: c, axe: v.axe, axeDark: v.axeDark, errors: v.errors, small: v.smallTargets, heroFit: v.heroFit, overflow: v.overflow, emoji: v.emoji }, null, 2));
+    if (!ok) console.log(JSON.stringify({ fn, scrollSpy: v.scrollSpy, heroGeom: v.heroGeom, tiles: v.tiles, closingClear: v.closingClear, nameClear: v.nameClear, bandGap: v.bandGap, kinsoku: v.kinsoku, drift: v.drift, leader: v.leader, featureRing: v.featureRing, copy: v.copy, fabDark: v.fabDark, clock: v.clock, layout: v.layout, ctaClear: v.ctaClear, mapClear: v.mapClear, landscapeMenu: v.landscapeMenu, factsDrift: v.factsDrift, anchorLanding: v.anchorLanding, reducedMotion: v.reducedMotion, focusRing: v.focusRing, computed: c, axe: v.axe, axeDark: v.axeDark, errors: v.errors, small: v.smallTargets, heroFit: v.heroFit, overflow: v.overflow, emoji: v.emoji }, null, 2));
   }
   const lh = report.lighthouse;
   const lhOk = lh && typeof lh === 'object' && ['performance', 'accessibility', 'best-practices', 'seo'].every(k => lh[k] >= 90);
