@@ -1,4 +1,4 @@
-"""場景插畫：把每個類別的物件放進幾個固定的場景（店面、吧台、窗邊、街角）。
+"""場景插畫：把每個類別的物件放進場景（店面、店裡、窗邊、街角），店面與店裡依類別換樣式。
 
 沒有照片的店，插畫就是門面。單一圖示放大、旋轉看起來像版型；場景有前後、有環境，
 同一套場景配上不同類別的物件，每一家看起來都是「自己的店」。店面招牌寫的是店名。
@@ -35,35 +35,130 @@ def _sign_text(name: str, cx: float, cy: float, width: float, size: float = 24) 
             f'font-size="{fs:.1f}">{html.escape(name)}</text>')
 
 
-def storefront(mset: dict, name: str, drawable, ground: bool = True, bg: bool = True) -> str:
-    """店面：招牌寫店名、條紋遮陽棚、櫥窗上貼著這個類別的主圖騰、門、吊牌、門口一盆植物。"""
-    a, c = mset["a"], mset.get("c", mset["a"])
+STYLE_OF = {  # 店面樣式：依類別（餐飲遮陽棚、沙龍拱窗、服務業平雨遮、鍋物／餐館木造暖簾）
+    "cafe": "awning", "breakfast": "awning", "dessert": "awning", "snack": "awning", "florist": "awning", "default": "awning",
+    "hair": "arch", "beauty": "arch", "wellness": "arch", "lodging": "arch",
+    "pet": "canopy", "clinic": "canopy", "education": "canopy", "gym": "canopy", "auto": "canopy",
+    "hotpot": "noren", "restaurant": "noren",
+}
+ROOM_OF = {"hair": "salon", "beauty": "salon", "pet": "grooming", "hotpot": "dining", "restaurant": "dining"}
+
+
+def _plate(x: float, y: float) -> str:
+    """門上的小牌子：頁面判斷營業中／休息中後由 JS 寫字（沒有 JS 就不顯示）。"""
+    return (f'<g class="plate"><path d="M{x + 12} {y}l10-8 10 8"/><rect x="{x}" y="{y}" width="44" height="18" rx="3"/>'
+            f'<text x="{x + 22}" y="{y + 9.5}" text-anchor="middle" dominant-baseline="central" font-size="10"></text></g>')
+
+
+def _front_awning(a: str, c: str) -> dict:
     stripes = "".join(
         f'<path class="acc" d="M{92 + 27 * i} 126h27l{(76 + 31 * (i + 1)) - (92 + 27 * (i + 1))} 24h-31z"/>'
         for i in range(0, 8, 2))
     scallops = "M76 150" + "a15.5 10 0 0 0 31 0" * 8
-    lines = (
-        ('<path d="M0 266H400"/><path class="fine" d="M16 280h56M104 280h28M268 280h48M344 280h40"/>' if ground else "")
-        + '<path d="M70 266V70h260v196"/><path d="M62 62h276v8H62z"/>'
-        + '<rect x="104" y="80" width="192" height="36" rx="4"/>'
-        + '<path d="M92 126h216l16 24H76z"/>' + f'<path class="fine" d="{scallops}"/>'
-        + '<rect x="94" y="168" width="136" height="82" rx="2"/><path d="M88 250h148"/>'
-        + '<path class="fine" d="M104 184l14-10M106 198l26-18"/>'
-        + _place(a, 162, 242, 58, 96)
-        + '<rect x="246" y="164" width="60" height="102" rx="2"/><path class="fine" d="M256 232v-38a20 20 0 0 1 40 0v38z"/>'
-        + '<circle class="acc" cx="297" cy="240" r="3.2"/><path class="fine" d="M240 266v-4h72v4"/>'
-        + '<path class="fine" d="M330 132h26M350 132v2"/><circle cx="350" cy="152" r="17"/>' + _place(c, 350, 162, 18, 24)
-        + '<path d="M26 266l4-24h32l4 24z"/><path class="fine" d="M46 242c-2-22-14-34-26-38M46 242c2-24 12-38 26-44M46 242c-8-14-6-28 2-38"/>'
-    )
-    tone = ('<g class="sc-tone" transform="translate(7 7)"><rect x="70" y="70" width="260" height="196"/>'
-            '<path d="M26 266l4-24h32l4 24z"/><circle cx="350" cy="152" r="17"/></g>')
-    paper = ('<g class="sc-paper"><rect x="104" y="80" width="192" height="36" rx="4"/><rect class="win" x="94" y="168" width="136" height="82" rx="2"/></g>'
-             '<rect class="glow" x="94" y="168" width="136" height="82" rx="2"/>')
-    # 門上的小牌子：頁面判斷營業中／休息中後由 JS 寫字（沒有 JS 就不顯示）
-    plate = ('<g class="plate"><path class="sc-ln-fine" d="M266 176l10-8 10 8"/><rect x="254" y="176" width="44" height="18" rx="3"/>'
-             '<text x="276" y="185.5" text-anchor="middle" dominant-baseline="central" font-size="10"></text></g>')
+    return {
+        "lines": ('<path d="M70 266V70h260v196"/><path d="M62 62h276v8H62z"/>'
+                  '<rect x="104" y="80" width="192" height="36" rx="4"/>'
+                  '<path d="M92 126h216l16 24H76z"/>' + f'<path class="fine" d="{scallops}"/>'
+                  '<rect x="94" y="168" width="136" height="82" rx="2"/><path d="M88 250h148"/>'
+                  '<path class="fine" d="M104 184l14-10M106 198l26-18"/>' + _place(a, 162, 242, 58, 96)
+                  + '<rect x="246" y="164" width="60" height="102" rx="2"/><path class="fine" d="M256 232v-38a20 20 0 0 1 40 0v38z"/>'
+                  '<circle class="acc" cx="297" cy="240" r="3.2"/><path class="fine" d="M240 266v-4h72v4"/>'
+                  '<path class="fine" d="M330 132h26M350 132v2"/><circle cx="350" cy="152" r="17"/>' + _place(c, 350, 162, 18, 24)
+                  + '<path d="M26 266l4-24h32l4 24z"/><path class="fine" d="M46 242c-2-22-14-34-26-38M46 242c2-24 12-38 26-44M46 242c-8-14-6-28 2-38"/>'),
+        "under": stripes,
+        "tone": '<rect x="70" y="70" width="260" height="196"/><path d="M26 266l4-24h32l4 24z"/><circle cx="350" cy="152" r="17"/>',
+        "paper": '<rect x="104" y="80" width="192" height="36" rx="4"/>',
+        "windows": '<rect x="94" y="168" width="136" height="82" rx="2"/>',
+        "sign": (200, 99, 172), "plate": (254, 176),
+    }
+
+
+def _front_arch(a: str, c: str) -> dict:
+    win = "M92 250V174a34 34 0 0 1 68 0v76z", "M240 250V174a34 34 0 0 1 68 0v76z"
+    leaves = "".join(f'<path class="fine" d="M{x} 250c-2-8-8-12-14-12M{x} 250c2-10 8-14 14-14"/>' for x in (108, 140, 256, 288))
+    return {
+        "lines": ('<path d="M70 266V70h260v196"/><path d="M62 70h276"/><path class="fine" d="M66 62h268v8"/>'
+                  '<rect x="100" y="82" width="200" height="32" rx="16"/>'
+                  f'<path d="{win[0]}"/><path d="{win[1]}"/><path class="fine" d="M126 140v110M274 140v110"/>'
+                  + _place(a, 126, 238, 46, 56) + _place(c, 274, 238, 40, 56)
+                  + '<path d="M86 250h80v12H86zM234 250h80v12h-80z"/>' + leaves
+                  + '<path d="M176 266V180a24 24 0 0 1 48 0v86"/><path class="fine" d="M186 266V184a14 14 0 0 1 28 0v82"/>'
+                  '<circle class="acc" cx="214" cy="226" r="3"/>'
+                  '<path class="fine" d="M168 152v-10M232 152v-10"/><circle class="acc" cx="168" cy="158" r="5"/><circle class="acc" cx="232" cy="158" r="5"/>'
+                  '<path class="fine" d="M330 120h24"/><circle cx="350" cy="138" r="15"/>' + _place(c, 350, 147, 16, 20)),
+        "under": "",
+        "tone": f'<rect x="70" y="70" width="260" height="196"/><path d="{win[0]}"/><path d="{win[1]}"/>',
+        "paper": '<rect x="100" y="82" width="200" height="32" rx="16"/>',
+        "windows": f'<path d="{win[0]}"/><path d="{win[1]}"/>',
+        "sign": (200, 98, 172), "plate": (178, 196),
+    }
+
+
+def _front_canopy(a: str, c: str) -> dict:
+    return {
+        "lines": ('<path d="M70 266V70h260v196"/><path d="M62 62h276v8H62z"/>'
+                  '<rect x="86" y="80" width="228" height="38" rx="6"/>'
+                  '<path d="M78 128h244v8H78z"/><path class="fine" d="M92 136l10 10M308 136l-10 10"/>'
+                  '<rect x="86" y="152" width="150" height="98" rx="4"/><path class="fine" d="M161 152v98M96 166l14-10"/>'
+                  + _place(a, 124, 238, 44, 56) + _place(c, 199, 238, 40, 60)
+                  + '<path d="M80 250h162"/>'
+                  '<rect x="250" y="152" width="58" height="114" rx="3"/><rect class="fine" x="258" y="162" width="42" height="64" rx="2"/>'
+                  '<circle class="acc" cx="300" cy="240" r="3"/>'
+                  '<path d="M316 266c0-7 5-10 12-10s12 3 12 10z"/>'
+                  '<path d="M26 266l4-24h32l4 24z"/><path class="fine" d="M46 242c-2-22-14-34-26-38M46 242c2-24 12-38 26-44M46 242c-8-14-6-28 2-38"/>'),
+        "under": '<path class="acc" d="M78 128h244v8H78z"/>',
+        "tone": '<rect x="70" y="70" width="260" height="196"/><path d="M26 266l4-24h32l4 24z"/>',
+        "paper": '<rect x="86" y="80" width="228" height="38" rx="6"/>',
+        "windows": '<rect x="86" y="152" width="150" height="98" rx="4"/>',
+        "sign": (200, 99, 204), "plate": (257, 192),
+    }
+
+
+def _front_noren(a: str, c: str) -> dict:
+    slats = "".join(f"M{x} 96v170" for x in (78, 86, 314, 322))
+    panels = "".join(f'<path class="acc" d="M{152 + 25 * i} 140h23v50h-23z"/>' for i in range(4))
+    lantern = lambda x: (f'<path class="fine" d="M{x} 84v10"/><ellipse cx="{x}" cy="110" rx="11" ry="15"/>'  # noqa: E731
+                         f'<path class="fine" d="M{x - 11} 110h22M{x - 7} 98h14M{x - 7} 122h14"/>')
+    return {
+        "lines": ('<path d="M70 266V96h260v170"/><path d="M52 96l18-22h260l18 22z"/><path class="fine" d="M84 84h232"/>'
+                  f'<path class="fine" d="{slats}"/>'
+                  '<rect x="110" y="100" width="180" height="30" rx="3"/>'
+                  + lantern(96) + lantern(304)
+                  + '<path d="M146 138h108"/><rect x="150" y="138" width="100" height="128"/><path class="fine" d="M200 192v74"/>'
+                  + _place(a, 200, 186, 26, 40)
+                  + '<rect x="96" y="160" width="40" height="64"/><path class="fine" d="M116 160v64M96 182h40M96 204h40"/>'
+                  '<rect x="264" y="160" width="40" height="64"/><path class="fine" d="M284 160v64M264 182h40M264 204h40"/>'
+                  + _place(c, 284, 220, 16, 24)
+                  + '<path d="M338 266l8-44h22l8 44"/><path class="fine" d="M346 236h28M348 246h24"/>'),
+        "under": panels + '<path class="acc2" d="M52 96l18-22h260l18 22z"/>'
+                 '<ellipse class="acc" cx="96" cy="110" rx="11" ry="15"/><ellipse class="acc" cx="304" cy="110" rx="11" ry="15"/>',
+        "tone": '<rect x="70" y="96" width="260" height="170"/>',
+        "paper": '<rect x="110" y="100" width="180" height="30" rx="3"/>',
+        "windows": '<rect x="96" y="160" width="40" height="64"/><rect x="264" y="160" width="40" height="64"/>',
+        "sign": (200, 115, 164), "plate": (178, 214),
+    }
+
+
+FRONTS = {"awning": _front_awning, "arch": _front_arch, "canopy": _front_canopy, "noren": _front_noren}
+
+
+def storefront(mset: dict, name: str, drawable, ground: bool = True, bg: bool = True, key: str = "default") -> str:
+    """店面：招牌寫店名、櫥窗上貼著這個類別的主圖騰、門上掛營業牌；外觀依類別換（遮陽棚、拱窗、平雨遮、暖簾）。"""
+    a, c = mset["a"], mset.get("c", mset["a"])
+    f = FRONTS[STYLE_OF.get(key, "awning")](a, c)
+    ground_lines = '<path d="M0 266H400"/><path class="fine" d="M16 280h56M104 280h28M268 280h48M344 280h40"/>' if ground else ""
+    tone = f'<g class="sc-tone" transform="translate(7 7)">{f["tone"]}</g>'
+    paper = (f'<g class="sc-paper">{f["paper"]}</g><g class="sc-paper win">{f["windows"]}</g>'
+             f'<g class="glow">{f["windows"]}</g>')
+    sx, sy, sw = f["sign"]
     return ((('<rect class="sc-bg" width="400" height="300"/><circle class="acc2" cx="356" cy="40" r="22"/>') if bg else "")
-            + tone + paper + stripes + f'<g class="sc-ln">{drawable(lines)}</g>' + _sign_text(name, 200, 99, 172) + plate)
+            + tone + paper + f["under"] + f'<g class="sc-ln">{drawable(ground_lines + f["lines"])}</g>'
+            + _sign_text(name, sx, sy, sw) + _plate(*f["plate"]))
+
+
+def interior(mset: dict, drawable, key: str = "default") -> str:
+    """店裡：依類別換場景（吧台、髮廊鏡台、寵物美容台、鍋物餐桌）。"""
+    return {"salon": salon, "grooming": grooming, "dining": dining}.get(ROOM_OF.get(key, ""), counter)(mset, drawable)
 
 
 def counter(mset: dict, drawable) -> str:
@@ -93,6 +188,86 @@ def counter(mset: dict, drawable) -> str:
             + '<rect class="sc-paper" x="33" y="99" width="42" height="54"/>' + f'<g class="sc-ln">{drawable(lines)}</g>')
 
 
+def salon(mset: dict, drawable) -> str:
+    """髮廊／美容：兩面拱形鏡子與檯面，鏡前一張油壓椅，右邊推車放工具，角落一盆高植物。"""
+    b, c = mset.get("b", mset["a"]), mset.get("c", mset["a"])
+    mirror = lambda x: (f'<path d="M{x} 150V96a34 34 0 0 1 68 0v54z"/>'  # noqa: E731
+                        f'<path class="fine" d="M{x + 14} 80c8-8 20-10 30-6M{x + 10} 132l16-16"/>')
+    lines = (
+        '<path d="M0 266H400"/><path class="fine" d="M0 252H400"/>'
+        '<path class="fine" d="M104 0v30M264 0v30"/><path d="M92 40c0-8 5-12 12-12s12 4 12 12zM252 40c0-8 5-12 12-12s12 4 12 12z"/>'
+        + mirror(70) + mirror(230)
+        + '<path d="M56 150h296v8H56z"/>' + _place(c, 180, 150, 24, 40)
+        + '<path d="M246 150v-14h7v14M248 136v-4h3"/><path d="M322 150v-16h9v16M324 134v-4h5"/>'
+        '<path d="M84 214V184a12 12 0 0 1 12-12h16a12 12 0 0 1 12 12v30"/>'
+        '<path d="M78 214h52a5 5 0 0 1 0 10H78a5 5 0 0 1 0-10z"/><path d="M104 224v20M104 244l-18 22M104 244l18 22"/>'
+        '<path d="M286 266v-70h48v70"/><path d="M286 196h48M286 230h48"/>'
+        '<circle class="fine" cx="292" cy="268" r="3"/><circle class="fine" cx="328" cy="268" r="3"/>'
+        + _place(b, 310, 196, 34, 44)
+        + '<path d="M18 266l4-28h28l4 28z"/><path class="fine" d="M36 238c-4-30-18-44-30-50M36 238c2-34 14-52 30-60M36 238c-10-16-10-36-2-50"/>'
+    )
+    tone = ('<g class="sc-tone" transform="translate(7 7)"><path d="M56 150h296v8H56z"/><path d="M70 150V96a34 34 0 0 1 68 0v54z"/>'
+            '<path d="M230 150V96a34 34 0 0 1 68 0v54z"/><path d="M286 196h48v70h-48z"/></g>')
+    glass = '<g class="sc-paper"><path d="M70 150V96a34 34 0 0 1 68 0v54z"/><path d="M230 150V96a34 34 0 0 1 68 0v54z"/></g>'
+    return ('<rect class="sc-bg" width="400" height="300"/>' + tone + glass
+            + '<path class="acc" d="M92 40c0-8 5-12 12-12s12 4 12 12zM252 40c0-8 5-12 12-12s12 4 12 12z"/>'
+            + '<path class="acc2" d="M78 214h52a5 5 0 0 1 0 10H78a5 5 0 0 1 0-10z"/>'
+            + f'<g class="sc-ln">{drawable(lines)}</g>')
+
+
+def grooming(mset: dict, drawable) -> str:
+    """寵物美容室：左邊美容台（含吊桿），右邊有蓮蓬頭的洗澡缸，牆上掛牽繩，架上疊毛巾。"""
+    a, b, c = mset["a"], mset.get("b", mset["a"]), mset.get("c", mset["a"])
+    tiles = "".join(f"M{x} 150v116" for x in range(40, 400, 40))
+    lines = (
+        '<path d="M0 266H400"/><path class="fine" d="M0 150H400"/>' + f'<path class="fine" d="{tiles}" opacity=".5"/>'
+        '<rect x="38" y="58" width="56" height="50" rx="3"/>' + _place(a, 66, 100, 30, 40)
+        + '<path d="M36 186h124v8H36z"/><path d="M54 194v72M142 194v72"/><path class="fine" d="M54 238h88"/>'
+        '<path d="M152 186V118h-34"/><path class="fine" d="M120 118v16a8 8 0 0 0 16 0v-16"/>'
+        + _place(b, 84, 186, 16, 40)
+        + '<path d="M182 100h48"/><path class="fine" d="M192 100v8a4 4 0 0 0 8 0M214 100v8a4 4 0 0 0 8 0"/>'
+        '<path class="fine" d="M196 112c-8 24 8 40 0 60M218 112c-6 18 6 30 0 46"/>'
+        '<path d="M222 196h140v20a26 26 0 0 1-26 26h-88a26 26 0 0 1-26-26z"/><path d="M216 196h152"/>'
+        '<path d="M240 242l-6 24M344 242l6 24"/>'
+        '<path d="M346 196V118h-28"/><path d="M302 114h22v8h-22z"/><path class="fine" d="M306 132v8M314 132v10M310 146v6M320 134v6"/>'
+        '<path d="M262 92h96"/><path class="fine" d="M272 92l6 8M348 92l-6 8"/>'
+        '<rect x="300" y="72" width="40" height="9" rx="4"/><rect x="304" y="81" width="36" height="9" rx="4"/>'
+        + _place(c, 280, 92, 22, 30)
+    )
+    tone = ('<g class="sc-tone" transform="translate(7 7)"><path d="M36 186h124v8H36z"/>'
+            '<path d="M222 196h140v20a26 26 0 0 1-26 26h-88a26 26 0 0 1-26-26z"/><rect x="38" y="58" width="56" height="50"/></g>')
+    return ('<rect class="sc-bg" width="400" height="300"/>' + tone
+            + '<rect class="sc-paper" x="38" y="58" width="56" height="50" rx="3"/>'
+            + '<path class="acc2" d="M222 196h140v20a26 26 0 0 1-26 26h-88a26 26 0 0 1-26-26z"/>'
+            + '<rect class="acc" x="300" y="72" width="40" height="9" rx="4"/>'
+            + f'<g class="sc-ln">{drawable(lines)}</g>')
+
+
+def dining(mset: dict, drawable) -> str:
+    """鍋物／餐館：三顆圓燈籠、牆上一排木製菜牌，桌上一鍋正在煮，兩張圓凳。"""
+    b, c = mset.get("b", mset["a"]), mset.get("c", mset["a"])
+    lantern = lambda x: (f'<path class="fine" d="M{x} 0v40"/><ellipse cx="{x}" cy="58" rx="15" ry="18"/>'  # noqa: E731
+                         f'<path class="fine" d="M{x - 15} 58h30M{x - 10} 44h20M{x - 10} 72h20"/>')
+    tags = "".join(f'<rect x="{x}" y="70" width="14" height="58" rx="2"/><path class="fine" d="M{x + 7} 78v12M{x + 7} 96v8M{x + 7} 110v10"/>'
+                   for x in (300, 320, 340, 360))
+    lines = (
+        '<path d="M0 266H400"/><path class="fine" d="M0 150H400"/>'
+        + lantern(110) + lantern(200) + lantern(290) + tags
+        + '<path d="M96 196h208"/><path class="fine" d="M96 196v6h208v-6"/><path d="M118 202v64M282 202v64"/>'
+        + _place(b, 200, 196, 58, 90) + _place(c, 272, 196, 22, 36)
+        + '<path class="fine" d="M104 192a16 4 0 0 0 32 0M106 186l22-8M288 192a8 3 0 0 0 0-1"/><path d="M140 196v-9h11v9zM250 196v-9h11v9z"/>'
+        '<path d="M44 222h44M50 222l-4 44M82 222l4 44"/><path class="fine" d="M48 246h36"/>'
+        '<path d="M312 222h44M318 222l-4 44M350 222l4 44"/><path class="fine" d="M316 246h36"/>'
+        '<rect x="22" y="70" width="70" height="52" rx="3"/><path class="fine" d="M32 84h50M32 96h36M32 108h44"/>'
+    )
+    tone = ('<g class="sc-tone" transform="translate(7 7)"><path d="M96 196h208v6H96z"/><rect x="22" y="70" width="70" height="52"/>'
+            '<path d="M300 70h74v58h-74z"/></g>')
+    lanterns = "".join(f'<ellipse class="acc" cx="{x}" cy="58" rx="15" ry="18"/>' for x in (110, 200, 290))
+    return ('<rect class="sc-bg" width="400" height="300"/>' + tone + lanterns
+            + '<rect class="sc-paper" x="22" y="70" width="70" height="52" rx="3"/>'
+            + f'<g class="sc-ln">{drawable(lines)}</g>')
+
+
 def window(mset: dict, drawable, uid: str = "w") -> str:
     """窗邊（直式）：拱窗外是屋頂與山，窗台上一盆植物和這個類別的小物，旁邊垂著窗簾。"""
     c = mset.get("c", mset["a"])
@@ -120,10 +295,10 @@ def window(mset: dict, drawable, uid: str = "w") -> str:
             + f'<g class="sc-ln">{drawable(lines)}</g>')
 
 
-def street(mset: dict, name: str, drawable, seed: str = "") -> str:
+def street(mset: dict, name: str, drawable, seed: str = "", key: str = "default") -> str:
     """街角：自己的店在兩棟鄰居中間（鄰居有鐵窗），門口停一台機車，路燈與小鳥。"""
     rnd = random.Random(seed + "street")
-    shop = storefront(mset, name, drawable, ground=False, bg=False)
+    shop = storefront(mset, name, drawable, ground=False, bg=False, key=key)
     sx = 0.56
     tx, ty = 112 - 70 * sx, 266 - 266 * sx
     left_w = "".join(f'<rect class="fine" x="{x}" y="{y}" width="24" height="26"/>' for x in (24, 62) for y in (128, 170, 212))

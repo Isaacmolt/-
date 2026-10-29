@@ -189,11 +189,15 @@ def load_or_make_content(lead: dict, theme: dict, site_dir: Path, use_ai: bool, 
             content = {}
         if content:
             cleaned = clean_content(content)
+            if (lead.get("theme") or "") == "pet":
+                cleaned = pet_words(cleaned)
             if cleaned != content:
                 cj.write_text(json.dumps(cleaned, ensure_ascii=False, indent=2), encoding="utf-8")
             return cleaned
 
     copy = clean_content((ai_copy(lead, theme) if use_ai else None) or default_copy(lead, theme))
+    if (lead.get("theme") or "") == "pet":
+        copy = pet_words(copy)
     content = {
         "_說明": "改這個檔案再執行 build_site.py --slug <slug> --rebuild 就會更新網站。gallery 放 img/ 裡的檔名。",
         "name": lead["name"],
@@ -349,13 +353,13 @@ def split_statement(text: str) -> tuple[str, str, str]:
     return "", text, ""
 
 
-def scene_tile(key: str, mset: dict, name: str, seed: str) -> str:
+def scene_tile(key: str, mset: dict, name: str, seed: str, theme_key: str = "default") -> str:
     """相簿的場景插畫磚：吧台、街角（橫式）、窗邊（直式）。"""
     from markupsafe import Markup
     if key == "window":
         return Markup('<svg class="art scene" viewBox="0 0 300 400" preserveAspectRatio="xMidYMid slice" aria-hidden="true">'
                       f'{scenes.window(mset, drawable, hashlib.md5(seed.encode()).hexdigest()[:6])}</svg>')
-    body = scenes.counter(mset, drawable) if key == "counter" else scenes.street(mset, name, drawable, seed)
+    body = scenes.interior(mset, drawable, theme_key) if key == "counter" else scenes.street(mset, name, drawable, seed, theme_key)
     return Markup(f'<svg class="art scene" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true">{body}</svg>')
 
 
@@ -381,6 +385,36 @@ def map_art(seed: str) -> str:
         f'<g class="mb">{"".join(blocks)}</g><g class="ml">{"".join(lanes)}</g><g class="mr">{"".join(roads)}</g></svg>')
 
 
+def feature_cta(label: str, line_url: str) -> str:
+    """沒有 LINE 時，招牌卡按鈕其實是撥電話：「LINE 訂位」改成「電話訂位」。"""
+    if not line_url and label.startswith("LINE "):
+        return "電話" + label[5:]
+    return label
+
+
+def pet_words(v):
+    """寵物用「牠」：AI 文案或舊檔寫成「它」時一律改掉。"""
+    if isinstance(v, str):
+        return v.replace("它們", "牠們").replace("它", "牠")
+    if isinstance(v, list):
+        return [pet_words(x) for x in v]
+    if isinstance(v, dict):
+        return {k: pet_words(x) for k, x in v.items()}
+    return v
+
+
+def alt_line(theme: dict, tagline: str, fill: dict) -> str:
+    """相簿直排標語用另一句（首屏已經有 tagline，不重複）。"""
+    for t_ in theme.get("taglines", []):
+        try:
+            line = t_.format(**fill)
+        except (KeyError, IndexError):
+            continue
+        if line and line != tagline and "{" not in line:
+            return line
+    return tagline
+
+
 def vertical_columns(text: str) -> list[str]:
     """直排標語按標點分欄（標點留在前一欄）；沒有標點就整句一欄，交給前端斷詞平衡。"""
     cols, buf = [], ""
@@ -400,9 +434,10 @@ ACCENTS = {
     "blob": '<path class="disc" d="M94 36c30-22 80-8 88 30s-8 70-46 72-70-14-68-46 0-38 26-56z"/>',
     "sun": '<path class="disc" d="M70 150a64 64 0 0 1 128 0z"/>',
     "square": '<rect class="disc" x="90" y="28" width="96" height="96" rx="20" transform="rotate(8 138 76)"/>',
-    "crown": '<circle class="disc" cx="120" cy="64" r="34"/>',  # 寵物：小一點，壓在頭頂右上（狗頭在畫面中央）
+    "halo": '<circle class="disc" cx="100" cy="102" r="80"/>',  # 寵物：整顆頭後面一個置中的圓，不半遮臉
+    "mirror": '<path class="disc" d="M132 38h38a26 26 0 0 1 26 26v80h-90V64a26 26 0 0 1 26-26z"/>',  # 髮廊：鏡子的偏移色塊（印刷錯位感）
 }
-ACCENT_OF = {"cafe": "circle", "hair": "arch", "pet": "crown", "breakfast": "sun", "restaurant": "circle", "snack": "blob",
+ACCENT_OF = {"cafe": "circle", "hair": "mirror", "pet": "halo", "breakfast": "sun", "restaurant": "circle", "snack": "blob",
              "hotpot": "sun", "dessert": "arch", "beauty": "blob", "clinic": "square", "gym": "square", "florist": "arch",
              "auto": "sun", "education": "square", "wellness": "blob", "lodging": "arch", "default": "circle"}
 
@@ -888,7 +923,7 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, 
     name_zh = "".join(first_line["tokens"]) if first_line["kind"] != "en" else name
     for g_ in gallery_items:
         if g_["art"] in ("counter", "street", "window"):
-            g_["art"] = scene_tile(g_["art"], mset, name_zh, lead["slug"])
+            g_["art"] = scene_tile(g_["art"], mset, name_zh, lead["slug"], lead.get("theme") or "default")
     b = {
         "name": name, "slug": lead["slug"], "url": url,
         "category": lead.get("category") or theme["label"],
@@ -913,8 +948,12 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, 
         "name_len": name_len_units(name),
         "has_photos": bool(imgs),
         "gallery_name": "店內環境" if imgs else "店的樣子",
+        "nav_labels": {"about": "關於我們", "services": content.get("nav_services") or theme.get("nav_services") or "服務項目",
+                       "gallery": "店內環境" if imgs else "店的樣子", "info": "營業資訊"},
         "nav_services": content.get("nav_services") or theme.get("nav_services") or "服務項目",
-        "feature_cta": content.get("feature_cta") or theme.get("feature_cta") or "詢問這一項",
+        "order": [k for k in (content.get("order") or theme.get("order") or ["about", "services", "gallery", "info"])
+                  if k in ("about", "services", "gallery", "info")],
+        "feature_cta": feature_cta(content.get("feature_cta") or theme.get("feature_cta") or "詢問這一項", line_url),
         "gallery_title": (content.get("gallery_title") or (f"走進{name_zh}" if imgs
                           else theme.get("gallery_title", "{district}的一個角落").format(**fill))),
         "services_title": content.get("services_title") or theme.get("services_title") or "我們能為您做的",
@@ -922,7 +961,7 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, 
         "hero_photo": imgs[0] if imgs else "",
         "about_photo": imgs[1] if len(imgs) > 1 else "",
         "name_zh": name_zh,
-        "vcols": vertical_columns(content.get("tagline", "")),
+        "vcols": vertical_columns(alt_line(theme, content.get("tagline", ""), fill)),
         "vlen": max((len(c) for c in vertical_columns(content.get("tagline", ""))), default=6),
         "map_art": map_art(lead["slug"]),
         "address_disp": address_display(address),
@@ -930,7 +969,7 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, 
         "scrim": _lum(theme["palette"]["p"]) > 0.2,
         "initial": initial, "name_tokens": name_tokens(name), "name_lines": name_lines(name), "address_short": address_short,
         "name_groups": [cjk_groups(ln["tokens"]) if ln["kind"] == "zh" else [[t] for t in ln["tokens"]] for ln in name_lines(name)],
-        "services_lead": content.get("services_lead") or theme.get("services_lead") or "點任一項即可直接詢問，有其他需求也歡迎告訴我們。",
+        "services_lead": content.get("services_lead") or theme.get("services_lead") or "用實在的價格，認真做好每一件事。",
         "address_html": address_html(address, lead.get("city", ""), lead.get("district", "")),
         "mode": theme.get("mode", "bold"), "hero_layout": theme.get("hero", "side"),
         "fonts_url": mode["url"], "fonts": fonts or [], "font_display": mode["display"],
@@ -965,7 +1004,7 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, 
                                          "motif_feature": Markup(print_scene(mset.get("hero") or motif, ground=False)),
                                          "motif_band2": Markup(band2), "motif_closing": Markup(closing_draw),
                                          "motif_b_draw": Markup(drawable(mset.get("b", motif))),
-                                         "motif_about": Markup(scenes.storefront(mset, b["name_zh"], drawable, bg=False)),
+                                         "motif_about": Markup(scenes.storefront(mset, b["name_zh"], drawable, bg=False, key=key)),
                                          "motif_overlay": Markup(mset.get("b", motif)),
                                          "motif_b": Markup(mset.get("b", motif)), "motif_band": Markup(band)}, demo=demo))
 

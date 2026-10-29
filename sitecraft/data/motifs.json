@@ -119,10 +119,12 @@
         1
       ]
     },
-    "hero": "<path class='fine' d='M-6 184H214'/><path d='M118 34h44a22 22 0 0 1 22 22v86h-88V56a22 22 0 0 1 22-22z'/><path class='acc2' d='M120 44h40a14 14 0 0 1 14 14v76h-68V58a14 14 0 0 1 14-14z'/><path class='fine' d='M128 58c8-6 18-8 28-4'/><path d='M34 140h62'/><path d='M42 140V94a12 12 0 0 1 12-12h26a12 12 0 0 1 12 12v46'/><path d='M64 140v26M42 182h44M64 166l-18 16M64 166l18 16'/><path class='fine' d='M108 160h80'/><circle class='acc' cx='126' cy='156' r='3'/><circle class='acc' cx='140' cy='156' r='3'/>",
+    "hero": "<path class='fine' d='M-6 184H214'/><path d='M124 30h38a26 26 0 0 1 26 26v80h-90V56a26 26 0 0 1 26-26z'/><path class='acc2' d='M126 40h34a18 18 0 0 1 18 18v70h-70V58a18 18 0 0 1 18-18z'/><path class='fine' d='M128 58c8-6 18-8 28-4M120 120l14-14'/><path d='M92 136h100v6H92z'/><path d='M104 136v-12h7v12M106 124v-4h3'/><path d='M170 136v-15h9v15M172 121v-4h5'/><circle class='acc' cx='142' cy='131' r='3'/><path class='fine' d='M58 -6v32'/><path class='acc' d='M44 40c0-8 6-14 14-14s14 6 14 14z'/><path class='fine' d='M52 46a6 4 0 0 0 12 0'/><path d='M30 132V98a14 14 0 0 1 14-14h20a14 14 0 0 1 14 14v34'/><path d='M24 132h60a6 6 0 0 1 0 12H24a6 6 0 0 1 0-12z'/><path d='M54 144v22M54 166l-16 16M54 166l16 16'/><path class='fine' d='M42 172h24'/><path d='M192 184l-3-18h-20l-3 18'/><path class='fine' d='M179 166c-4-14-12-20-20-22M179 166c2-16 8-24 18-28M179 166c-8-8-8-20-2-28'/>",
     "hero_idle": {
-      "kind": "float",
-      "shapes": []
+      "kind": "pulse",
+      "shapes": [
+        16
+      ]
     }
   },
   "beauty": {

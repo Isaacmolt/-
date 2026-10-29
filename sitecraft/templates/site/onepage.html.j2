@@ -115,7 +115,7 @@ body[data-mode="bold"] .label b{font-family:var(--body);font-weight:700}
 .overlay .ov-brand{position:absolute;top:22px;left:24px;right:84px;font-weight:700;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 @media (max-width:640px){.overlay{padding-inline:18px}.overlay .ov-brand{left:18px}}
 @media (max-height:520px){.overlay{padding-top:64px;padding-bottom:16px}.overlay>a:not(.btn){font-size:1.5rem;padding:2px 0;line-height:1.3}.overlay small{margin-top:10px}.overlay .acts{margin-top:10px}.overlay .acts .btn{min-height:44px}}
-@media (max-height:520px){.overlay .ov-motif{display:none}}
+@media (max-height:740px){.overlay .ov-motif{display:none}}
 .overlay .ov-motif{position:fixed;right:-12vw;bottom:-6vw;width:70vw;opacity:.12;stroke:currentColor;fill:none;stroke-width:1.2;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
 @media (max-width:880px){.nav ul,.nav .call{display:none}.menu-btn{display:flex}.nav .wrap{height:68px;padding-right:62px}}
 
@@ -159,6 +159,7 @@ body[data-mode="bold"] .label b{font-family:var(--body);font-weight:700}
 @keyframes draw{to{stroke-dashoffset:0}}
 .js .dw [pathLength]:not(.acc):not(.acc2){stroke-dasharray:1 2;stroke-dashoffset:1.01}
 .js [data-reveal].in .dw [pathLength]:not(.acc):not(.acc2){animation:draw 1.8s var(--ease) forwards;animation-delay:calc(.2s + var(--i,0)*.07s)}
+.js [data-reveal].in :is(.scene.dw,.dw .scene) [pathLength]:not(.acc):not(.acc2){animation-duration:1s;animation-delay:min(calc(.1s + var(--i,0)*.02s),.7s)}
 .closing[data-open="closed"] .cl-motif .idle{opacity:0}
 @media (hover:none){.hero .motif svg{transform:translate3d(0,calc(var(--sy,0)*-.12px),0)}}
 .js .cl-motif :is(path,circle,ellipse,rect){stroke-dasharray:1 2;stroke-dashoffset:1.01}
@@ -234,8 +235,12 @@ body[data-mode="editorial"] h1 .en{font-style:italic;font-weight:400}
 .hstat{display:none;align-items:center;gap:8px;margin:14px 0 0;font-size:var(--t-s);font-weight:600;color:#fff}
 .hstat i{flex:none;width:8px;height:8px;border-radius:50%;background:#6ee7a0}.hstat.off i{background:#f4a259}
 .hero[data-hero="band"] .hstat{justify-content:center}
-@media (max-width:640px){.hstat.on{display:flex}}
+.hstat{flex-wrap:wrap;row-gap:4px}.hstat .hs-r{display:inline-flex;align-items:center;gap:6px;padding-left:12px;margin-left:4px;border-left:1px solid rgba(255,255,255,.3)}
+.hstat .star{width:14px;height:14px;fill:var(--a)}.hstat small{font-size:var(--t-xs);font-weight:500;opacity:.8}
+@media (max-width:640px){.hstat.on{display:flex}.hero-foot>.wrap{display:none}}
+@media (max-width:900px) and (max-height:450px){.hstat.on{display:flex}.hero-foot>.wrap{display:none}}
 @media (max-width:880px){.fact:last-child:nth-child(odd){grid-column:1/-1}}
+@media (max-height:450px){.hero .hp-m{display:none}}
 @media (min-width:641px) and (max-width:900px) and (max-height:450px){.hero>.wrap{padding-top:76px}.hero h1{font-size:clamp(2rem,9vh,2.8rem);margin:6px 0 4px}.hero .tagline{font-size:1.05rem;max-width:40ch}.hero .cta{margin-top:var(--s3)}.hero .cta .tlink{display:none}.hero[data-hero="side"]>.wrap>.motif{display:none}}
 .motif .m2{display:none}
 @media (max-width:640px){.hero[data-hero="band"] .motif .m1{display:none}.hero[data-hero="band"] .motif .m2{display:block}body .hero[data-hero="band"] .hero-foot .motif{width:100vw;aspect-ratio:1.5/1}body .hero[data-hero="band"] .motif svg{opacity:.78}}
@@ -293,7 +298,7 @@ h2{font-size:clamp(2rem,4.4vw,3.6rem);margin-bottom:var(--s5)}
 .scene .plate text{fill:#fff;stroke:none;font-family:var(--body);font-weight:700;letter-spacing:.08em}body[data-open="closed"] .scene .plate rect{fill:var(--mu)}
 @media (prefers-color-scheme:dark){.scene .plate rect{fill:color-mix(in oklab,var(--a) 70%,#000)}}
 @media (prefers-color-scheme:dark){.about .ph.art .scene .sc-tone>*{fill:color-mix(in oklab,var(--sf) 60%,var(--p))}}
-@media (min-width:641px) and (max-width:880px){.about .ph.art{max-width:560px}}
+@media (min-width:641px) and (max-width:880px){section.about .wrap{grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);grid-template-areas:"lab lab" "txt side" "hl hl";column-gap:32px}section.about .ph{aspect-ratio:4/5;margin-top:var(--s2)}section.about .ph.art{aspect-ratio:4/3;align-self:center}section.about .ph.art svg{width:96%;height:auto}}
 @media (max-width:880px){.about .wrap{grid-template-columns:minmax(0,1fr);grid-template-areas:"lab" "txt" "side" "hl"}.about .side{position:static}.about .ph,.about .ph.art{aspect-ratio:4/3;margin:var(--s2) 0 0}.about .ph.art svg{width:auto;height:96%}}
 body:not([data-mode="editorial"]) .about.has-art{position:relative;overflow:hidden}
 @media (min-width:881px){body:not([data-mode="editorial"]) .about.has-art .wrap{grid-template-columns:minmax(0,1fr);grid-template-areas:"lab" "txt" "hl"}body:not([data-mode="editorial"]) .about.has-art :is(.txt,.hl){max-width:min(620px,54%);position:relative;z-index:1}body:not([data-mode="editorial"]) .about.has-art h2.statement{font-size:clamp(2.2rem,4.4vw,3.6rem)}body:not([data-mode="editorial"]) .about.has-art .side{position:absolute;right:max(24px,(100vw - 1180px)/2 - 40px);top:clamp(60px,8vw,120px);width:min(40vw,560px);pointer-events:none}body:not([data-mode="editorial"]) .about.has-art .ph.art{background:none;border:0;aspect-ratio:1;border-radius:0}body:not([data-mode="editorial"]) .about.has-art .ph.art svg{width:100%}}
@@ -379,7 +384,7 @@ body[data-mode="bold"] .svc li:has(>a:focus-visible){outline-color:var(--a);outl
 .feature .sig-l::before{content:"";width:24px;height:2px;border-radius:2px;background:var(--a)}
 .feature h3{font-family:var(--display),var(--cjk-head);font-weight:var(--head-weight);font-size:clamp(2rem,4vw,3.2rem);line-height:1.15;max-width:14ch}
 .feature p{opacity:.88;max-width:34ch;font-size:var(--t-l)}
-.feature .num{font-size:clamp(1.4rem,2.4vw,1.9rem);color:var(--a)}
+.feature .num{font-size:clamp(1.4rem,2.4vw,1.9rem);color:color-mix(in oklab,var(--a),#fff 24%)}
 .feature .btn{margin-top:var(--s3)}
 .feature .sig-art .tone *{fill:var(--a);fill-opacity:.25;stroke:none}.feature .sig-art .tone .fine{display:none}.feature .sig-art .ln :is(.acc,.acc2){fill:var(--a);fill-opacity:.5;stroke:currentColor}
 @media (max-width:640px){.feature .sig-art{width:36%;top:16px;right:14px;bottom:auto;transform:none;opacity:.3}}
@@ -390,8 +395,7 @@ body[data-mode="bold"] .svc li:has(>a:focus-visible){outline-color:var(--a);outl
 .gallery .count{color:var(--mu);white-space:nowrap;display:flex;gap:var(--s4);align-items:center}
 .gallery .count .bar{width:96px;height:2px;border-radius:2px;background:var(--line);position:relative;overflow:hidden}
 .gallery .count .bar i{position:absolute;inset:0;background:var(--ink);transform-origin:left;transform:scaleX(var(--p,0));transition:transform .3s var(--ease)}
-.strip:focus-visible{outline:none}
-.strip:focus-visible .tile{outline:2px solid var(--ink);outline-offset:3px}
+.strip:focus-visible{outline:2px solid var(--ink);outline-offset:6px;border-radius:12px}
 .tile img{-webkit-user-drag:none;user-select:none}
 .gallery .count button{width:44px;height:44px;border-radius:50%;border:1.5px solid var(--line);display:grid;place-items:center;transition:background .3s,color .3s}
 .gallery .count button:hover{background:var(--ink);color:var(--bg);border-color:var(--ink)}
@@ -408,6 +412,7 @@ body[data-mode="bold"] .svc li:has(>a:focus-visible){outline-color:var(--a);outl
 .tile.type .vtext{writing-mode:vertical-rl;text-orientation:mixed;font-family:var(--cjk-head),var(--display),var(--body);font-weight:var(--head-weight);font-feature-settings:normal;font-size:min(2.2rem,calc((100cqh - 112px)/(var(--vl,6)*1.24)));letter-spacing:.22em;line-height:1.5;color:var(--ink);margin-bottom:44px}
 .tile.type .vc{display:block;white-space:nowrap}
 .tile .cap{max-width:calc(100% - 36px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tile.type .cap{white-space:normal;word-break:keep-all;line-height:1.35;border-radius:14px}
 @media (max-width:640px){.tile.type .cap{font-size:var(--t-xs);letter-spacing:.06em;padding:5px 10px}.tile .cap-en{display:none}}
 .tile.type::before{content:"";position:absolute;left:22px;top:22px;bottom:72px;width:1px;background:var(--ink);opacity:.35}
 .tile .cap{color:var(--tx);background:color-mix(in srgb,var(--bg) 84%,transparent)}
@@ -442,7 +447,8 @@ body[data-mode="bold"] .svc li:has(>a:focus-visible){outline-color:var(--a);outl
 .hours{border-top:1px solid var(--line)}
 .hours li{display:flex;justify-content:space-between;align-items:center;gap:var(--s3);padding:var(--s4) 0;border-bottom:1px solid var(--line);font-size:var(--t-m)}
 .hours li.today{font-weight:700;color:var(--ink)}
-.hours .tag{font-size:var(--t-xs);margin-left:var(--s2);letter-spacing:.1em;padding:3px 8px;border-radius:999px;background:var(--ink);color:var(--bg);vertical-align:middle;font-weight:600}
+.hours li>span:first-child{white-space:nowrap}.hours li>.num{text-align:right}
+.hours .tag{white-space:nowrap;font-size:var(--t-xs);margin-left:var(--s2);letter-spacing:.1em;padding:3px 8px;border-radius:999px;background:var(--ink);color:var(--bg);vertical-align:middle;font-weight:600}
 .hours .closed{color:var(--mu)}
 .hours .num{font-size:var(--t-m)}
 .open-now{display:flex;align-items:center;gap:var(--s2);margin-bottom:var(--s5);font-weight:600;color:var(--tx)}
@@ -479,7 +485,7 @@ body[data-mode="bold"] .svc li:has(>a:focus-visible){outline-color:var(--a);outl
 /* closing */
 .closing{background:var(--pd);color:#fff;position:relative;overflow:hidden;isolation:isolate;border-top:1px solid var(--line)}
 .closing .cl-motif{position:absolute;right:-2vw;bottom:-1.5vw;width:36vw;max-width:520px;opacity:.22;z-index:-1;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
-@media (max-width:640px){.closing .cl-motif{width:26vw;right:-3vw;bottom:-8vw}}
+@media (max-width:640px){.closing .cl-motif{position:relative;display:block;right:auto;bottom:auto;width:84px;margin:0 0 6px 18px;opacity:.4;overflow:visible}}
 .closing::before{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(50% 60% at 15% 100%,color-mix(in oklab,var(--p) 70%,transparent),transparent 70%)}
 .closing .wrap{display:grid;grid-template-columns:minmax(0,1fr) min(40vw,560px);gap:40px;align-items:end}
 @media (max-width:880px){.closing .wrap{grid-template-columns:1fr}}
@@ -562,10 +568,7 @@ body.demo.bar-mini .fab{bottom:56px}
     <a class="brand" href="#top"><span class="mark" aria-hidden="true"><svg viewBox="0 0 200 200">{{ t.motif }}</svg></span><span class="bn{% if b.name_zh | length > 8 %} long{% endif %}">{% if b.name_lines[0].kind != "en" %}{% for g in b.name_groups[0] %}{{ g | join("") }}{% if not loop.last %}<wbr>{% endif %}{% endfor %}{% else %}{{ b.name_zh }}{% endif %}{% if b.name_zh != b.name %}<span class="bn-en"> {{ b.name[(b.name_zh | length):] | trim }}</span>{% endif %}</span></a>
     <nav aria-label="主選單">
       <ul>
-        <li><a href="#about">關於我們</a></li>
-        <li><a href="#services">{{ b.nav_services }}</a></li>
-        <li><a href="#gallery">{{ b.gallery_name }}</a></li>
-        <li><a href="#info">營業資訊</a></li>
+        {% for k in b.order %}<li><a href="#{{ k }}">{{ b.nav_labels[k] }}</a></li>{% endfor %}
       </ul>
     </nav>
     {% if b.phone_href %}<a class="call" href="{{ b.phone_href }}"><svg class="ico"><use href="#i-phone"/></svg>{{ b.phone }}</a>{% endif %}
@@ -574,10 +577,7 @@ body.demo.bar-mini .fab{bottom:56px}
 <div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-label="選單" aria-hidden="true">
   <span class="ov-brand">{{ b.name_zh }}</span>
   <svg class="ov-motif" viewBox="0 0 200 200" aria-hidden="true">{{ t.motif_overlay }}</svg>
-  <a href="#about" style="--i:0">關於我們</a>
-  <a href="#services" style="--i:1">{{ b.nav_services }}</a>
-  <a href="#gallery" style="--i:2">{{ b.gallery_name }}</a>
-  <a href="#info" style="--i:3">營業資訊</a>
+  {% for k in b.order %}<a href="#{{ k }}" style="--i:{{ loop.index0 }}">{{ b.nav_labels[k] }}</a>{% endfor %}
   <small><span id="ovHours"><span class="nb">{% if b.today_hours %}今日 {{ b.today_hours }}{% endif %}</span></span><i class="sep"></i><span class="nb">{{ b.address_short }}</span></small>
   <div class="acts">
     {% if b.phone_href %}<a class="btn btn-ghost" href="{{ b.phone_href }}"><svg class="ico"><use href="#i-phone"/></svg>電話</a>{% endif %}
@@ -588,40 +588,10 @@ body.demo.bar-mini .fab{bottom:56px}
 <button class="menu-btn" id="menuBtn" aria-label="開啟選單" aria-expanded="false" aria-controls="overlay"><span></span><span></span></button>
 
 <main id="main">
-<section class="hero" id="top" data-hero="{{ b.hero_layout }}"{% if b.scrim %} data-scrim{% endif %}{% if b.hero_photo %} data-photo{% endif %} aria-label="{{ b.name }}">
-  {% if b.hero_photo %}<figure class="hp" aria-hidden="true"><img src="{{ b.hero_photo }}" alt="" fetchpriority="high"></figure>{% endif %}
-  <div class="grain" aria-hidden="true"></div>
-    <div class="wrap">
-    <p class="eyebrow"><span>{{ b.category }}</span><span>{{ b.city }}{{ b.district }}</span></p>
-    <h1 aria-label="{{ b.name }}" style="--len:{{ b.name_len }}">{% set ns = namespace(i=0) %}{% for line in b.name_lines %}{% if line.kind == "en" %}<span class="en">{% for w in line.tokens %}<span class="w" style="--i:{{ ns.i }}">{{ w }}</span>{% if not loop.last %} {% endif %}{% set ns.i = ns.i + 1 %}{% endfor %}</span>{% else %}{% for grp in b.name_groups[loop.index0] %}<span class="wd">{% for w in grp %}<span class="w" style="--i:{{ ns.i }}">{{ w }}</span>{% set ns.i = ns.i + 1 %}{% endfor %}</span>{% endfor %}{% endif %}{% endfor %}</h1>
-    <p class="tagline">{{ b.tagline }}</p>
-    <div class="cta">
-      {% if b.line_url %}<a class="btn btn-line" href="{{ b.line_url }}" target="_blank" rel="noopener"><svg class="ico"><use href="#i-chat"/></svg>LINE 聯絡</a>
-      {% if b.phone_href %}<a class="btn btn-ghost" href="{{ b.phone_href }}"><svg class="ico"><use href="#i-phone"/></svg>撥打電話</a>{% endif %}
-      {% elif b.phone_href %}<a class="btn btn-solid" href="{{ b.phone_href }}"><svg class="ico"><use href="#i-phone"/></svg>撥打電話</a>{% endif %}
-      <a class="tlink" href="{{ b.maps_url }}" target="_blank" rel="noopener"><svg class="ico"><use href="#i-pin"/></svg>查看地圖</a>
-    </div>
-    <p class="hstat" id="heroStat" aria-hidden="true"><i></i><span></span></p>
-    {% if b.hero_photo %}<figure class="hp-m" aria-hidden="true"><img src="{{ b.hero_photo }}" alt="" loading="lazy"></figure>{% endif %}
-    {% if b.hero_layout != "band" and not b.hero_photo %}<div class="motif" aria-hidden="true"><svg viewBox="-10 -10 220 220"><g class="d">{{ t.motif_scene }}</g></svg></div>{% endif %}
-  </div>
-  <div class="hero-foot">
-    {% if b.hero_layout == "band" and not b.hero_photo %}<div class="motif" aria-hidden="true"><svg class="m1" viewBox="110 -10 580 220" preserveAspectRatio="xMidYMax meet"><g class="d">{{ t.motif_band }}</g></svg><svg class="m2" viewBox="-10 -10 220 220" preserveAspectRatio="xMidYMax meet"><g class="d">{{ t.motif_band2 }}</g></svg></div>{% endif %}
-    <div class="wrap">
-      <div class="facts" style="--nf:{{ 2 + (1 if b.rating else 0) + (1 if b.phone else 0) }}">
-        <div class="fact" style="--i:0"><b>今日營業</b><span class="status" id="heroStatus"><i></i><span id="heroHours"><span class="nb">{{ b.today_hours or "請來電詢問" }}</span></span></span></div>
-        {% if b.rating %}<div class="fact" style="--i:1"><b>Google 評分</b><a href="{{ b.maps_url }}" target="_blank" rel="noopener" aria-label="{{ b.rating }} {{ b.review_count }} 則評論，在 Google 地圖查看"><svg class="star" viewBox="0 0 24 24"><use href="#i-star"/></svg><span class="num">{{ b.rating }}</span> <span class="sub">{{ b.review_count }} 則評論</span></a></div>{% endif %}
-        <div class="fact" style="--i:2"><b>地址</b><a class="fl" href="{{ b.maps_url }}" target="_blank" rel="noopener"><span>{{ b.address_short }}</span></a></div>
-        {% if b.phone %}<div class="fact" style="--i:3"><b>電話</b>{% if b.phone_href %}<a class="fl" href="{{ b.phone_href }}"><span class="num">{{ b.phone }}</span></a>{% else %}<span class="num">{{ b.phone }}</span>{% endif %}</div>{% endif %}
-      </div>
-    </div>
-  </div>
-</section>
-
-
+{% macro sec_about(n) %}
 <section class="about{% if not b.about_photo %} has-art{% endif %}" id="about">
   <div class="wrap">
-    <div class="label" data-reveal><b>01</b>關於我們<svg class="lm dw" viewBox="0 0 200 200" aria-hidden="true">{{ t.motif_b_draw }}</svg></div>
+    <div class="label" data-reveal><b>{{ "%02d" % n }}</b>關於我們<svg class="lm dw" viewBox="0 0 200 200" aria-hidden="true">{{ t.motif_b_draw }}</svg></div>
     <div class="txt">
       <h2 class="statement" data-reveal style="--i:1">{% if b.statement_name %}<span class="nm">{% for line in b.name_lines %}{% if line.kind == "en" %}<span class="en">{{ line.tokens | join(" ") }}</span>{% else %}{{ line.tokens | join("") }}{% endif %}{% if not loop.last %} {% endif %}{% endfor %}</span><wbr>{% endif %}{% if b.statement_units %}<span class="un">{{ b.statement_pre }}</span><wbr><em class="un">{{ b.statement_em }}</em>{% else %}{{ b.statement_pre }}<em>{{ b.statement_em }}</em>{{ b.statement_post }}{% endif %}</h2>
       {% for para in b.about_paragraphs %}<p data-reveal style="--i:{{ loop.index + 1 }}">{{ para }}</p>{% endfor %}
@@ -634,11 +604,12 @@ body.demo.bar-mini .fab{bottom:56px}
     </div>
   </div>
 </section>
-
+{% endmacro %}
+{% macro sec_services(n) %}
 <section class="services" id="services">
   {{ weave("s") }}
   <div class="wrap">
-    <div class="label" data-reveal><b>02</b>{{ b.nav_services }}<svg class="lm dw" viewBox="0 0 200 200" aria-hidden="true">{{ t.motif_b_draw }}</svg></div>
+    <div class="label" data-reveal><b>{{ "%02d" % n }}</b>{{ b.nav_services }}<svg class="lm dw" viewBox="0 0 200 200" aria-hidden="true">{{ t.motif_b_draw }}</svg></div>
     <h2 data-reveal style="--i:1">{{ b.services_title }}</h2>
     <p class="lead" data-reveal style="--i:2">{% if b.services_linked %}{{ b.services_lead }}{% else %}有其他需求也歡迎告訴我們。{% endif %}</p>
     {% set feat = b.signature if (b.signature and b.signature.kind == "feature") else none %}
@@ -672,12 +643,13 @@ body.demo.bar-mini .fab{bottom:56px}
     {% endif %}
   </div>
 </section>
-
+{% endmacro %}
+{% macro sec_gallery(n) %}
 <section class="gallery" id="gallery">
   <div class="wrap">
     <div class="head">
       <div>
-        <div class="label" data-reveal><b>03</b>{{ b.gallery_name }}<svg class="lm dw" viewBox="0 0 200 200" aria-hidden="true">{{ t.motif_b_draw }}</svg></div>
+        <div class="label" data-reveal><b>{{ "%02d" % n }}</b>{{ b.gallery_name }}<svg class="lm dw" viewBox="0 0 200 200" aria-hidden="true">{{ t.motif_b_draw }}</svg></div>
         <h2 data-reveal style="--i:1">{{ b.gallery_title }}</h2>
         {% if demo and not b.has_photos %}<p class="note" data-reveal style="--i:2">正式上線時，這裡會換成店內實拍照片。</p>{% endif %}
       </div>
@@ -693,30 +665,24 @@ body.demo.bar-mini .fab{bottom:56px}
       {% for g in b.gallery_items %}
       <div class="tile{% if g.tall %} tall{% endif %}{% if g.type %} type{% endif %}" style="--i:{{ loop.index0 }}">
         {% if g.img %}<img src="{{ g.img }}" alt="{{ b.name }} {{ g.label }}" loading="lazy" draggable="false">{% elif g.type %}<span class="vtext" style="--vl:{{ b.vlen }}">{% for c in b.vcols %}<span class="vc">{{ c }}</span>{% endfor %}</span>{% else %}<span class="dw">{{ g.art }}</span>{% endif %}
-        {% if g.img %}<span class="cap">{{ g.label }}</span>{% elif g.type %}<span class="cap">{{ b.name_zh }}</span>{% endif %}
+        {% if g.img %}<span class="cap">{{ g.label }}</span>{% elif g.type %}<span class="cap">{% if b.name_lines[0].kind != "en" %}{% for g2 in b.name_groups[0] %}{{ g2 | join("") }}{% if not loop.last %}<wbr>{% endif %}{% endfor %}{% else %}{{ b.name_zh }}{% endif %}</span>{% endif %}
       </div>
       {% endfor %}
     </div>
   </div>
 </section>
-
-<dialog class="lb" id="lb" aria-label="放大檢視">
-  <div class="lb-frame" id="lbFrame">
-    <div class="lb-body" id="lbBody" tabindex="-1"></div>
-    <div class="lb-bar"><span class="lb-cap" id="lbCap"></span><span class="lb-nav"><button type="button" id="lbPrev" aria-label="上一張"><svg class="ico" style="transform:rotate(180deg)"><use href="#i-arrow"/></svg></button><span id="lbNow" aria-live="polite"></span><button type="button" id="lbNext" aria-label="下一張"><svg class="ico"><use href="#i-arrow"/></svg></button><button type="button" id="lbClose" aria-label="關閉">×</button></span></div>
-  </div>
-</dialog>
-
+{% endmacro %}
+{% macro sec_info(n) %}
 <section class="info" id="info">
   <div class="wrap">
-    <div class="label" data-reveal><b>04</b>營業資訊<svg class="lm dw" viewBox="0 0 200 200" aria-hidden="true">{{ t.motif_b_draw }}</svg></div>
+    <div class="label" data-reveal><b>{{ "%02d" % n }}</b>營業資訊<svg class="lm dw" viewBox="0 0 200 200" aria-hidden="true">{{ t.motif_b_draw }}</svg></div>
     <div class="cols">
       <div data-reveal style="--i:1">
         <div class="open-now"><span class="status" id="infoStatus"><i></i><span id="infoStatusText">營業時間</span></span></div>
         {% if b.weekday_hours %}
         <ul class="hours" id="hours">
           {% for h in b.weekday_hours %}
-          <li data-day="{{ h.day }}"><span>{{ h.label }}</span><span class="num {% if h.closed %}closed{% endif %}">{{ h.text }}</span></li>
+          <li data-day="{{ h.day }}"><span>{{ h.label }}</span><span class="num {% if h.closed %}closed{% endif %}">{% for part in h.text.split("、") %}<span class="nb">{{ part }}</span>{% if not loop.last %}、<wbr>{% endif %}{% endfor %}</span></li>
           {% endfor %}
         </ul>
         {% else %}
@@ -741,6 +707,54 @@ body.demo.bar-mini .fab{bottom:56px}
     </div>
   </div>
 </section>
+{% endmacro %}
+<section class="hero" id="top" data-hero="{{ b.hero_layout }}"{% if b.scrim %} data-scrim{% endif %}{% if b.hero_photo %} data-photo{% endif %} aria-label="{{ b.name }}">
+  {% if b.hero_photo %}<figure class="hp" aria-hidden="true"><img src="{{ b.hero_photo }}" alt="" fetchpriority="high"></figure>{% endif %}
+  <div class="grain" aria-hidden="true"></div>
+    <div class="wrap">
+    <p class="eyebrow"><span>{{ b.category }}</span><span>{{ b.city }}{{ b.district }}</span></p>
+    <h1 aria-label="{{ b.name }}" style="--len:{{ b.name_len }}">{% set ns = namespace(i=0) %}{% for line in b.name_lines %}{% if line.kind == "en" %}<span class="en">{% for w in line.tokens %}<span class="w" style="--i:{{ ns.i }}">{{ w }}</span>{% if not loop.last %} {% endif %}{% set ns.i = ns.i + 1 %}{% endfor %}</span>{% else %}{% for grp in b.name_groups[loop.index0] %}<span class="wd">{% for w in grp %}<span class="w" style="--i:{{ ns.i }}">{{ w }}</span>{% set ns.i = ns.i + 1 %}{% endfor %}</span>{% endfor %}{% endif %}{% endfor %}</h1>
+    <p class="tagline">{{ b.tagline }}</p>
+    <div class="cta">
+      {% if b.line_url %}<a class="btn btn-line" href="{{ b.line_url }}" target="_blank" rel="noopener"><svg class="ico"><use href="#i-chat"/></svg>LINE 聯絡</a>
+      {% if b.phone_href %}<a class="btn btn-ghost" href="{{ b.phone_href }}"><svg class="ico"><use href="#i-phone"/></svg>撥打電話</a>{% endif %}
+      {% elif b.phone_href %}<a class="btn btn-solid" href="{{ b.phone_href }}"><svg class="ico"><use href="#i-phone"/></svg>撥打電話</a>{% endif %}
+      <a class="tlink" href="{{ b.maps_url }}" target="_blank" rel="noopener"><svg class="ico"><use href="#i-pin"/></svg>查看地圖</a>
+    </div>
+    <p class="hstat" id="heroStat" aria-hidden="true"><i></i><span class="hs-t"></span>{% if b.rating %}<span class="hs-r"><svg class="star" viewBox="0 0 24 24"><use href="#i-star"/></svg>{{ b.rating }}<small>{{ b.review_count }} 則評論</small></span>{% endif %}</p>
+    {% if b.hero_photo %}<figure class="hp-m" aria-hidden="true"><img src="{{ b.hero_photo }}" alt="" loading="lazy"></figure>{% endif %}
+    {% if b.hero_layout != "band" and not b.hero_photo %}<div class="motif" aria-hidden="true"><svg viewBox="-10 -10 220 220"><g class="d">{{ t.motif_scene }}</g></svg></div>{% endif %}
+  </div>
+  <div class="hero-foot">
+    {% if b.hero_layout == "band" and not b.hero_photo %}<div class="motif" aria-hidden="true"><svg class="m1" viewBox="110 -10 580 220" preserveAspectRatio="xMidYMax meet"><g class="d">{{ t.motif_band }}</g></svg><svg class="m2" viewBox="-10 -10 220 220" preserveAspectRatio="xMidYMax meet"><g class="d">{{ t.motif_band2 }}</g></svg></div>{% endif %}
+    <div class="wrap">
+      <div class="facts" style="--nf:{{ 2 + (1 if b.rating else 0) + (1 if b.phone else 0) }}">
+        <div class="fact" style="--i:0"><b>今日營業</b><span class="status" id="heroStatus"><i></i><span id="heroHours"><span class="nb">{{ b.today_hours or "請來電詢問" }}</span></span></span></div>
+        {% if b.rating %}<div class="fact" style="--i:1"><b>Google 評分</b><a href="{{ b.maps_url }}" target="_blank" rel="noopener" aria-label="{{ b.rating }} {{ b.review_count }} 則評論，在 Google 地圖查看"><svg class="star" viewBox="0 0 24 24"><use href="#i-star"/></svg><span class="num">{{ b.rating }}</span> <span class="sub">{{ b.review_count }} 則評論</span></a></div>{% endif %}
+        <div class="fact" style="--i:2"><b>地址</b><a class="fl" href="{{ b.maps_url }}" target="_blank" rel="noopener"><span>{{ b.address_short }}</span></a></div>
+        {% if b.phone %}<div class="fact" style="--i:3"><b>電話</b>{% if b.phone_href %}<a class="fl" href="{{ b.phone_href }}"><span class="num">{{ b.phone }}</span></a>{% else %}<span class="num">{{ b.phone }}</span>{% endif %}</div>{% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+
+
+
+
+
+{% for k in b.order %}{% if k == "about" %}{{ sec_about(loop.index) }}{% elif k == "services" %}{{ sec_services(loop.index) }}{% elif k == "gallery" %}{{ sec_gallery(loop.index) }}{% elif k == "info" %}{{ sec_info(loop.index) }}{% endif %}
+{% endfor %}
+<dialog class="lb" id="lb" aria-label="放大檢視">
+  <div class="lb-frame" id="lbFrame">
+    <div class="lb-body" id="lbBody" tabindex="-1"></div>
+    <div class="lb-bar"><span class="lb-cap" id="lbCap"></span><span class="lb-nav"><button type="button" id="lbPrev" aria-label="上一張"><svg class="ico" style="transform:rotate(180deg)"><use href="#i-arrow"/></svg></button><span id="lbNow" aria-live="polite"></span><button type="button" id="lbNext" aria-label="下一張"><svg class="ico"><use href="#i-arrow"/></svg></button><button type="button" id="lbClose" aria-label="關閉">×</button></span></div>
+  </div>
+</dialog>
+
+
 
 <section class="closing" aria-labelledby="closingTitle">
   <svg class="cl-motif" viewBox="0 0 200 200" aria-hidden="true">{{ t.motif_closing }}</svg>
@@ -793,8 +807,8 @@ body.demo.bar-mini .fab{bottom:56px}
   var barSet=0;function measure(){var bar=d.getElementById('demoBar');if(bar){var bh=bar.offsetHeight;d.documentElement.style.setProperty('--barnow',bh+'px');if(!barSet||!bar.classList.contains('mini')){d.documentElement.style.setProperty('--bar',bh+'px');barSet=1}}heroH=hero.offsetHeight;maxY=Math.max(d.documentElement.scrollHeight-innerHeight,1)}
   var foot=d.querySelector('.hero-foot'),lock=0,lockT=null,closing=d.querySelector('.closing');
   function onScroll(){
-    var y=scrollY,solidAt=heroH-foot.offsetHeight-nav.offsetHeight;
-    var solid=y>solidAt;nav.classList.toggle('solid',solid);btn.classList.toggle('solid',solid);
+    var y=scrollY;
+    var solid=y>16;nav.classList.toggle('solid',solid);btn.classList.toggle('solid',solid);
     nav.classList.toggle('hide',!lock&&y>last&&y>heroH&&!overlay.classList.contains('open'));
     var db=d.getElementById('demoBar');if(db&&y>40&&!db.classList.contains('mini')){db.classList.add('mini');d.body.classList.add('bar-mini');measure()}
     btn.classList.toggle('hide',nav.classList.contains('hide'));
@@ -835,22 +849,22 @@ body.demo.bar-mini .fab{bottom:56px}
     hero.dataset.open=open?'open':'closed';if(closing)closing.dataset.open=hero.dataset.open;
     if(overnight!==false&&li){var py=d.querySelector('#hours li[data-day="'+overnight+'"]');if(py){li.classList.remove('today');py.classList.add('today');tg.textContent='現在';py.children[0].appendChild(tg);li=py}}
     var wk='日一二三四五六',nextText=nextOpen?((nextOpen.k===0?'今天 ':nextOpen.k===1?'明天 ':(nextOpen.k===7?'下週':'週')+wk.charAt(nextOpen.p.day)+' ')+fmt(nextOpen.p.hour,nextOpen.p.minute||0)+' 開門'):'';
-    state={open:open,next:nextText,text:open?('營業中　'+(closeAt?fmt(closeAt.hour,closeAt.minute||0)+' 打烊':'')):((todayClosed?'今日公休':'休息中')+(nextText?'　'+nextText:''))};
+    state={open:open,nextK:nextOpen?nextOpen.k:null,next:nextText,text:open?('營業中　'+(closeAt?fmt(closeAt.hour,closeAt.minute||0)+' 打烊':'')):((todayClosed?'今日公休':'休息中')+(nextText?'　'+nextText:''))};
   }
   ['heroStatus','infoStatus'].forEach(function(id){var el=d.getElementById(id);if(!el)return;if(!state){el.querySelector('i').style.display='none';return}el.classList.toggle('off',!state.open)});
   var ist=d.getElementById('infoStatusText');if(ist&&state)ist.textContent=state.text;
   var ch=d.getElementById('closingHours');if(ch&&state)ch.textContent=state.text;
-  var ct=d.getElementById('closingTitle');if(ct&&state&&!state.open&&ct.dataset.closed)ct.textContent=ct.dataset.closed;
-  else if(ct&&state&&state.open&&mins<15*60&&/今晚/.test(ct.textContent))ct.textContent=ct.textContent.replace('今晚','今天');
+  var ct=d.getElementById('closingTitle');if(ct&&state&&!state.open&&ct.dataset.closed)ct.textContent=ct.dataset.closed.replace(/^下次/,state.nextK===0?'晚點':state.nextK===1?'明天':'下次');
+  else if(ct&&state&&state.open&&mins>=300&&mins<15*60&&/今晚/.test(ct.textContent))ct.textContent=ct.textContent.replace('今晚','今天');
   if(state){d.body.dataset.open=state.open?'open':'closed';d.querySelectorAll('.scene .plate text').forEach(function(t){t.textContent=state.open?'營業中':'休息中'})}
-  var hst=d.getElementById('heroStat');if(hst&&state){hst.querySelector('span').textContent=state.text;hst.classList.add('on');hst.classList.toggle('off',!state.open)}
+  var hst=d.getElementById('heroStat');if(hst&&state){hst.querySelector('.hs-t').textContent=state.text;hst.classList.add('on');hst.classList.toggle('off',!state.open)}
   var hs=d.getElementById('heroHours');if(hs&&state){var nxt=state.text.split('　')[1]||'';var a1=state.open?'營業中':(todayClosed?'今日公休':'休息中'),a2=state.open?(closeAt?fmt(closeAt.hour,closeAt.minute||0)+' 打烊':''):state.next;hs.innerHTML='';var s1=d.createElement('span');s1.textContent=a1;hs.appendChild(s1);if(a2){var s2=d.createElement('span');s2.className='nb';s2.textContent=a2;hs.appendChild(s2)}}
   /* quick contact: shows once the hero buttons scroll away, steps aside over the closing (which has its own) */
   var heroCta=d.querySelector('.hero .cta'),seen={cta:true,closing:false},under=0;
   function fabState(){var on=!seen.cta&&!seen.closing&&!under&&!overlay.classList.contains('open');fab.classList.toggle('show',on);if('inert' in fab)fab.inert=!on}
   if(closing&&'IntersectionObserver' in window){new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting)closing.classList.add('in')})},{threshold:.35}).observe(closing);
     var fo=new IntersectionObserver(function(es){es.forEach(function(e){seen[e.target===heroCta?'cta':'closing']=e.isIntersecting});fabState()},{threshold:0});if(heroCta)fo.observe(heroCta);fo.observe(closing);
-    var hits=new Set(),uo=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting)hits.add(e.target);else hits.delete(e.target)});under=hits.size;fabState()},{rootMargin:'-78% 0px 0px 0px'});d.querySelectorAll('.svc li>a,.info .contact>*').forEach(function(el){uo.observe(el)})}
+    var hits=new Set(),uo=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting)hits.add(e.target);else hits.delete(e.target)});under=hits.size;fabState()},{rootMargin:'-78% 0px 0px 0px'});d.querySelectorAll('.svc li>a,.info .contact>*,.steps li,.feature').forEach(function(el){uo.observe(el)})}
   fabState();
   /* 中文斷詞：標題級文字只在詞的邊界換行 */
   (window.requestIdleCallback||function(f){setTimeout(f,1200)})(function(){if(window.Intl&&Intl.Segmenter){try{var seg=new Intl.Segmenter('zh-Hant',{granularity:'word'});d.querySelectorAll('h2.statement,.tagline,.closing h2,.about p,.svc p,.lead,.steps p,.feature p,.demo-bar>span:first-child').forEach(function(el){var body=el.tagName==='P';var w=d.createTreeWalker(el,NodeFilter.SHOW_TEXT,{acceptNode:function(n){return n.parentNode.closest('.nm,.nb,.en,.un')?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT}}),nodes=[];while(w.nextNode())nodes.push(w.currentNode);nodes.forEach(function(n){var parts=[],open=/[「『（【〈《]$|^[不沒別很太更最較]$/;for(var it=seg.segment(n.nodeValue)[Symbol.iterator](),r=it.next();!r.done;r=it.next()){var sg=r.value.segment;if(parts.length&&(!r.value.isWordLike||open.test(parts[parts.length-1])))parts[parts.length-1]+=sg;else parts.push(sg)}if(parts.length<2)return;var tail=0,k=parts.length;if(body&&n===nodes[nodes.length-1]){var tx=n.nodeValue,cl=tx.length-1-Math.max(tx.lastIndexOf('，'),tx.lastIndexOf('、'),tx.lastIndexOf('；')),want=cl<=12&&cl<tx.length?cl:5;while(k>1&&tail<want){k--;tail+=parts[k].length}if(tail>12){k=parts.length;tail=0;while(k>1&&tail<5){k--;tail+=parts[k].length}}}var f=d.createDocumentFragment();parts.slice(0,k).forEach(function(tx,i){if(i)f.appendChild(d.createElement('wbr'));f.appendChild(d.createTextNode(tx))});if(k<parts.length){f.appendChild(d.createElement('wbr'));var g=d.createElement('span');g.className='nb';g.textContent=parts.slice(k).join('');f.appendChild(g)}n.parentNode.replaceChild(f,n)});el.classList.add('seg')});
@@ -878,10 +892,10 @@ body.demo.bar-mini .fab{bottom:56px}
     strip.addEventListener('dragstart',function(e){e.preventDefault()});
     strip.addEventListener('pointerdown',function(e){dragged=false;if(e.pointerType!=='mouse'||e.button!==0)return;down=true;pid=e.pointerId;sx=lx=e.clientX;sl=strip.scrollLeft;lt=e.timeStamp;vx=0;si=at()});
     strip.addEventListener('pointermove',function(e){if(!down)return;if(!dragged){if(Math.abs(e.clientX-sx)<=6)return;dragged=true;strip.style.scrollSnapType='none';try{strip.setPointerCapture(pid)}catch(_){}}vx=(e.clientX-lx)/Math.max(e.timeStamp-lt,1);lx=e.clientX;lt=e.timeStamp;strip.scrollLeft=sl-(e.clientX-sx)});
-    var endDrag=function(){if(!down)return;down=false;if(!dragged)return;strip.style.scrollSnapType='';setTimeout(function(){dragged=false},0);var i=at();if(vx<-.35)i=Math.min(si+1,tiles.length-1);else if(vx>.35)i=Math.max(si-1,0);go(i)};
+    var endDrag=function(){if(!down)return;down=false;if(!dragged)return;strip.style.scrollSnapType='';setTimeout(function(){dragged=false},0);var i=at(),st=stops(),x=strip.scrollLeft,j;if(vx<-.35){i=tiles.length-1;for(j=0;j<st.length;j++)if(st[j]>x+4){i=j;break}}else if(vx>.35){i=0;for(j=0;j<st.length;j++)if(st[j]<x-4)i=j}go(i)};
     ['pointerup','pointercancel','lostpointercapture'].forEach(function(ev){strip.addEventListener(ev,endDrag)})}
   /* print drawings: crop the viewBox to the drawing */
-  d.querySelectorAll('svg.fit').forEach(function(s){try{var bb=s.getBBox(),pad=6;if(bb.width>20&&bb.height>20)s.setAttribute('viewBox',[bb.x-pad,bb.y-pad,bb.width+pad*2,bb.height+pad*2].map(function(v){return Math.round(v*10)/10}).join(' '))}catch(e){}});
+  (window.requestIdleCallback||function(f){setTimeout(f,600)})(function(){d.querySelectorAll('svg.fit').forEach(function(s){try{var bb=s.getBBox(),pad=6;if(bb.width>20&&bb.height>20)s.setAttribute('viewBox',[bb.x-pad,bb.y-pad,bb.width+pad*2,bb.height+pad*2].map(function(v){return Math.round(v*10)/10}).join(' '))}catch(e){}})});
   /* lightbox */
   var lb=d.getElementById('lb'),lbBody=d.getElementById('lbBody'),lbFrame=d.getElementById('lbFrame'),lbCap=d.getElementById('lbCap'),lbNow=d.getElementById('lbNow'),cur=0,opener=null;
   var slides=tiles.filter(function(t){return t.querySelector('img')}),cap=function(t){var c=t.querySelector('.cap');return c?c.textContent:''};

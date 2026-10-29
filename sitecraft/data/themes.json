@@ -67,9 +67,15 @@
       "kind": "feature",
       "label": "今日推薦"
     },
-    "services_lead": "想喝什麼、想坐多久，點任一項直接問我們。",
+    "services_lead": "豆子跟著季節換，甜點每天限量；想坐多久都可以。",
     "nav_services": "菜單",
-    "feature_cta": "LINE 預留座位"
+    "feature_cta": "LINE 預留座位",
+    "order": [
+      "services",
+      "about",
+      "gallery",
+      "info"
+    ]
   },
   "breakfast": {
     "label": "早午餐",
@@ -140,9 +146,15 @@
       "kind": "feature",
       "label": "招牌"
     },
-    "services_lead": "點任一項就能先問，外帶內用都好。",
+    "services_lead": "蛋餅、吐司到早午餐盤，全部現點現做，外帶內用都好。",
     "nav_services": "菜單",
-    "feature_cta": "LINE 先點餐"
+    "feature_cta": "LINE 先點餐",
+    "order": [
+      "services",
+      "about",
+      "gallery",
+      "info"
+    ]
   },
   "restaurant": {
     "label": "餐廳",
@@ -225,9 +237,15 @@
       "kind": "feature",
       "label": "招牌菜"
     },
-    "services_lead": "想訂位或問今天的菜色，點任一項直接問。",
+    "services_lead": "家常的味道、實在的份量，多人聚餐也好分。",
     "nav_services": "菜單",
-    "feature_cta": "LINE 訂位"
+    "feature_cta": "LINE 訂位",
+    "order": [
+      "services",
+      "about",
+      "gallery",
+      "info"
+    ]
   },
   "snack": {
     "label": "小吃",
@@ -311,9 +329,15 @@
       "kind": "feature",
       "label": "招牌"
     },
-    "services_lead": "點任一項直接問，外帶也可以先說。",
+    "services_lead": "只做幾樣，但樣樣做到好吃；湯頭每天熬。",
     "nav_services": "菜單",
-    "feature_cta": "LINE 先點餐"
+    "feature_cta": "LINE 先點餐",
+    "order": [
+      "services",
+      "about",
+      "gallery",
+      "info"
+    ]
   },
   "hotpot": {
     "label": "火鍋",
@@ -385,9 +409,15 @@
       "kind": "feature",
       "label": "招牌湯底"
     },
-    "services_lead": "想訂位或問湯底，點任一項直接問。",
+    "services_lead": "湯底每天現熬，個人鍋與多人鍋都有。",
     "nav_services": "菜單",
-    "feature_cta": "LINE 訂位"
+    "feature_cta": "LINE 訂位",
+    "order": [
+      "services",
+      "about",
+      "gallery",
+      "info"
+    ]
   },
   "dessert": {
     "label": "甜點烘焙",
@@ -468,9 +498,15 @@
       "kind": "feature",
       "label": "今日推薦"
     },
-    "services_lead": "想訂蛋糕或問今天還有什麼，點任一項直接問。",
+    "services_lead": "每天早上現做，賣完就沒了；整顆蛋糕可以預訂。",
     "nav_services": "菜單",
-    "feature_cta": "LINE 預訂"
+    "feature_cta": "LINE 預訂",
+    "order": [
+      "services",
+      "about",
+      "gallery",
+      "info"
+    ]
   },
   "hair": {
     "label": "美髮",
@@ -539,7 +575,7 @@
       "店面"
     ],
     "hero": "band",
-    "statement": "先聽你說，再剪出適合你的樣子",
+    "statement": "先聽你說，再動剪刀",
     "services_title": "想怎麼剪，跟我們說",
     "gallery_title": "鏡子前的那張椅子",
     "signature": {
@@ -560,7 +596,7 @@
         }
       ]
     },
-    "services_lead": "不確定適合什麼也沒關係，點任一項先聊聊。",
+    "services_lead": "剪、染、燙、護，每一項都先聊過再動剪。",
     "nav_services": "服務項目"
   },
   "beauty": {
@@ -653,7 +689,7 @@
         }
       ]
     },
-    "services_lead": "想看款式或問時段，點任一項直接問。",
+    "services_lead": "美甲、美睫與臉部護理，器具一客一消毒。",
     "nav_services": "服務項目"
   },
   "pet": {
@@ -687,10 +723,10 @@
     },
     "taglines": [
       "{district}毛小孩的第二個家",
-      "溫柔對待，讓它不害怕",
+      "溫柔對待，讓牠不害怕",
       "把毛小孩交給我們，您放心"
     ],
-    "about": "{name} 位於{city}{district}，提供寵物美容與照護服務。我們用最溫柔的方式對待每一隻毛小孩，過程不趕、不吼，讓它們放鬆地完成洗澡與修剪。家長可以隨時詢問狀況，我們也會主動回報。",
+    "about": "{name} 位於{city}{district}，提供寵物美容與照護服務。我們用最溫柔的方式對待每一隻毛小孩，過程不趕、不吼，讓牠們放鬆地完成洗澡與修剪。家長可以隨時詢問狀況，我們也會主動回報。",
     "highlights": [
       "溫柔不趕、過程安心",
       "一對一服務",
@@ -744,7 +780,7 @@
         }
       ]
     },
-    "services_lead": "不確定毛小孩適合哪一項，點任一項先問我們。",
+    "services_lead": "洗澡、美容到照護，依毛小孩的個性慢慢來。",
     "nav_services": "服務項目"
   },
   "clinic": {
@@ -838,7 +874,7 @@
         }
       ]
     },
-    "services_lead": "想預約或先問問題，點任一項直接聯絡。",
+    "services_lead": "看診前先說明，看診後交代清楚。",
     "nav_services": "看診項目"
   },
   "gym": {
@@ -930,7 +966,7 @@
         }
       ]
     },
-    "services_lead": "不知道從哪開始，點任一項先問我們。",
+    "services_lead": "團體課與一對一，第一次來也有人帶。",
     "nav_services": "課程"
   },
   "florist": {
@@ -1019,7 +1055,7 @@
         }
       ]
     },
-    "services_lead": "說說預算和場合，點任一項直接問。",
+    "services_lead": "日常小花到節日花禮，依預算與場合現場設計。",
     "nav_services": "服務項目"
   },
   "auto": {
@@ -1114,7 +1150,7 @@
         }
       ]
     },
-    "services_lead": "車子有狀況，點任一項先問報價。",
+    "services_lead": "先檢查、先報價，您同意再動工。",
     "nav_services": "服務項目"
   },
   "education": {
@@ -1211,7 +1247,7 @@
         }
       ]
     },
-    "services_lead": "想了解課程或預約試上，點任一項直接問。",
+    "services_lead": "小班制教學，每位學生的進度都看得到。",
     "nav_services": "課程"
   },
   "wellness": {
@@ -1301,7 +1337,7 @@
         }
       ]
     },
-    "services_lead": "想預約或問哪一種適合您，點任一項直接問。",
+    "services_lead": "全身、腳底與經絡推拿，先問狀況再調整力道。",
     "nav_services": "療程"
   },
   "lodging": {
@@ -1392,7 +1428,7 @@
         }
       ]
     },
-    "services_lead": "想問空房或交通，點任一項直接問。",
+    "services_lead": "乾淨的房間、好睡的床，還有熟悉在地的主人。",
     "nav_services": "房型"
   },
   "default": {
@@ -1472,7 +1508,7 @@
         }
       ]
     },
-    "services_lead": "點任一項即可直接詢問，有其他需求也歡迎告訴我們。",
+    "services_lead": "用實在的價格，認真做好每一件事。",
     "nav_services": "服務項目"
   }
 }
