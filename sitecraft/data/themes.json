@@ -793,6 +793,8 @@
       "毛孩",
       "日期"
     ],
+    "services_style": "chart",
+    "size_cols": ["小型犬", "中型犬", "大型犬"],
     "glow": "soft",
     "record_photo": "今天洗好了",
     "info_title": "帶牠來的時間與位置"

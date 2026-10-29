@@ -1021,13 +1021,15 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, 
         "nav_labels": {"about": "關於我們", "services": content.get("nav_services") or theme.get("nav_services") or "服務項目",
                        "gallery": "店內環境" if imgs else "店的樣子", "info": "營業資訊"},
         "nav_services": content.get("nav_services") or theme.get("nav_services") or "服務項目",
-        "services_style": content.get("services_style") or theme.get("services_style") or "",
+        # 寵物：至少一項服務有依體型的價格（services[].sizes）才畫成價目表，否則退回卡片
+        "services_style": (lambda st: st if st != "chart" or any(s_.get("sizes") for s_ in services) else "")(content.get("services_style") or theme.get("services_style") or ""),
+        "size_cols": theme.get("size_cols") or ["小型", "中型", "大型"],
         "steps_style": theme.get("steps_style", ""), "record_fields": theme.get("record_fields") or ["姓名", "日期"], "record_photo": theme.get("record_photo", ""),
         # 營業時間的外框跟著招牌元件走：收據 → 黑板、預約卡 → 票根、照護紀錄 → 夾板卡（themes.json 可用 hours_style 覆寫）
         "hours_style": theme.get("hours_style") or {"receipt": "board"}.get(theme.get("services_style", ""))
                        or {"appt": "ticket", "record": "card"}.get(theme.get("steps_style", ""), ""),
         "hours_card": theme.get("hours_card", "到店時間"),
-        "glow": theme.get("glow", ""),
+        "glow": theme.get("glow", ""), "latin": theme.get("latin", ""),
         # 橫幅首屏的大框：沙龍是一面拱形鏡（標題在鏡子裡）；themes.json 的 hero_frame 可指定
         "hero_frame": theme.get("hero_frame") or ("arch" if theme.get("hero") == "band" and scenes.ROOM_OF.get(lead.get("theme") or "") == "salon" else ""),  # soft：強調色與主色色相差太遠時（綠底黃光），首屏角落的光改用主色的淡色
         "info_title": content.get("info_title") or theme.get("info_title") or "營業時間與位置",
@@ -1089,6 +1091,7 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, 
                                          "motif_about": Markup(scenes.storefront(mset, b["name_zh"], drawable, bg=False, key=key, parts=b["name_parts"])),
                                          "motif_overlay": Markup(mset.get("b", motif)),
                                          "motif_hero": Markup(drawable(mset.get("hero") or motif)),
+                                         "motif_photo": Markup(drawable(mset["photo"])) if mset.get("photo") else "",
                                          "motif_label": Markup(lbl_markup),
                                          "motif_b": Markup(mset.get("b", motif)), "motif_band": Markup(band)}, demo=demo))
 

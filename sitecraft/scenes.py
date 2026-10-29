@@ -435,36 +435,54 @@ def window(mset: dict, drawable, uid: str = "w") -> str:
             + f'<g class="sc-ln">{drawable(lines)}</g>')
 
 
+def _vsign(text: str, cx: float, top: float, height: float, size: float = 15) -> str:
+    """直式招牌的字：一字一行，字級依字數縮放（最多 6 個字）。"""
+    chars = [c for c in text if c.strip()][:6] or ["店"]
+    fs = min(size, (height - 10) / (len(chars) * 1.12))
+    step = fs * 1.12
+    y0 = top + (height - step * len(chars)) / 2 + step / 2
+    return "".join(f'<text class="sg" x="{cx}" y="{y0 + k * step:.1f}" text-anchor="middle" dominant-baseline="central" '
+                   f'font-size="{fs:.1f}">{html.escape(c)}</text>' for k, c in enumerate(chars))
+
+
 def street(mset: dict, name: str, drawable, seed: str = "", key: str = "default", parts: list[str] | None = None,
            night: bool = False, short: str = "") -> str:
-    """街角：自己的店在兩棟鄰居中間（鄰居有鐵窗），門口停一台機車，路燈與小鳥。"""
+    """巷子裡（晚上）：中間是這家店所在的三層老公寓（樓上鐵窗、一樓鐵捲門拉起一半、裡面亮著燈），
+    側面掛一塊直式招牌寫店名；左右是鄰居、路燈與一台機車。和關於我們白天的店面是同一家店，但換了一個角度，
+    整頁不會出現兩張一樣的店面。"""
     rnd = random.Random(seed + "street")
-    far = name if len(name) <= 6 else (short or name[:4])  # 遠景招牌字太多會縮到看不清
-    shop = storefront(mset, far, drawable, ground=False, bg=False, key=key, parts=None)
-    sx = 0.56
-    tx, ty = 112 - 70 * sx, 266 - 266 * sx
-    left_w = "".join(f'<rect class="fine" x="{x}" y="{y}" width="24" height="26"/>' for x in (24, 62) for y in (128, 170, 212))
-    grille = "".join(f'M{x} 168v34' for x in range(288, 380, 8))
+    far = name if len(name) <= 6 else (short or name[:4])  # 直式招牌最多 6 個字
+    c = mset.get("c", mset["a"])
+    left_w = "".join(f'<rect class="fine" x="{x}" y="{y}" width="24" height="26"/>' for x in (22, 58) for y in (128, 170, 212))
+    grille = "".join(f"M{x} 168v34" for x in range(288, 380, 8))
+    up = "".join(f'<rect x="{x}" y="{y}" width="40" height="30"/><path class="fine" d="{"".join(f"M{x + k} {y}v30" for k in range(8, 40, 8))}"/>'
+                 for x in (134, 196) for y in (86, 146))
+    shutter = "".join(f"M140 {y}h90" for y in range(210, 226, 4))
     lines = (
         '<path d="M0 266H400"/><path class="fine" d="M0 278H400"/>'
-        '<path d="M10 266V110h92v156"/><path class="fine" d="M6 110h100"/>' + left_w
+        '<path d="M8 266V110h86v156"/><path class="fine" d="M4 110h94"/>' + left_w
+        + '<path d="M118 266V64h134v202"/><path class="fine" d="M114 64h142M118 132h134M118 192h134"/>' + up
+        + '<rect x="140" y="206" width="90" height="60"/><path class="fine" d="' + shutter + '"/>'
+        + '<path class="fine" d="M146 266v-30h20v30M202 266v-30h22v30"/>'
+        + _place(c, 185, 252, 18, 26)
+        + '<path class="fine" d="M118 104h-12M118 186h-12"/><rect x="88" y="96" width="22" height="98" rx="2"/>'
         + '<path d="M268 266V128h124v138"/><path class="fine" d="M264 128h132"/>'
         f'<rect x="282" y="164" width="96" height="42"/><path class="fine" d="{grille}"/>'
-        '<rect class="fine" x="290" y="222" width="34" height="44"/><rect class="fine" x="338" y="222" width="34" height="30"/>'
-        '<path d="M107 266V140h-18"/><path class="acc" d="M82 140h14l-3 8h-8z"/>'
+        '<rect class="fine" x="290" y="222" width="34" height="44"/>'
+        '<path d="M64 266V146h16"/><path class="acc" d="M76 146h14l-3 8h-8z"/>'
         '<circle cx="300" cy="256" r="9"/><circle cx="354" cy="256" r="9"/>'
         '<path d="M288 250c0-14 9-22 22-22h10c4 0 6 3 6 7v15z"/><path d="M296 222h26"/><path d="M326 250h14"/>'
         '<path d="M340 250c4-10 4-22-2-34"/><path d="M336 214h14"/><path class="fine" d="M344 226l10 30"/>'
-        f'<path class="fine" d="M{rnd.randint(180, 230)} 46q6-6 12 0q6-6 12 0M{rnd.randint(140, 170)} 60q5-5 10 0q5-5 10 0"/>'
+        f'<path class="fine" d="M{rnd.randint(160, 230)} 40q6-6 12 0q6-6 12 0"/>'
     )
-    tone = ('<g class="sc-tone" transform="translate(7 7)"><rect x="10" y="110" width="92" height="156"/>'
-            '<rect x="268" y="128" width="124" height="138"/></g>'
+    tone = ('<g class="sc-tone" transform="translate(7 7)"><rect x="8" y="110" width="86" height="156"/>'
+            '<rect x="118" y="64" width="134" height="202"/><rect x="268" y="128" width="124" height="138"/></g>'
             '<path class="acc" d="M288 250c0-14 9-22 22-22h10c4 0 6 3 6 7v15z"/>')
+    lit = ('<g class="sc-paper"><rect x="140" y="226" width="90" height="40"/><rect x="88" y="96" width="22" height="98" rx="2"/>'
+           + "".join(f'<rect x="{x}" y="{y}" width="40" height="30"/>' for x, y in ((196, 86), (134, 146))) + '</g>')
     sky = ""
-    if night:  # 晚上：月亮、幾顆星、路燈打下來的一道光
-        stars = "".join(f'<circle cx="{rnd.randint(20, 380)}" cy="{rnd.randint(14, 96)}" r="{rnd.choice((1, 1.3, 1.6))}"/>' for _ in range(14))
-        sky = f'<g class="star">{stars}</g><path class="beam" d="M82 148h14l30 118H52z"/>'
-    return ('<rect class="sc-bg" width="400" height="300"/><circle class="acc2" cx="340" cy="58" r="24"/>' + sky + tone
-            + f'<g transform="translate({tx:.1f} {ty:.1f}) scale({sx})" style="--k:{1 / sx:.2f}">{shop}</g>'
-            + f'<g class="sc-ln">{drawable(lines)}</g>')
-
+    if night:  # 晚上：月亮、幾顆星、店門口打出來的一片光
+        stars = "".join(f'<circle cx="{rnd.randint(20, 380)}" cy="{rnd.randint(14, 56)}" r="{rnd.choice((1, 1.3, 1.6))}"/>' for _ in range(14))
+        sky = f'<g class="star">{stars}</g><path class="beam" d="M140 266h90l26 20H114z"/><path class="beam" d="M76 154h14l26 112H50z"/>'
+    return ('<rect class="sc-bg" width="400" height="300"/><circle class="acc2" cx="340" cy="52" r="22"/>' + sky + tone + lit
+            + f'<g class="sc-ln">{drawable(lines)}</g>' + _vsign(far, 99, 96, 98))
