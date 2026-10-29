@@ -23,7 +23,7 @@
       "a_soft": "#FAEBD7"
     },
     "taglines": [
-      "{district}巷弄裡，一杯手沖的時間",
+      "在{district}，一杯手沖的時間",
       "自家烘焙，每天現煮的香氣",
       "坐下來，讓咖啡慢慢說話"
     ],
@@ -328,9 +328,9 @@
       "外帶窗口"
     ],
     "hero": "band",
-    "statement": "巷口的老味道，一碗一碗慢慢煮",
+    "statement": "街坊的老味道，一碗一碗慢慢煮",
     "services_title": "來一碗吧",
-    "gallery_title": "巷口的那一攤",
+    "gallery_title": "熟客常來的那一攤",
     "signature": {
       "kind": "feature",
       "label": "招牌"
