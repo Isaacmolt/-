@@ -356,9 +356,9 @@ body[data-mode="mono"] h1 .en{font-weight:500;letter-spacing:-.02em}
 body[data-mode="mono"] .statement em{background:none;border-bottom:3px solid var(--a);padding-bottom:2px}
 body[data-mode="mono"] .btn{border-radius:12px}
 .statement em{font-style:normal;color:var(--ink2);box-decoration-break:clone;-webkit-box-decoration-break:clone;background:linear-gradient(transparent 62%,var(--a-soft) 62%)}
-.svc p,.closing p{text-wrap:pretty}
-/* 內文照中文書籍排版：任兩字之間都可以換行、標點不落在行首（strict）、左右對齊成整齊的版心；只有標題級的字（大標、標語、結尾）用斷詞器保持詞組完整 */
-:is(.about .txt p,.lead,.svc:not(.tags) p,.steps li p,.feature p,.price-chart th small){word-break:normal;line-break:strict;text-align:justify;text-justify:inter-character;text-wrap:pretty}html body .svc.tags.tags p{text-wrap:wrap}
+.closing p{text-wrap:pretty}
+/* 內文在詞與詞之間換行（斷詞器加 <wbr>、keep-all），靠左排，不撐開字距 */
+:is(.about .txt p,.lead,.svc:not(.tags) p,.steps li p,.feature p,.price-chart th small){text-align:start}
 .about p{margin-bottom:var(--s4);font-size:var(--t-l);max-width:58ch}
 .hl{counter-reset:h;border-top:1px solid var(--line);margin-top:.35em}
 .hl li{display:grid;grid-template-columns:32px 1fr;gap:var(--s4);align-items:center;padding:var(--s5) 0;border-bottom:1px solid var(--line);font-size:var(--t-l);font-weight:600}
@@ -410,14 +410,14 @@ html body .svc.receipt.receipt li>a,html body .svc.receipt.receipt li>div{paddin
 .record .rec-h b{font-family:var(--cjk-head),var(--display);font-weight:var(--head-weight);font-size:var(--t-xl);margin-right:auto}
 @container (max-width:520px){.record .rec-h{grid-template-columns:1fr 1fr}.record .rec-h b{grid-column:1/-1}}.record .rec-h b{margin:0}.record .fld i{font-style:normal;font-family:var(--display),var(--cjk-head);color:var(--ink);font-size:var(--t-m);margin-left:10px}.record .fld{font-size:var(--t-s);color:var(--mu);border-bottom:1px solid var(--line);padding-bottom:2px}
 .sig.steps.record ol{grid-template-columns:1fr;gap:0}.sig.steps.record li{display:grid;grid-template-columns:34px minmax(0,1fr);grid-template-areas:"c b" "c p";column-gap:14px;padding:16px 0;border-top:0;border-bottom:1px dashed var(--line)}
-.rec-pair .polaroid{display:none}
-@media (min-width:700px){.rec-pair{display:grid;grid-template-columns:minmax(0,1fr) minmax(220px,300px);gap:clamp(32px,5vw,72px);align-items:center;margin-top:var(--s8)}.rec-pair .sig{margin-top:0;max-width:760px}.rec-pair .polaroid{display:block;position:relative;margin:0;padding:12px 12px 0;background:#fff;color:#222;transform:rotate(3deg);box-shadow:0 30px 60px rgba(0,0,0,.16),0 2px 6px rgba(0,0,0,.08)}.polaroid::before{content:"";position:absolute;top:-14px;left:50%;width:88px;height:26px;margin-left:-44px;background:color-mix(in oklab,var(--a) 55%,#fff);opacity:.8;transform:rotate(-4deg)}.polaroid .ph-in{display:block;aspect-ratio:1;background:var(--pd);overflow:hidden}.polaroid svg{width:100%;height:100%;color:#fff;stroke:currentColor;fill:none;stroke-width:1.05;stroke-linecap:round;stroke-linejoin:round;opacity:.92}.polaroid .fine{stroke-width:.7}.polaroid .acc{fill:var(--a);stroke:none}.polaroid .acc2{fill:var(--a);fill-opacity:.4}.polaroid figcaption{font-family:var(--cjk-head),var(--display);font-weight:var(--head-weight);font-size:var(--t-l);text-align:center;padding:14px 0 18px;letter-spacing:.08em}.js .polaroid .ph-in{filter:brightness(2.4) saturate(0) blur(2px);transition:filter 2.6s cubic-bezier(.3,.7,.2,1) .5s}.js .polaroid.in .ph-in{filter:none}}
+.rec-pair .polaroid{display:block;position:relative;margin:36px auto 0;width:min(64%,260px);padding:12px 12px 0;background:#fff;color:#222;transform:rotate(3deg);box-shadow:0 30px 60px rgba(0,0,0,.16),0 2px 6px rgba(0,0,0,.08)}.polaroid::before{content:"";position:absolute;top:-14px;left:50%;width:88px;height:26px;margin-left:-44px;background:color-mix(in oklab,var(--a) 55%,#fff);opacity:.8;transform:rotate(-4deg)}.polaroid .ph-in{display:block;aspect-ratio:1;background:var(--pd);overflow:hidden}.polaroid svg{width:100%;height:100%;color:#fff;stroke:currentColor;fill:none;stroke-width:1.05;stroke-linecap:round;stroke-linejoin:round;opacity:.92}.polaroid .fine{stroke-width:.7}.polaroid .acc{fill:var(--a);stroke:none}.polaroid .acc2{fill:var(--a);fill-opacity:.4}.polaroid figcaption{font-family:var(--cjk-head),var(--display);font-weight:var(--head-weight);font-size:var(--t-l);text-align:center;padding:14px 0 18px;letter-spacing:.08em}.js .polaroid .ph-in{filter:brightness(2.4) saturate(0) blur(2px);transition:filter 2.6s cubic-bezier(.3,.7,.2,1) .5s}.js .polaroid.in .ph-in{filter:none}
+@media (min-width:700px){.rec-pair{display:grid;grid-template-columns:minmax(0,1fr) minmax(220px,300px);gap:clamp(32px,5vw,72px);align-items:center;margin-top:var(--s8)}.rec-pair .sig{margin-top:0;max-width:760px}.rec-pair .polaroid{margin:0;width:auto}}
 @media (prefers-reduced-motion:reduce){.js .polaroid .ph-in{filter:none;transition:none}}
 @media (prefers-color-scheme:dark){.rec-pair .polaroid{background:#d8d3c9;box-shadow:0 30px 60px rgba(0,0,0,.4)}}
 .sig.steps.record .sn{display:none}.sig.steps.record li>b{grid-area:b}.sig.steps.record li p{grid-area:p}
 .record .chk{grid-area:c;width:28px;height:28px;margin-top:2px;fill:none;stroke:var(--ink);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}.record .chk path{stroke:var(--a);stroke-width:2.8}
 .js .record .chk path{stroke-dasharray:1 2;stroke-dashoffset:1.01}.js .record.in .chk path{animation:draw .5s var(--ease) forwards;animation-delay:calc(.7s + var(--k,0)*.45s)}
-.info-h{margin-bottom:var(--s7)}@media (min-width:881px){.info .cols>:last-child{position:sticky;top:96px;align-self:start}}
+.info-h{margin-bottom:var(--s7)}@media (min-width:881px){.info .cols>.map{align-self:stretch}.info .cols>.map .map-ph .art{flex:1 1 auto;min-height:clamp(200px,24vw,300px)}}
 .fact b .lat{letter-spacing:.02em}
 .gallery{padding-block:clamp(56px,8vw,112px)!important}
 html body .svc.tags.tags{display:flex;flex-wrap:wrap;justify-content:center;gap:36px 28px;border:0;padding-top:40px;position:relative}
@@ -574,7 +574,7 @@ html:has(dialog.lb[open]){overflow:hidden}
 .map iframe{position:absolute;inset:0;width:100%;height:100%;border:0;filter:saturate(.85)}
 @media (prefers-color-scheme:dark){.map iframe{filter:invert(.92) hue-rotate(180deg) saturate(.7)}}
 .map-ph{display:flex;flex-direction:column;gap:var(--s3);padding:0 var(--s5) var(--s5);color:var(--tx);flex:1}
-.map{align-self:start}.map-ph .art{position:relative;flex:none;height:clamp(200px,24vw,300px);margin:0 calc(-1*var(--s5)) var(--s2)}
+.map-ph .art{position:relative;flex:none;height:clamp(200px,24vw,300px);margin:0 calc(-1*var(--s5)) var(--s2)}
 .map-ph .art::after{content:"";position:absolute;inset:auto 0 0;height:45%;background:linear-gradient(transparent,var(--bg))}
 .map-ph .mapart{position:absolute;inset:0;width:100%;height:100%}
 .mapart .mb rect{fill:color-mix(in srgb,var(--ink) 7%,transparent)}
@@ -638,7 +638,7 @@ body.demo.bar-mini .fab{bottom:var(--barnow,40px)}
 @keyframes printOut{to{clip-path:inset(-12px -90px -90px -90px)}}
 @keyframes mirrorSweep{0%{background-position:130% 0}28%,100%{background-position:-30% 0}}
 @keyframes bubbleUp{0%{transform:translate(0,30px) scale(.6);opacity:0}15%{opacity:.7}50%{transform:translate(8px,-60px) scale(1)}100%{transform:translate(-4px,-150px) scale(1.1);opacity:0}}
-.about .txt{position:relative}.bubbles{position:absolute;left:0;top:0;width:min(100%,520px);height:200px;pointer-events:none;z-index:-1}.bubbles i{position:absolute;bottom:0;left:calc(var(--k)*15% + 4%);width:calc(10px + var(--k)*3px);height:calc(10px + var(--k)*3px);border-radius:50%;border:1.5px solid color-mix(in oklab,var(--ink) 45%,transparent);background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.7) 0 20%,transparent 22%);opacity:0}@media (prefers-reduced-motion:reduce){.bubbles{display:none}}
+.about .txt{position:relative}.bubbles{position:absolute;right:-72px;top:-20px;width:96px;height:240px;pointer-events:none;z-index:-1}@media (max-width:1100px){.bubbles{display:none}}.bubbles i{position:absolute;bottom:0;left:calc(var(--k)*13%);width:calc(10px + var(--k)*3px);height:calc(10px + var(--k)*3px);border-radius:50%;border:1.5px solid color-mix(in oklab,var(--ink) 45%,transparent);background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.7) 0 20%,transparent 22%);opacity:0}@media (prefers-reduced-motion:reduce){.bubbles{display:none}}
 @media (prefers-reduced-motion:reduce){
   .js .record .chk path,.js .record.in .chk path{animation:none;stroke-dashoffset:0;stroke-dasharray:none}
   .js [data-reveal].in .dw.scene :is(.sc-tone,.sc-paper,.acc,.acc2,.star,.beam),.js [data-reveal].in .dw .scene :is(.sc-tone,.sc-paper,.acc,.acc2,.star,.beam),.js .motif .scene :is(.sc-tone,.sc-paper,.acc,.acc2){animation:none}html body .svc.tags.tags li:hover{transform:none}
@@ -773,7 +773,7 @@ body.demo.bar-mini .fab{bottom:var(--barnow,40px)}
       </li>
       {% endfor %}
     </ul>
-    {% if b.services_style == "tags" %}<p class="swipe-hint" aria-hidden="true">左右滑動，看全部 {{ b.services | length }} 項</p>{% endif %}
+    {% if b.services_style == "tags" %}<p class="swipe-hint" aria-hidden="true">左右滑動，看全部 {{ (b.services[1:] if feat else b.services) | length }} 項</p>{% endif %}
     {% endif %}
     {% if b.services_style == "receipt" %}<div class="rc-f" aria-hidden="true"><span>謝謝光臨</span><i class="bars"></i></div></div>{% endif %}
     {% if pair %}</div>{% endif %}
@@ -1020,7 +1020,7 @@ body.demo.bar-mini .fab{bottom:var(--barnow,40px)}
   var hbo=d.querySelector('.hb-h span');if(hbo&&state)hbo.textContent=state.open?'OPEN':'CLOSED';
   d.querySelectorAll('[data-today]').forEach(function(el){var t=new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Taipei'}));el.textContent=(t.getMonth()+1)+'/'+t.getDate()});
   var hst=d.getElementById('heroStat');if(hst&&state){hst.querySelector('.hs-t').textContent=state.text;hst.classList.add('on');hst.classList.toggle('off',!state.open)}
-  if(todayClosed){var fb=d.querySelector('.hero-foot .fact b');if(fb)fb.textContent='營業狀態'}
+  if(todayClosed||state&&!state.open){var fb=d.querySelector('.hero-foot .fact b');if(fb)fb.textContent='營業狀態'}
   var hs=d.getElementById('heroHours');if(hs&&state){var nxt=state.text.split('　')[1]||'';var a1=state.open?'營業中':(todayClosed?'今日公休':(state.lunch?'午休中':'休息中')),a2=state.open?(closeAt?fmt(closeAt.hour,closeAt.minute||0)+cw:''):state.next;hs.innerHTML='';var s1=d.createElement('span');s1.textContent=a1;hs.appendChild(s1);if(a2){var s2=d.createElement('span');s2.className='nb';s2.textContent=a2;hs.appendChild(s2)}}
   /* quick contact: shows once the hero buttons scroll away and stays (on phones the slim demo bar steps aside for it) */
   var heroCta=d.querySelector('.hero .cta'),seen={cta:true,closing:false},under=0;
@@ -1029,12 +1029,16 @@ body.demo.bar-mini .fab{bottom:var(--barnow,40px)}
     var fo=new IntersectionObserver(function(es){es.forEach(function(e){seen[e.target===heroCta?'cta':'closing']=e.isIntersecting});fabState()},{threshold:0});if(heroCta)fo.observe(heroCta);fo.observe(closing)}
   fabState();
   /* 中文斷詞：標題級文字只在詞的邊界換行 */
-  (window.requestIdleCallback?function(f){requestIdleCallback(f,{timeout:400})}:function(f){setTimeout(f,300)})(function(){if(window.Intl&&Intl.Segmenter){try{var seg=new Intl.Segmenter('zh-Hant',{granularity:'word'});d.querySelectorAll('h2.statement,.tagline,.closing h2,.demo-bar>span:first-child').forEach(function(el){var body=el.tagName==='P';var w=d.createTreeWalker(el,NodeFilter.SHOW_TEXT,{acceptNode:function(n){return n.parentNode.closest('.nm,.nb,.en,.un')?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT}}),nodes=[];while(w.nextNode())nodes.push(w.currentNode);nodes.forEach(function(n){var parts=[],open=/[「『（【〈《]$|^[不沒別很太更最較只才就都也還再又各]$|^[每這那]?[一二兩三四五六七八九十幾]$|^.{1,2}、$|^[\u4e00-\u9fff]$/,pair={'毛小孩':1,'一對一':1},tail=/^[的之了著們地得]$/,sgs=Array.from(seg.segment(n.nodeValue));for(var q=0;q<sgs.length;q++){var rv=sgs[q],sg=rv.segment,lone=rv.isWordLike&&/^[\u4e00-\u9fff]$/.test(sg)&&!(sgs[q+1]&&sgs[q+1].isWordLike),prevS=q>0?sgs[q-1].segment:'',cur=parts.length?parts[parts.length-1]:'',twin=q>0&&/^[\u4e00-\u9fff]$/.test(sg)&&/^[\u4e00-\u9fff]$/.test(prevS);if(parts.length&&(!rv.isWordLike||pair[cur+sg]||tail.test(sg)||lone||((open.test(cur)||open.test(prevS)||twin||/[不沒別]$/.test(prevS))&&(cur+sg).length<=6)))parts[parts.length-1]+=sg;else parts.push(sg)}if(parts.length<2)return;var tail=0,k=parts.length;if(body&&n===nodes[nodes.length-1]){var tx=n.nodeValue,cl=tx.length-1-Math.max(tx.lastIndexOf('，'),tx.lastIndexOf('、'),tx.lastIndexOf('；')),want=cl<=12&&cl<tx.length?cl:5;while(k>1&&tail<want){k--;tail+=parts[k].length}if(tail>12){k=parts.length;tail=0;while(k>1&&tail<5){k--;tail+=parts[k].length}}}var f=d.createDocumentFragment();parts.slice(0,k).forEach(function(tx,i){if(i)f.appendChild(d.createElement('wbr'));f.appendChild(d.createTextNode(tx))});if(k<parts.length){f.appendChild(d.createElement('wbr'));var g=d.createElement('span');g.className='nb';g.textContent=parts.slice(k).join('');f.appendChild(g)}n.parentNode.replaceChild(f,n)});el.classList.add('seg')});
+  (window.requestIdleCallback?function(f){requestIdleCallback(f,{timeout:400})}:function(f){setTimeout(f,300)})(function(){if(window.Intl&&Intl.Segmenter){try{var seg=new Intl.Segmenter('zh-Hant',{granularity:'word'});d.querySelectorAll('h2.statement,.tagline,.closing h2,.about p,.svc:not(.tags) p,.lead,.steps p,.feature p,table.price-chart th small,.demo-bar>span:first-child').forEach(function(el){var body=el.tagName==='P';var w=d.createTreeWalker(el,NodeFilter.SHOW_TEXT,{acceptNode:function(n){return n.parentNode.closest('.nm,.nb,.en,.un')?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT}}),nodes=[];while(w.nextNode())nodes.push(w.currentNode);nodes.forEach(function(n){var parts=[],open=/[「『（【〈《]$|^[不沒別很太更最較只才就都也還再又各]$|^[每這那]?[一二兩三四五六七八九十幾]$|^.{1,2}、$|^[\u4e00-\u9fff]$/,pair={'毛小孩':1,'一對一':1},tail=/^[的之了著們地得]$/,sgs=Array.from(seg.segment(n.nodeValue));for(var q=0;q<sgs.length;q++){var rv=sgs[q],sg=rv.segment,lone=rv.isWordLike&&/^[\u4e00-\u9fff]$/.test(sg)&&!(sgs[q+1]&&sgs[q+1].isWordLike),prevS=q>0?sgs[q-1].segment:'',cur=parts.length?parts[parts.length-1]:'',twin=q>0&&/^[\u4e00-\u9fff]$/.test(sg)&&/^[\u4e00-\u9fff]$/.test(prevS);if(parts.length&&(!rv.isWordLike||pair[cur+sg]||tail.test(sg)||lone||((open.test(cur)||open.test(prevS)||twin||/[不沒別]$/.test(prevS))&&(cur+sg).length<=6)))parts[parts.length-1]+=sg;else parts.push(sg)}if(parts.length<2)return;var tail=0,k=parts.length;if(body&&n===nodes[nodes.length-1]){var tx=n.nodeValue,cl=tx.length-1-Math.max(tx.lastIndexOf('，'),tx.lastIndexOf('、'),tx.lastIndexOf('；')),want=cl<=12&&cl<tx.length?cl:5;while(k>1&&tail<want){k--;tail+=parts[k].length}if(tail>12){k=parts.length;tail=0;while(k>1&&tail<5){k--;tail+=parts[k].length}}}var f=d.createDocumentFragment();parts.slice(0,k).forEach(function(tx,i){if(i)f.appendChild(d.createElement('wbr'));f.appendChild(d.createTextNode(tx))});if(k<parts.length){f.appendChild(d.createElement('wbr'));var g=d.createElement('span');g.className='nb';g.textContent=parts.slice(k).join('');f.appendChild(g)}n.parentNode.replaceChild(f,n)});el.classList.add('seg')});
   }catch(e){}}});
   /* reveal + counters */
   if('IntersectionObserver' in window&&!reduce){
-    var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.1,rootMargin:'0px 0px -6% 0px'});
-    d.querySelectorAll('[data-reveal]').forEach(function(el){io.observe(el)});
+    /* 收據一開始被 clip-path 切成一條細縫（等著「印」出來），面積比例到不了 10%，所以用門檻 0 的觀察器；
+       橫向捲動的木牌菜單只要有一塊出現，整排一起出現（第三塊只露一角時不會一直是透明的） */
+    var rv=function(el){el.classList.add('in');io.unobserve(el);io0.unobserve(el);if(el.matches('div.receipt'))el.querySelectorAll('[data-reveal]').forEach(function(x){x.classList.add('in');io.unobserve(x)});var strip=el.closest('.svc.tags');if(strip)strip.querySelectorAll('[data-reveal]').forEach(function(x){x.classList.add('in');io.unobserve(x)})};
+    var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting)rv(e.target)})},{threshold:.1,rootMargin:'0px 0px -6% 0px'});
+    var io0=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting)rv(e.target)})},{threshold:0,rootMargin:'0px 0px -12% 0px'});
+    d.querySelectorAll('[data-reveal]').forEach(function(el){(el.matches('div.receipt')?io0:io).observe(el)});
   }else{d.querySelectorAll('[data-reveal]').forEach(function(el){el.classList.add('in')})}
   /* gallery strip */
   var strip=d.getElementById('strip'),tiles=strip?[].slice.call(strip.children):[],barEl=d.getElementById('stripBar');
@@ -1068,7 +1072,7 @@ body.demo.bar-mini .fab{bottom:var(--barnow,40px)}
       t.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();opener=t;show(i);lb.showModal();d.getElementById('lbClose').focus()}})});
     d.getElementById('lbPrev').addEventListener('click',function(){show(cur-1)});
     d.getElementById('lbNext').addEventListener('click',function(){show(cur+1)});
-    d.getElementById('lbClose').addEventListener('click',function(){lb.close()});
+    d.getElementById('lbClose').addEventListener('click',function(){lb.close()});lb.addEventListener('keydown',function(e){if(e.key!=='Tab')return;var f=[].filter.call(lb.querySelectorAll('button,a[href]'),function(x){return x.offsetParent!==null});if(!f.length)return;var first=f[0],last=f[f.length-1];if(e.shiftKey&&d.activeElement===first){e.preventDefault();last.focus()}else if(!e.shiftKey&&d.activeElement===last){e.preventDefault();first.focus()}});
     lb.addEventListener('click',function(e){if(e.target===lb)lb.close()});
     lb.addEventListener('keydown',function(e){if(e.key==='ArrowRight'){e.preventDefault();show(cur+1)}if(e.key==='ArrowLeft'){e.preventDefault();show(cur-1)}});
     lb.addEventListener('close',function(){if(opener){opener=slides[cur]||opener;opener.focus({preventScroll:true});go(tiles.indexOf(opener))}});

@@ -102,6 +102,14 @@ async function hoverContrast(pg) {
       await pg.close();
     }
     for (const [name, vp] of [['desktop', { width: 1440, height: 900 }], ['mobile', { width: 390, height: 844 }]]) {
+      // every [data-reveal] element ends up revealed after an ordinary scroll-through (nothing may stay invisible,
+      // e.g. a receipt clipped for its print-out animation never reaching the observer threshold)
+      { const rvp = await browser.newPage({ viewport: vp, reducedMotion: 'no-preference' }); await rvp.goto(url, { waitUntil: 'load' }); await rvp.waitForTimeout(500);
+        const H = await rvp.evaluate(() => document.documentElement.scrollHeight);
+        for (let y = 0; y < H; y += Math.round(vp.height * .6)) { await rvp.evaluate(t => scrollTo({ top: t, behavior: 'instant' }), y); await rvp.waitForTimeout(150); }
+        await rvp.waitForTimeout(900);
+        r.unrevealed = (r.unrevealed || []).concat(await rvp.evaluate(n => [...document.querySelectorAll('[data-reveal]:not(.in)')].filter(e => e.getClientRects().length).map(e => n + ':' + e.tagName + '.' + e.className), name));
+        await rvp.close(); }
       const page = await browser.newPage({ viewport: vp, deviceScaleFactor: 1, reducedMotion: 'no-preference' });
       page.on('pageerror', e => r.errors.push(name + ': ' + e.message));
       page.on('console', m => { if (m.type() === 'error' && !/fonts|maps|net::|favicon/i.test(m.text())) r.errors.push(name + ': ' + m.text()); });
@@ -451,6 +459,7 @@ async function hoverContrast(pg) {
       [`v.drift <= 20`, () => (v.drift <= 20)],
       [`v.leader`, () => (v.leader)],
       [`v.fabDark`, () => (v.fabDark)],
+      [`allRevealed`, () => (!(v.unrevealed || []).length)],
       [`btnHover`, () => ([...(v.btnHover || []), ...(v.btnHoverDark || [])].every(x => x.c >= 4.5))],
       [`clockOk(slug, v.clock)`, () => (clockOk(slug, v.clock))],
       [`v.reducedMotion`, () => (v.reducedMotion)],
@@ -473,7 +482,7 @@ async function hoverContrast(pg) {
     allOk = allOk && ok;
     console.log(`${slug}: ${ok ? 'PASS' : 'FAIL'}`);
     if (!ok) console.log('  failed checks: ' + failed.join(' | '));
-    if (!ok) console.log(JSON.stringify({ fn, scrollSpy: v.scrollSpy, heroGeom: v.heroGeom, tiles: v.tiles, closingClear: v.closingClear, nameClear: v.nameClear, bandGap: v.bandGap, kinsoku: v.kinsoku, drift: v.drift, leader: v.leader, featureRing: v.featureRing, copy: v.copy, navSolid: v.navSolid, ctaLabel: v.ctaLabel, navFocus: v.navFocus, seamless: v.seamless, stripFit: v.stripFit, stripScrolls: v.stripScrolls, rhythm: v.rhythm, rowLabels: v.rowLabels, dragBack: v.dragBack, fabDark: v.fabDark, btnHover: v.btnHover, btnHoverDark: v.btnHoverDark, clock: v.clock, layout: v.layout, ctaClear: v.ctaClear, mapClear: v.mapClear, landscapeMenu: v.landscapeMenu, factsDrift: v.factsDrift, anchorLanding: v.anchorLanding, reducedMotion: v.reducedMotion, focusRing: v.focusRing, computed: c, axe: v.axe, axeDark: v.axeDark, errors: v.errors, small: v.smallTargets, heroFit: v.heroFit, overflow: v.overflow, emoji: v.emoji }, null, 2));
+    if (!ok) console.log(JSON.stringify({ fn, scrollSpy: v.scrollSpy, heroGeom: v.heroGeom, tiles: v.tiles, closingClear: v.closingClear, nameClear: v.nameClear, bandGap: v.bandGap, kinsoku: v.kinsoku, drift: v.drift, leader: v.leader, featureRing: v.featureRing, copy: v.copy, navSolid: v.navSolid, ctaLabel: v.ctaLabel, navFocus: v.navFocus, seamless: v.seamless, stripFit: v.stripFit, stripScrolls: v.stripScrolls, rhythm: v.rhythm, rowLabels: v.rowLabels, dragBack: v.dragBack, fabDark: v.fabDark, unrevealed: v.unrevealed, btnHover: v.btnHover, btnHoverDark: v.btnHoverDark, clock: v.clock, layout: v.layout, ctaClear: v.ctaClear, mapClear: v.mapClear, landscapeMenu: v.landscapeMenu, factsDrift: v.factsDrift, anchorLanding: v.anchorLanding, reducedMotion: v.reducedMotion, focusRing: v.focusRing, computed: c, axe: v.axe, axeDark: v.axeDark, errors: v.errors, small: v.smallTargets, heroFit: v.heroFit, overflow: v.overflow, emoji: v.emoji }, null, 2));
   }
   const lh = report.lighthouse;
   const lhOk = lh && typeof lh === 'object' && ['performance', 'accessibility', 'best-practices', 'seo'].every(k => lh[k] >= 90);
