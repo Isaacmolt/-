@@ -353,13 +353,14 @@ def split_statement(text: str) -> tuple[str, str, str]:
     return "", text, ""
 
 
-def scene_tile(key: str, mset: dict, name: str, seed: str, theme_key: str = "default") -> str:
-    """相簿的場景插畫磚：吧台、街角（橫式）、窗邊（直式）。"""
+def scene_tile(key: str, mset: dict, name: str, seed: str, theme_key: str = "default", parts: list[str] | None = None) -> str:
+    """相簿的場景插畫磚：店裡、街角（橫式）、近景（直式，依類別：洗頭區、吹整台、醬料台、窗邊）。"""
     from markupsafe import Markup
-    if key == "window":
+    if key == "detail":
         return Markup('<svg class="art scene" viewBox="0 0 300 400" preserveAspectRatio="xMidYMid slice" aria-hidden="true">'
-                      f'{scenes.window(mset, drawable, hashlib.md5(seed.encode()).hexdigest()[:6])}</svg>')
-    body = scenes.interior(mset, drawable, theme_key) if key == "counter" else scenes.street(mset, name, drawable, seed, theme_key)
+                      f'{scenes.detail(mset, drawable, theme_key, hashlib.md5(seed.encode()).hexdigest()[:6])}</svg>')
+    body = (scenes.interior(mset, drawable, theme_key) if key == "interior"
+            else scenes.street(mset, name, drawable, seed, theme_key, parts))
     return Markup(f'<svg class="art scene" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true">{body}</svg>')
 
 
@@ -434,11 +435,12 @@ ACCENTS = {
     "blob": '<path class="disc" d="M94 36c30-22 80-8 88 30s-8 70-46 72-70-14-68-46 0-38 26-56z"/>',
     "sun": '<path class="disc" d="M70 150a64 64 0 0 1 128 0z"/>',
     "square": '<rect class="disc" x="90" y="28" width="96" height="96" rx="20" transform="rotate(8 138 76)"/>',
-    "halo": '<circle class="disc" cx="100" cy="102" r="80"/>',  # 寵物：整顆頭後面一個置中的圓，不半遮臉
+    "halo": '<circle class="disc" cx="100" cy="102" r="80"/>',
+    "glow": '<circle class="disc" cx="100" cy="112" r="64"/>',  # 鍋物：鍋子正後方一圈暖光  # 寵物：整顆頭後面一個置中的圓，不半遮臉
     "mirror": '<path class="disc" d="M132 38h38a26 26 0 0 1 26 26v80h-90V64a26 26 0 0 1 26-26z"/>',  # 髮廊：鏡子的偏移色塊（印刷錯位感）
 }
 ACCENT_OF = {"cafe": "circle", "hair": "mirror", "pet": "halo", "breakfast": "sun", "restaurant": "circle", "snack": "blob",
-             "hotpot": "sun", "dessert": "arch", "beauty": "blob", "clinic": "square", "gym": "square", "florist": "arch",
+             "hotpot": "glow", "dessert": "arch", "beauty": "blob", "clinic": "square", "gym": "square", "florist": "arch",
              "auto": "sun", "education": "square", "wellness": "blob", "lodging": "arch", "default": "circle"}
 
 
@@ -544,7 +546,7 @@ def about_opening(text: str, name: str, loc: str) -> str:
     for nm in {name, name.replace(" ", "")}:
         for head, repl in ((f"{nm} 位於{loc}，是", f"在{loc}，我們是"), (f"{nm}位於{loc}，是", f"在{loc}，我們是"),
                            (f"{nm} 位於{loc}，提供", f"我們在{loc}提供"), (f"{nm}位於{loc}，提供", f"我們在{loc}提供"),
-                           (f"{nm} 位於{loc}，", f"在{loc}，"), (f"{nm}位於{loc}，", f"在{loc}，"),
+                           (f"{nm} 位於{loc}，", f"我們在{loc}。"), (f"{nm}位於{loc}，", f"我們在{loc}。"),
                            (f"{nm} 是{loc}", f"我們是{loc}"), (f"{nm}是{loc}", f"我們是{loc}")):
             if text.startswith(head):
                 return repl + text[len(head):]
@@ -571,8 +573,13 @@ def signature_block(theme: dict, content: dict, services: list[dict]) -> dict | 
     if sig.get("kind") == "feature":
         if not services:
             return None
-        return {"kind": "feature", "label": sig.get("label", "招牌"), "item": services[0]}
-    steps = [x for x in sig.get("steps", []) if x.get("title")][:3]
+        label, title = sig.get("label", "招牌"), services[0].get("title", "")
+        # 標籤和品名講同一件事（招牌湯底／特色湯底）就換成通用的標籤
+        if any(label[i:i + 2] in title for i in range(len(label) - 1)):
+            label = "本店招牌"
+        return {"kind": "feature", "label": label, "item": services[0]}
+    steps = [dict(x, desc=x["desc"] + ("" if x.get("desc", "")[-1:] in "。！？…" else "。")) if x.get("desc") else x
+             for x in sig.get("steps", []) if x.get("title")][:3]
     return {"kind": "steps", "title": sig.get("title", ""), "steps": steps} if steps else None
 
 
@@ -869,8 +876,10 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, 
     else:
         # 沒有照片：標語直排一張、三張場景插畫（吧台、街角、窗邊；不加圖說，不假裝是照片），店名定了再畫
         gallery_items.append({"img": "", "art": "", "tall": True, "type": True, "label": ""})
-        for key in ("counter", "street", "window"):
-            gallery_items.append({"img": "", "art": key, "tall": key == "window", "type": False, "label": ""})
+        # 橫幅版型的首屏已經畫了店裡，相簿就不再放同一張
+        keys = ("street", "detail") if theme.get("hero", "side") == "band" else ("interior", "street", "detail")
+        for key in keys:
+            gallery_items.append({"img": "", "art": key, "tall": key == "detail", "type": False, "label": ""})
     mode = FONT_MODES.get(theme.get("mode", "bold"), FONT_MODES["bold"])
     fill = {"name": name, "city": lead.get("city", ""), "district": lead.get("district", "") or "在地"}
     statement = (content.get("statement") or theme.get("statement", "").format(**fill)).strip()
@@ -921,9 +930,10 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, 
     show_credit = demo or brand.get("show_credit_on_final_site", True)
     first_line = name_lines(name)[0] if name_lines(name) else {"kind": "en", "tokens": [name]}
     name_zh = "".join(first_line["tokens"]) if first_line["kind"] != "en" else name
+    name_parts = ["".join(g_) for g_ in cjk_groups(first_line["tokens"])] if first_line["kind"] != "en" else None
     for g_ in gallery_items:
-        if g_["art"] in ("counter", "street", "window"):
-            g_["art"] = scene_tile(g_["art"], mset, name_zh, lead["slug"], lead.get("theme") or "default")
+        if g_["art"] in ("interior", "street", "detail"):
+            g_["art"] = scene_tile(g_["art"], mset, name_zh, lead["slug"], lead.get("theme") or "default", name_parts)
     b = {
         "name": name, "slug": lead["slug"], "url": url,
         "category": lead.get("category") or theme["label"],
@@ -960,7 +970,7 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, 
         "signature": signature_block(theme, content, services),
         "hero_photo": imgs[0] if imgs else "",
         "about_photo": imgs[1] if len(imgs) > 1 else "",
-        "name_zh": name_zh,
+        "name_zh": name_zh, "name_parts": name_parts,
         "vcols": vertical_columns(alt_line(theme, content.get("tagline", ""), fill)),
         "vlen": max((len(c) for c in vertical_columns(content.get("tagline", ""))), default=6),
         "map_art": map_art(lead["slug"]),
@@ -990,9 +1000,8 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, 
     # 橫幅：兩側是主圖騰與第三圖騰，中間是這一類的場景插畫（像一組靜物，不是三個圖示）
     key = lead.get("theme") or "default"
     hero_block = scene_markup(mset, key)
-    band = (f'<g transform="translate(150 52) rotate(-8 100 100) scale(.7)">{drawable(motif)}</g>'
-            f'<g transform="translate(300 0)">{hero_block}</g>'
-            f'<g transform="translate(496 52) rotate(-5 100 100) scale(.7)">{drawable(mset.get("c", motif))}</g>')
+    # 橫幅版型：首屏下半部是這一類的店裡（一張有地平線、比例一致的完整場景）
+    band = scenes.interior(mset, drawable, key).replace('<rect class="sc-bg" width="400" height="300"/>', '')
     idle = mset.get("idle") or {"kind": "float", "shapes": [0]}
 
     band2 = hero_block
@@ -1001,10 +1010,10 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, 
     return minify_css(tpl.render(b=b, t={**theme["palette"], "word": theme.get("word", "LOCAL"), "motif": Markup(motif),
                                          "motif_draw": Markup(drawable(motif)), "motif_idle": Markup(idle_classes(drawable(motif), idle)),
                                          "motif_scene": Markup(scene_markup(mset, key)),
-                                         "motif_feature": Markup(print_scene(mset.get("hero") or motif, ground=False)),
+                                         "motif_feature": Markup(print_scene(mset.get("c", motif), ground=False)),
                                          "motif_band2": Markup(band2), "motif_closing": Markup(closing_draw),
                                          "motif_b_draw": Markup(drawable(mset.get("b", motif))),
-                                         "motif_about": Markup(scenes.storefront(mset, b["name_zh"], drawable, bg=False, key=key)),
+                                         "motif_about": Markup(scenes.storefront(mset, b["name_zh"], drawable, bg=False, key=key, parts=b["name_parts"])),
                                          "motif_overlay": Markup(mset.get("b", motif)),
                                          "motif_b": Markup(mset.get("b", motif)), "motif_band": Markup(band)}, demo=demo))
 

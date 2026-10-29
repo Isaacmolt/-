@@ -82,11 +82,11 @@
         3
       ]
     },
-    "hero": "<path class='fine' d='M-6 184H214'/><path d='M40 96h120v40a26 26 0 0 1-26 26H66a26 26 0 0 1-26-26z'/><ellipse class='acc2' cx='100' cy='96' rx='60' ry='9'/><path d='M40 104H26a6 6 0 0 0 0 12h14M160 104h14a6 6 0 0 1 0 12h-14'/><circle class='fine' cx='78' cy='94' r='5'/><circle class='fine' cx='118' cy='92' r='6'/><path class='fine' d='M92 96l10-4M126 98l8 2'/><path class='fine' d='M70 70c-5 7 5 12 0 18M130 70c-5 7 5 12 0 18'/><path d='M62 172h76'/><path class='acc' d='M88 172c-5-6 0-13 5-15 0 6 6 9 4 15zM108 172c-5-6 0-13 5-15 0 6 6 9 4 15z'/>",
+    "hero": "<path class='fine' d='M-6 184H214'/><path d='M52 162h96a4 4 0 0 1 4 4v18H48v-18a4 4 0 0 1 4-4z'/><circle cx='136' cy='173' r='4'/><path class='fine' d='M62 162v-10M100 162v-10M138 162v-10'/><path class='acc' d='M86 158c-4-5 0-11 4-12 0 5 5 7 3 12zM106 158c-4-5 0-11 4-12 0 5 5 7 3 12z'/><path d='M44 96h112v34a22 22 0 0 1-22 22H66a22 22 0 0 1-22-22z'/><ellipse class='acc2' cx='100' cy='96' rx='56' ry='8'/><path d='M44 104H30a6 6 0 0 0 0 12h14M156 104h14a6 6 0 0 1 0 12h-14'/><circle class='fine' cx='76' cy='94' r='5'/><circle class='fine' cx='124' cy='93' r='6'/><path class='fine' d='M100 88c-8 4 8 12 0 16'/><path class='fine' d='M76 70c-5 7 5 12 0 18M100 62c-5 7 5 12 0 18M124 70c-5 7 5 12 0 18'/><path d='M2 170h32c0 8-7 14-16 14s-16-6-16-14z'/><path class='fine' d='M0 164l36-9M2 168l36-9'/><path d='M166 170h32c0 8-7 14-16 14s-16-6-16-14z'/>",
     "hero_idle": {
       "kind": "float",
       "shapes": [
-        7
+        11
       ]
     }
   },
@@ -119,7 +119,7 @@
         1
       ]
     },
-    "hero": "<path class='fine' d='M-6 184H214'/><path d='M124 30h38a26 26 0 0 1 26 26v80h-90V56a26 26 0 0 1 26-26z'/><path class='acc2' d='M126 40h34a18 18 0 0 1 18 18v70h-70V58a18 18 0 0 1 18-18z'/><path class='fine' d='M128 58c8-6 18-8 28-4M120 120l14-14'/><path d='M92 136h100v6H92z'/><path d='M104 136v-12h7v12M106 124v-4h3'/><path d='M170 136v-15h9v15M172 121v-4h5'/><circle class='acc' cx='142' cy='131' r='3'/><path class='fine' d='M58 -6v32'/><path class='acc' d='M44 40c0-8 6-14 14-14s14 6 14 14z'/><path class='fine' d='M52 46a6 4 0 0 0 12 0'/><path d='M30 132V98a14 14 0 0 1 14-14h20a14 14 0 0 1 14 14v34'/><path d='M24 132h60a6 6 0 0 1 0 12H24a6 6 0 0 1 0-12z'/><path d='M54 144v22M54 166l-16 16M54 166l16 16'/><path class='fine' d='M42 172h24'/><path d='M192 184l-3-18h-20l-3 18'/><path class='fine' d='M179 166c-4-14-12-20-20-22M179 166c2-16 8-24 18-28M179 166c-8-8-8-20-2-28'/>",
+    "hero": "<path class='fine' d='M-6 184H214'/><path d='M124 30h38a26 26 0 0 1 26 26v80h-90V56a26 26 0 0 1 26-26z'/><path class='acc2' d='M126 40h34a18 18 0 0 1 18 18v70h-70V58a18 18 0 0 1 18-18z'/><path class='fine' d='M128 58c8-6 18-8 28-4M120 120l14-14'/><path d='M92 136h100v6H92z'/><path d='M104 136v-12h7v12M106 124v-4h3'/><path d='M170 136v-15h9v15M172 121v-4h5'/><circle class='acc' cx='142' cy='131' r='3'/><path class='fine' d='M58 -6v32'/><path class='acc' d='M44 40c0-8 6-14 14-14s14 6 14 14z'/><path class='fine' d='M52 46a6 4 0 0 0 12 0'/><path d='M30 132V98a14 14 0 0 1 14-14h20a14 14 0 0 1 14 14v34'/><path d='M24 132h60a6 6 0 0 1 0 12H24a6 6 0 0 1 0-12z'/><path d='M54 144v22M54 166l-16 16M54 166l16 16'/><path class='fine' d='M42 172h24'/><path d='M178 184l-3-16h-18l-3 16'/><path class='fine' d='M166 168c-4-8-10-12-16-13M166 168c2-9 7-14 13-16M166 168c-5-5-5-12-1-17'/>",
     "hero_idle": {
       "kind": "pulse",
       "shapes": [
