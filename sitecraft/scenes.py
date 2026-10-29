@@ -390,10 +390,11 @@ def window(mset: dict, drawable, uid: str = "w") -> str:
 
 
 def street(mset: dict, name: str, drawable, seed: str = "", key: str = "default", parts: list[str] | None = None,
-           night: bool = False) -> str:
+           night: bool = False, short: str = "") -> str:
     """街角：自己的店在兩棟鄰居中間（鄰居有鐵窗），門口停一台機車，路燈與小鳥。"""
     rnd = random.Random(seed + "street")
-    shop = storefront(mset, name, drawable, ground=False, bg=False, key=key, parts=parts)
+    far = name if len(name) <= 6 else (short or name[:4])  # 遠景招牌字太多會縮到看不清
+    shop = storefront(mset, far, drawable, ground=False, bg=False, key=key, parts=None)
     sx = 0.56
     tx, ty = 112 - 70 * sx, 266 - 266 * sx
     left_w = "".join(f'<rect class="fine" x="{x}" y="{y}" width="24" height="26"/>' for x in (24, 62) for y in (128, 170, 212))

@@ -72,6 +72,7 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
                  vtext: (v => !v || innerWidth > 640 || parseFloat(getComputedStyle(v).fontSize) >= 14)(document.querySelector('.tile.type .vtext')),
                  nav: [...document.querySelectorAll('.nav ul a, .nav .call')].filter(a => a.getBoundingClientRect().width > 0).every(a => a.getClientRects().length === 1 && a.getBoundingClientRect().height < 50),
                  hoursRows: [...document.querySelectorAll('#hours li')].every(li => { const n = li.children[1]; const lh = parseFloat(getComputedStyle(n).lineHeight) || 28; return n.getBoundingClientRect().height <= lh * (n.querySelector('.sep') ? 2 : 1) + 4; }),
+                 sig: [...document.querySelectorAll('div.receipt, .sig.steps.appt, .sig.steps.record')].every(e => { const b = e.getBoundingClientRect(); return e.scrollWidth <= e.clientWidth + 1 && b.left >= -1 && b.right <= innerWidth + 1; }),
                  bandArt: (m => !m || innerWidth <= 880 || innerHeight < 700 || m.getBoundingClientRect().height >= 140)(document.querySelector('.hero[data-hero="band"] .hero-foot .motif svg.m1')) };
       });
       // map card: the pin sits in its drawing, never on the address
@@ -96,7 +97,7 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
         await fz.evaluate(el => el.remove()); }
       await page.evaluate(() => scrollTo(0, document.documentElement.scrollHeight)); await page.waitForTimeout(900);
       r.footGap = r.footGap || [];
-      r.footGap.push(await page.evaluate(() => { const f = document.querySelector('footer').getBoundingClientRect(); const bar = document.getElementById('demoBar'); const limit = bar ? bar.getBoundingClientRect().top : innerHeight; return Math.abs(f.bottom - limit) <= 1; }));
+      r.footGap.push(await page.evaluate(() => { const f = document.querySelector('footer').getBoundingClientRect(); const bar = document.getElementById('demoBar'), fab = document.querySelector('.fab'); let limit = bar ? bar.getBoundingClientRect().top : innerHeight; if (fab && getComputedStyle(fab).display !== 'none' && fab.classList.contains('show')) limit = Math.min(limit, fab.getBoundingClientRect().top); return Math.abs(f.bottom - limit) <= 1; }));
       await page.evaluate(() => scrollTo(0, 0)); await page.waitForTimeout(400);
       r.overflow[name] = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
       if (name === 'mobile') {
@@ -136,10 +137,17 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
           r.fn.lightbox = await page.evaluate(() => !document.getElementById('lb').open && !document.querySelector('.strip .tile[tabindex]'));
         }
         r.fn.photoFull = await page.evaluate(() => { const hp = document.querySelector('.hero .hp-m'); if (!hp) return true; const a = hp.getBoundingClientRect(), cta = document.querySelector('.hero .cta').getBoundingClientRect(); return a.width > innerWidth * .8 && a.height >= 100 && a.top >= cta.bottom; });
-        r.fn.fabUnder = await page.evaluate(async () => { const f = document.querySelector('.fab'), a = document.querySelector('.svc li > a'); if (!f || !a) return true; scrollTo(0, a.getBoundingClientRect().top + scrollY - innerHeight + 110); await new Promise(r => setTimeout(r, 700)); return !f.classList.contains('show'); });
         // the hidden quick-contact bar is not reachable by keyboard
         await page.evaluate(() => scrollTo(0, 0)); await page.waitForTimeout(400);
         r.fabSafe = await page.evaluate(() => { const f = document.querySelector('.fab'); return !f || (getComputedStyle(f).visibility === 'hidden' && f.inert === true); });
+        // phone action bar: once the hero buttons are gone it is pinned to the bottom edge, full width, every cell labelled,
+        // and stays there through the services, the hours and the closing section
+        r.fn.barFixed = [];
+        for (const sel of ['#services', '#info', 'footer']) {
+          await page.evaluate(s => { const el = document.querySelector(s); el.scrollIntoView({ block: 'end' }); }, sel); await page.waitForTimeout(700);
+          r.fn.barFixed.push(await page.evaluate(() => { const f = document.querySelector('.fab'); if (!f) return true; const b = f.getBoundingClientRect(), bar = document.getElementById('demoBar'); const floor = bar ? bar.getBoundingClientRect().top : innerHeight; return f.classList.contains('show') && !f.inert && Math.abs(b.bottom - floor) <= 1 && b.left <= 0 && b.right >= innerWidth && [...f.querySelectorAll('a')].every(a => (a.querySelector('.t') || {}).textContent && a.querySelector('.t').getBoundingClientRect().width > 0); }));
+        }
+        await page.evaluate(() => scrollTo(0, 0)); await page.waitForTimeout(400);
         r.fn.statementUnits = await page.evaluate(() => [...document.querySelectorAll('.statement .un')].every(el => el.getClientRects().length === 1));
         r.fn.factsLinks = await page.evaluate(() => [...document.querySelectorAll('.hero .fact')].filter(f => /電話|地址/.test(f.querySelector('b').textContent)).every(f => !!f.querySelector('a[href]')));
         r.fn.typeClearMobile = await page.evaluate(() => { const vt = document.querySelector('.tile.type .vtext'), cap = document.querySelector('.tile.type .cap'); if (!vt) return true; document.getElementById('gallery').scrollIntoView(); return vt.getBoundingClientRect().bottom <= cap.getBoundingClientRect().top + 1; });
@@ -248,7 +256,7 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
         await page.keyboard.press('Shift'); await page.waitForTimeout(100);
         r.featureRing = await page.evaluate(() => { const a = document.querySelector('.feature .btn'); if (!a) return { ok: true }; const fv = a.matches(':focus-visible'), cs = getComputedStyle(a); const ring = cs.outlineColor, card = getComputedStyle(a.closest('.feature')).backgroundColor, active = document.activeElement === a; a.blur(); return { ok: fv && active && parseFloat(cs.outlineWidth) >= 2 && ring !== card, fv, active, width: cs.outlineWidth, ring, card }; });
         // band hero: motif never overlaps the title box; parallax never moves the facts bar
-        r.heroGeom = await page.evaluate(() => { const h = document.querySelector('h1').getBoundingClientRect(); const m = (document.querySelector('.hero .motif') || document.querySelector('.hero .hp')).getBoundingClientRect(); const band = document.querySelector('.hero').dataset.hero === 'band' && !!document.querySelector('.hero .motif'); const bar = document.querySelector('.hero-foot').getBoundingClientRect(); const ox = Math.max(0, Math.min(h.right, m.right) - Math.max(h.left, m.left)); const oy = Math.max(0, Math.min(h.bottom, m.bottom) - Math.max(h.top, m.top)); return { band, overlapPct: Math.round(100 * ox * oy / (h.width * h.height)), bandAboveBar: !band || Math.round(m.bottom) <= Math.round(bar.top) + 8 }; });
+        r.heroGeom = await page.evaluate(() => { const h = document.querySelector('h1').getBoundingClientRect(); const m = (document.querySelector('.hero .motif') || document.querySelector('.hero .hp')).getBoundingClientRect(); const band = document.querySelector('.hero').dataset.hero === 'band' && !!document.querySelector('.hero .motif'); const bar = document.querySelector('.hero-foot').getBoundingClientRect(); const ox = Math.max(0, Math.min(h.right, m.right) - Math.max(h.left, m.left)); const oy = Math.max(0, Math.min(h.bottom, m.bottom) - Math.max(h.top, m.top)); return { band, overlapPct: Math.round(100 * ox * oy / (h.width * h.height)), bandAboveBar: !band || Math.round(m.bottom) <= Math.round(bar.top) + 72 }; });
         r.tiles = await page.evaluate(() => { const th = document.getElementById('tileHours'), hh = document.getElementById('heroHours'); const vt = document.querySelector('.tile.type .vtext'), cap = document.querySelector('.tile.type .cap'); const today = document.querySelector('#hours li.today'); const nb = document.querySelector('#heroHours .nb'); const tt = th ? th.textContent.trim() : ''; return { hoursMatch: !th || !today || tt === today.children[1].textContent.trim() || (nb && tt === nb.textContent.trim()), typeClear: !vt || vt.getBoundingClientRect().bottom <= cap.getBoundingClientRect().top + 1 }; });
         await page.mouse.move(20, 300); await page.waitForTimeout(1000);
         r.factsDrift = await page.evaluate(() => getComputedStyle(document.querySelector('.facts')).transform);
@@ -324,6 +332,7 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
     const v = report[slug], fn = v.fn || {}, c = v.computed || {};
     const checks = [
       [`fn.fabHiddenAtTop`, () => (fn.fabHiddenAtTop)],
+      [`fn.barFixed`, () => (fn.barFixed.every(Boolean))],
       [`fn.menuBtnOnTop`, () => (fn.menuBtnOnTop)],
       [`fn.menuClosedByTap`, () => (fn.menuClosedByTap)],
       [`fn.galleryCounterAfter2Next === '3'`, () => (fn.galleryCounterAfter2Next === '3')],
@@ -369,7 +378,7 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
       [`Object.values(v.ctaClear).every(Boolean)`, () => (Object.values(v.ctaClear).every(Boolean))],
       [`v.fabSafe`, () => (v.fabSafe)],
       [`v.layout`, () => (v.layout)],
-      [`Object.values(v.layout).every(x => x.mark && x.words && x.facts && x.p`, () => (Object.values(v.layout).every(x => x.mark && x.words && x.facts && x.pic && x.brand && x.arch && x.tabletPics && x.factSlice && x.bandArt && x.svcFit && x.vtext && x.nav && x.hoursRows))],
+      [`Object.values(v.layout).every(x => x.mark && x.words && x.facts && x.p`, () => (Object.values(v.layout).every(x => x.mark && x.words && x.facts && x.pic && x.brand && x.arch && x.tabletPics && x.factSlice && x.bandArt && x.svcFit && x.vtext && x.nav && x.hoursRows && x.sig))],
       [`v.layout['1440x900'].h1px >= v.layout['1280x720'].h1px - 1`, () => (v.layout['1440x900'].h1px >= v.layout['1280x720'].h1px - 1)],
       [`v.layout['1920x1080'].h1px >= v.layout['1440x900'].h1px - 1`, () => (v.layout['1920x1080'].h1px >= v.layout['1440x900'].h1px - 1)],
       [`v.featureRing`, () => (v.featureRing)],
@@ -387,7 +396,6 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
       [`v.copy.typeCap`, () => (v.copy.typeCap)],
       [`v.copy.scenes`, () => (v.copy.scenes)],
       [`v.copy.sign`, () => (v.copy.sign)],
-      [`fn.fabUnder`, () => (fn.fabUnder)],
       [`v.footGap`, () => (v.footGap)],
       [`v.footGap.every(Boolean)`, () => (v.footGap.every(Boolean))],
       [`v.reducedMotion.draw === 'none'`, () => (v.reducedMotion.draw === 'none')],

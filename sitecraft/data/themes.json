@@ -69,13 +69,15 @@
     },
     "services_lead": "豆子跟著季節換，甜點每天限量；想坐多久都可以。",
     "nav_services": "菜單",
-    "feature_cta": "LINE 預留座位",
+    "feature_cta": "LINE 問這一杯",
     "order": [
       "services",
       "about",
       "gallery",
       "info"
-    ]
+    ],
+    "services_style": "receipt",
+    "info_title": "來坐坐的時間"
   },
   "breakfast": {
     "label": "早午餐",
@@ -154,7 +156,9 @@
       "about",
       "gallery",
       "info"
-    ]
+    ],
+    "services_style": "receipt",
+    "info_title": "早上幾點開"
   },
   "restaurant": {
     "label": "餐廳",
@@ -246,7 +250,8 @@
       "gallery",
       "info"
     ],
-    "services_style": "tags"
+    "services_style": "tags",
+    "info_title": "什麼時候來吃"
   },
   "snack": {
     "label": "小吃",
@@ -338,7 +343,9 @@
       "about",
       "gallery",
       "info"
-    ]
+    ],
+    "services_style": "receipt",
+    "info_title": "什麼時候有"
   },
   "hotpot": {
     "label": "火鍋",
@@ -419,7 +426,8 @@
       "gallery",
       "info"
     ],
-    "services_style": "tags"
+    "services_style": "tags",
+    "info_title": "開鍋的時間"
   },
   "dessert": {
     "label": "甜點烘焙",
@@ -508,7 +516,9 @@
       "about",
       "gallery",
       "info"
-    ]
+    ],
+    "services_style": "receipt",
+    "info_title": "甜點出爐的時間"
   },
   "hair": {
     "label": "美髮",
@@ -599,7 +609,9 @@
       ]
     },
     "services_lead": "剪、染、燙、護，每一項都先聊過再開始。",
-    "nav_services": "服務項目"
+    "nav_services": "服務項目",
+    "steps_style": "appt",
+    "info_title": "預約與交通"
   },
   "beauty": {
     "label": "美容美甲",
@@ -692,7 +704,9 @@
       ]
     },
     "services_lead": "美甲、美睫與臉部護理，器具一客一消毒。",
-    "nav_services": "服務項目"
+    "nav_services": "服務項目",
+    "steps_style": "appt",
+    "info_title": "預約與交通"
   },
   "pet": {
     "label": "寵物",
@@ -784,7 +798,13 @@
     },
     "services_lead": "洗澡、美容到照護，依毛小孩的個性慢慢來。",
     "nav_services": "服務項目",
-    "disc": "tint"
+    "disc": "tint",
+    "steps_style": "record",
+    "record_fields": [
+      "毛孩",
+      "日期"
+    ],
+    "info_title": "接送的時間與位置"
   },
   "clinic": {
     "label": "診所",
@@ -878,7 +898,13 @@
       ]
     },
     "services_lead": "看診前先說明，看診後交代清楚。",
-    "nav_services": "看診項目"
+    "nav_services": "看診項目",
+    "steps_style": "record",
+    "record_fields": [
+      "姓名",
+      "日期"
+    ],
+    "info_title": "看診時間與位置"
   },
   "gym": {
     "label": "健身運動",
@@ -970,7 +996,8 @@
       ]
     },
     "services_lead": "團體課與一對一，第一次來也有人帶。",
-    "nav_services": "課程"
+    "nav_services": "課程",
+    "info_title": "上課時間與位置"
   },
   "florist": {
     "label": "花店",
@@ -1059,7 +1086,8 @@
       ]
     },
     "services_lead": "日常小花到節日花禮，依預算與場合現場設計。",
-    "nav_services": "服務項目"
+    "nav_services": "服務項目",
+    "info_title": "取花的時間與位置"
   },
   "auto": {
     "label": "車輛維修",
@@ -1154,7 +1182,8 @@
       ]
     },
     "services_lead": "先檢查、先報價，您同意再動工。",
-    "nav_services": "服務項目"
+    "nav_services": "服務項目",
+    "info_title": "進廠時間與位置"
   },
   "education": {
     "label": "教育補習",
@@ -1251,7 +1280,8 @@
       ]
     },
     "services_lead": "小班制教學，每位學生的進度都看得到。",
-    "nav_services": "課程"
+    "nav_services": "課程",
+    "info_title": "上課時間與位置"
   },
   "wellness": {
     "label": "按摩放鬆",
@@ -1341,7 +1371,9 @@
       ]
     },
     "services_lead": "全身、腳底與經絡推拿，先問狀況再調整力道。",
-    "nav_services": "療程"
+    "nav_services": "療程",
+    "steps_style": "appt",
+    "info_title": "預約與交通"
   },
   "lodging": {
     "label": "住宿",
@@ -1432,7 +1464,8 @@
       ]
     },
     "services_lead": "乾淨的房間、好睡的床，還有熟悉在地的主人。",
-    "nav_services": "房型"
+    "nav_services": "房型",
+    "info_title": "入住與交通"
   },
   "default": {
     "label": "在地商家",
@@ -1512,6 +1545,7 @@
       ]
     },
     "services_lead": "用實在的價格，認真做好每一件事。",
-    "nav_services": "服務項目"
+    "nav_services": "服務項目",
+    "info_title": "營業時間與位置"
   }
 }

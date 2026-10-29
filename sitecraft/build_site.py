@@ -353,7 +353,8 @@ def split_statement(text: str) -> tuple[str, str, str]:
     return "", text, ""
 
 
-def scene_tile(key: str, mset: dict, name: str, seed: str, theme_key: str = "default", parts: list[str] | None = None) -> str:
+def scene_tile(key: str, mset: dict, name: str, seed: str, theme_key: str = "default", parts: list[str] | None = None,
+               short: str = "") -> str:
     """相簿的場景插畫磚：店裡、街角（橫式）、近景（直式，依類別：洗頭區、吹整台、醬料台、窗邊）。"""
     from markupsafe import Markup
     if key == "detail":
@@ -364,7 +365,7 @@ def scene_tile(key: str, mset: dict, name: str, seed: str, theme_key: str = "def
                       f'{scenes.interior(mset, drawable, theme_key)}</svg>')
     # 街角畫成晚上：關於我們是白天的店面，這裡是亮著燈的同一條巷子
     return Markup('<svg class="art scene night" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true">'
-                  f'{scenes.street(mset, name, drawable, seed, theme_key, parts, night=True)}</svg>')
+                  f'{scenes.street(mset, name, drawable, seed, theme_key, parts, night=True, short=short)}</svg>')
 
 
 def map_art(seed: str) -> str:
@@ -938,7 +939,8 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, 
     name_parts = ["".join(g_) for g_ in cjk_groups(first_line["tokens"])] if first_line["kind"] != "en" else None
     for g_ in gallery_items:
         if g_["art"] in ("interior", "street", "detail"):
-            g_["art"] = scene_tile(g_["art"], mset, name_zh, lead["slug"], lead.get("theme") or "default", name_parts)
+            g_["art"] = scene_tile(g_["art"], mset, name_zh, lead["slug"], lead.get("theme") or "default", name_parts,
+                                   theme.get("label", ""))
     b = {
         "name": name, "slug": lead["slug"], "url": url,
         "category": lead.get("category") or theme["label"],
@@ -970,6 +972,8 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, 
                        "gallery": "店內環境" if imgs else "店的樣子", "info": "營業資訊"},
         "nav_services": content.get("nav_services") or theme.get("nav_services") or "服務項目",
         "services_style": content.get("services_style") or theme.get("services_style") or "",
+        "steps_style": theme.get("steps_style", ""), "record_fields": theme.get("record_fields") or ["姓名", "日期"],
+        "info_title": content.get("info_title") or theme.get("info_title") or "營業時間與位置",
         "disc": theme.get("disc", ""),
         "order": [k for k in (content.get("order") or theme.get("order") or ["about", "services", "gallery", "info"])
                   if k in ("about", "services", "gallery", "info")],
