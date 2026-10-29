@@ -256,7 +256,7 @@
   addEventListener('resize',function(){measure();onScroll()},{passive:true});addEventListener('load',function(){requestAnimationFrame(measure)});measure();onScroll();
   /* mobile overlay menu */
   function setMenu(open){overlay.classList.toggle('open',open);overlay.setAttribute('aria-hidden',!open);btn.setAttribute('aria-expanded',open);btn.setAttribute('aria-label',open?'關閉選單':'開啟選單');d.body.style.overflow=open?'hidden':'';
-    d.querySelectorAll('main,header,.fab,.demo-bar,footer,.skip').forEach(function(el){el.inert=open});if(!open)fabState();
+    d.querySelectorAll('main,header,.fab,.demo-bar,footer,.skip').forEach(function(el){el.inert=open});if(!open){fabState();lock=1;nav.classList.remove('hide');clearTimeout(lockT);lockT=setTimeout(function(){lock=0;last=anchorY=scrollY;dir=0},450)}
     if(open){var ov=d.getElementById('ovHours'),hh=d.getElementById('heroHours');if(ov&&hh&&hh.textContent){ov.innerHTML='';[].forEach.call(hh.children,function(n){ov.appendChild(n.cloneNode(true))})}setTimeout(function(){overlay.querySelector('a').focus()},60)}else{btn.focus()}}
   btn.addEventListener('click',function(){setMenu(!overlay.classList.contains('open'))});
   overlay.addEventListener('click',function(e){if(e.target===overlay)setMenu(false)});

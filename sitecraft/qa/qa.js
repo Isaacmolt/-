@@ -175,6 +175,8 @@ async function hoverContrast(pg) {
         r.fn.typeClearMobile = await page.evaluate(() => { const vt = document.querySelector('.tile.type .vtext'), cap = document.querySelector('.tile.type .cap'); if (!vt) return true; document.getElementById('gallery').scrollIntoView(); return vt.getBoundingClientRect().bottom <= cap.getBoundingClientRect().top + 1; });
         r.fn.titleIndent = await page.evaluate(() => { const h = document.querySelector('h1'); const en = h.querySelector('.en'); if (!en) return 0; const zh = [...h.querySelectorAll('.w')].filter(w => !w.closest('.en')); const l = Math.min(...zh.map(w => w.getBoundingClientRect().left)), rr = Math.max(...zh.map(w => w.getBoundingClientRect().right)); const eb = en.getBoundingClientRect(); const enText = en.querySelector('.w'); const et = enText.getBoundingClientRect(); const last = en.querySelectorAll('.w'); const er = last[last.length - 1].getBoundingClientRect().right; return getComputedStyle(h).textAlign === 'center' ? Math.round(((et.left + er) / 2) - ((l + rr) / 2)) : Math.round(et.left - l); });
         // modal focus: after opening, focus is inside the overlay and Tab stays inside
+        // (the header hides while scrolling down, so scroll up a little first, as a person would, to bring the menu button back)
+        await page.mouse.wheel(0, -200); await page.waitForTimeout(800);
         await page.click('#menuBtn'); await page.waitForTimeout(500);
         const inside1 = await page.evaluate(() => !!document.activeElement.closest('#overlay'));
         await page.keyboard.press('Tab'); await page.keyboard.press('Tab'); await page.keyboard.press('Tab'); await page.keyboard.press('Tab'); await page.keyboard.press('Tab');
