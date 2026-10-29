@@ -2,4 +2,5 @@ requests>=2.31
 Jinja2>=3.1
 fonttools>=4.50  # 自架字型：依頁面用字切出 woff2
 brotli>=1.1
+cairosvg>=2.7  # 選用：分享預覽圖畫上類別插畫（需要系統有 cairo）
 anthropic>=2.0   # 選用：--ai-copy 用 Claude 寫網站文案

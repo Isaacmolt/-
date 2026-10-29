@@ -389,10 +389,26 @@ def vertical_columns(text: str) -> list[str]:
     return cols[:3] or [text]
 
 
-def scene_markup(motif_idle: str) -> str:
-    """hero 圖騰改成一個小場景：一塊實心強調色圓、主圖騰、一條細地平線（兩種線寬）。"""
-    return ('<circle class="disc" cx="134" cy="76" r="58"/>'
-            '<path class="gl" pathLength="1" style="--i:9" d="M-4 190H214"/>' + motif_idle)
+def scene_markup(mset: dict) -> str:
+    """hero 插畫：有 hero（多筆、兩種線寬、強調色填色）就用，沒有就用主圖騰；後面墊一個實心強調色圓。"""
+    if mset.get("hero"):
+        art = idle_classes(drawable(mset["hero"]), mset.get("hero_idle") or {"shapes": []})
+    else:
+        art = idle_classes(drawable(mset["a"]), mset.get("idle") or {"kind": "float", "shapes": [0]})
+    return '<circle class="disc" cx="134" cy="76" r="58"/>' + art
+
+
+def photo_tall(src: str, site_dir: Path | None) -> bool | None:
+    """本機照片看實際長寬決定直式或橫式；讀不到回 None（交給預設節奏）。"""
+    if not site_dir or src.startswith(("http:", "https:", "data:")):
+        return None
+    try:
+        from PIL import Image
+        with Image.open(site_dir / src) as im:
+            w, h = im.size
+        return h > w * 1.05
+    except Exception:  # noqa: BLE001
+        return None
 
 
 MOTIFS_FILE = TEMPLATES_DIR.parent / "data" / "motifs.json"
@@ -417,15 +433,22 @@ def drawable(markup: str) -> str:
 
 
 def idle_classes(markup: str, idle: dict) -> str:
-    """把指定序號的形狀加上閒置微動 class（蒸氣飄、刀刃開合、腳掌脈動）。"""
+    """把指定序號的形狀加上閒置微動 class（蒸氣飄、刀刃開合、腳掌脈動）；原本有 class 就合併。"""
     kind, shapes = idle.get("kind", "float"), set(idle.get("shapes", []))
     n = -1
 
     def tag(mm: re.Match) -> str:
         nonlocal n
         n += 1
-        return mm.group(0) + (f' class="idle idle-{kind}"' if n in shapes else "")
-    return re.sub(r'<(?:path|circle|ellipse|rect) pathLength="1" style="--i:\d+"', tag, markup)
+        el = mm.group(0)
+        if n not in shapes:
+            return el
+        add = f"idle idle-{kind}"
+        cm = re.search(r"""class=(['"])(.*?)\1""", el)
+        if cm:
+            return el[:cm.start()] + f'class="{cm.group(2)} {add}"' + el[cm.end():]
+        return el[:-2] + f' class="{add}"/>' if el.endswith("/>") else el[:-1] + f' class="{add}">'
+    return re.sub(r"<(?:path|circle|ellipse|rect)\b[^>]*>", tag, markup)
 
 
 def _lum(c: str) -> float:
@@ -462,6 +485,19 @@ def statement_from(about: list[str], tagline: str) -> tuple[str, list[str]]:
         return tagline, about
     paras = ([rest] if rest.strip() else []) + about[1:]
     return head, paras
+
+
+def signature_block(theme: dict, content: dict, services: list[dict]) -> dict | None:
+    """每個類別一個招牌區塊：餐飲類把第一項服務做成「今日推薦」，服務類是三個步驟。content.json 可以覆寫。"""
+    sig = content.get("signature") or theme.get("signature")
+    if not sig:
+        return None
+    if sig.get("kind") == "feature":
+        if not services:
+            return None
+        return {"kind": "feature", "label": sig.get("label", "招牌"), "item": services[0]}
+    steps = [x for x in sig.get("steps", []) if x.get("title")][:3]
+    return {"kind": "steps", "title": sig.get("title", ""), "steps": steps} if steps else None
 
 
 def closing_closed(theme_key: str) -> str:
@@ -559,51 +595,120 @@ def _hex(c: str) -> tuple[int, int, int]:
     return int(c[0:2], 16), int(c[2:4], 16), int(c[4:6], 16)
 
 
-def og_image(lead: dict, content: dict, theme: dict, out: Path) -> bool:
+VOICE_OG = {
+    # 分享預覽圖用同一套字型語氣：中文行、英文行（字型檔, 軸設定）
+    "editorial": (("NotoSerifTC[wght].ttf", {"Weight": 600}), ("Fraunces-Italic[SOFT,WONK,opsz,wght].ttf", {"Optical Size": 96, "Weight": 400, "Softness": 0, "Wonky": 0})),
+    "bold": (("NotoSansTC[wght].ttf", {"Weight": 800}), ("Syne[wght].ttf", {"Weight": 700})),
+    "mono": (("NotoSansTC[wght].ttf", {"Weight": 600}), ("SpaceGrotesk[wght].ttf", {"Weight": 500})),
+}
+
+
+def _voice_font(spec, size):
+    """變數字型設定軸；檔案不在就回 None。"""
+    from PIL import ImageFont
+    import fonts as fontkit
+    name, axes = spec
+    path = fontkit.FONT_DIR / name
+    if not path.exists() and not fontkit.ensure_sources({name}, log=lambda *_: None):
+        return None
     try:
-        from PIL import Image, ImageDraw, ImageFont
+        f = ImageFont.truetype(str(path), size)
+        order = [a["name"].decode() if isinstance(a, dict) else a.decode() for a in f.get_variation_axes()]
+        f.set_variation_by_axes([axes.get(n, 0) for n in order])
+        return f
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def og_art(lead: dict, pal: dict):
+    """分享圖右側畫上這一類的首屏插畫（需要 cairosvg；沒有就只留強調色圓）。"""
+    try:
+        import io
+        import cairosvg
+        from PIL import Image
+    except Exception:  # noqa: BLE001
+        return None
+    mset = load_motifs().get(lead.get("theme") or "default") or load_motifs()["default"]
+    body = mset.get("hero") or mset["a"]
+    a = pal["a"]
+    svg = ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="-10 -10 220 220" width="500" height="500">'
+           '<style>*{fill:none;stroke:#fff;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:.82}'
+           f'.fine{{stroke-width:.85}}.acc{{fill:{a};stroke:none}}.acc2{{fill:{a};fill-opacity:.35}}</style>{body}</svg>')
+    try:
+        png = cairosvg.svg2png(bytestring=svg.encode("utf-8"))
+        return Image.open(io.BytesIO(png)).convert("RGBA")
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def og_image(lead: dict, content: dict, theme: dict, out: Path) -> bool:
+    """LINE / FB 分享預覽圖（1200×630）：用網站同一套字型語氣與主色，圓形強調色、地址不含郵遞區號。"""
+    try:
+        from PIL import Image, ImageDraw, ImageFilter, ImageFont
     except ImportError:
         return False
-    font_file = find_cjk_font()
-    if not font_file:
-        return False
     pal = theme["palette"]
+    mode = theme.get("mode", "bold")
+    name = content.get("name") or lead["name"]
+    lines = name_lines(name)
+    zh = "".join(lines[0]["tokens"]) if lines and lines[0]["kind"] == "zh" else ""
+    en = " ".join(next((ln["tokens"] for ln in lines if ln["kind"] == "en"), []))
+    spec_zh, spec_en = VOICE_OG.get(mode, VOICE_OG["bold"])
+    base = find_cjk_font()
     W, H = 1200, 630
     img = Image.new("RGB", (W, H), _hex(pal["pd"]))
-    px = img.load()
+    d0 = ImageDraw.Draw(img)
     c0, c1 = _hex(pal["p"]), _hex(pal["pd"])
     for y in range(H):
-        f = y / H
-        row = tuple(int(c0[i] * (1 - f) + c1[i] * f) for i in range(3))
-        for x in range(W):
-            px[x, y] = row
-    overlay = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-    od = ImageDraw.Draw(overlay)
+        f = min(1.0, y / (H * .9))
+        d0.line([(0, y), (W, y)], fill=tuple(int(c0[i] * (1 - f) + c1[i] * f) for i in range(3)))
+    glow = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    gd = ImageDraw.Draw(glow)
     ac = _hex(pal["a"])
-    od.ellipse((780, -140, 1380, 460), fill=ac + (70,))
-    od.ellipse((900, 300, 1500, 900), fill=ac + (40,))
-    img = Image.alpha_composite(img.convert("RGBA"), overlay)
+    gd.ellipse((800, 60, 1160, 420), fill=ac + (150,))
+    glow = glow.filter(ImageFilter.GaussianBlur(2))
+    img = Image.alpha_composite(img.convert("RGBA"), glow)
+    art = og_art(lead, pal)
+    if art is not None:
+        img.alpha_composite(art, (700, 40))
     d = ImageDraw.Draw(img)
-    name = content.get("name") or lead["name"]
-    size = 96 if len(name) <= 10 else 72 if len(name) <= 16 else 56
-    big = ImageFont.truetype(font_file, size)
-    mid = ImageFont.truetype(font_file, 34)
-    small = ImageFont.truetype(font_file, 28)
-    d.text((80, 96), f"{lead.get('category') or theme['label']}　{lead.get('city', '')}{lead.get('district', '')}", font=mid, fill=(255, 255, 255, 215))
-    d.text((80, 170), name, font=big, fill=(255, 255, 255, 255))
-    d.text((80, 170 + size + 28), content.get("tagline", ""), font=mid, fill=(255, 255, 255, 230))
-    y = 500
+    zh_size = 128 if len(zh) <= 5 else 104 if len(zh) <= 7 else 84
+    f_zh = _voice_font(spec_zh, zh_size) or (ImageFont.truetype(base, zh_size) if base else None)
+    f_en = _voice_font(spec_en, 64) or (ImageFont.truetype(base, 56) if base else None)
+    f_small = _voice_font(("NotoSansTC[wght].ttf", {"Weight": 500}), 30) or (ImageFont.truetype(base, 30) if base else None)
+    f_tag = _voice_font(spec_zh if mode == "editorial" else ("NotoSansTC[wght].ttf", {"Weight": 400}), 40) or f_small
+    if not (f_zh and f_small):
+        return False
+    white = (255, 255, 255, 255)
+    eyebrow = f"{lead.get('category') or theme['label']}　{lead.get('city', '')}{lead.get('district', '')}"
+    d.line([(80, 112), (130, 112)], fill=(255, 255, 255, 200), width=2)
+    d.text((148, 94), eyebrow, font=f_small, fill=(255, 255, 255, 220))
+    y = 150
+    if zh:
+        d.text((76, y), zh, font=f_zh, fill=white)
+        y += int(zh_size * 1.3)
+    if en and f_en:
+        d.text((80, y), en, font=f_en, fill=white)
+        y += 84
+    if not zh and not en:
+        d.text((76, y), name, font=f_zh, fill=white)
+        y += int(zh_size * 1.12)
+    d.text((80, y + 10), content.get("tagline", ""), font=f_tag, fill=(255, 255, 255, 235))
+    foot = []
     if lead.get("rating"):
-        d.text((80, y), f"Google 評分 {fmt_rating(lead['rating'])}　{lead.get('review_count', '')} 則評論", font=small, fill=(255, 255, 255, 205))
-        y += 42
-    d.text((80, y), lead.get("address", ""), font=small, fill=(255, 255, 255, 180))
+        foot.append(f"Google {fmt_rating(lead['rating'])}（{lead.get('review_count', '')} 則評論）")
+    addr = address_display(lead.get("address", ""))
+    if addr:
+        foot.append(addr)
+    d.line([(80, 528), (W - 80, 528)], fill=(255, 255, 255, 70), width=1)
+    d.text((80, 548), "　·　".join(foot), font=f_small, fill=(255, 255, 255, 210))
     out.parent.mkdir(parents=True, exist_ok=True)
     img.convert("RGB").save(out, "PNG", optimize=True)
     return True
 
 
 def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, og_png: bool = False,
-                fonts: list[dict] | None = None) -> str:
+                fonts: list[dict] | None = None, site_dir: Path | None = None) -> str:
     theme = themes.get(lead.get("theme") or "default", themes["default"])
     brand = cfg["brand"]
     weekday_hours, periods = parse_hours(lead.get("hours_json", ""))
@@ -628,7 +733,8 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, 
     gallery_items = []
     if imgs:
         for i, src in enumerate(imgs):
-            gallery_items.append({"img": src, "art": "", "tall": i % 3 == 1, "type": False,
+            tall = photo_tall(src, site_dir)
+            gallery_items.append({"img": src, "art": "", "tall": (i % 3 == 1) if tall is None else tall, "type": False,
                                   "label": labels[i % len(labels)]})
     else:
         # 沒有照片：標語直排一張、三張線條示意圖（不加圖說，不假裝是照片）
@@ -708,8 +814,12 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, 
         "name_len": name_len_units(name),
         "has_photos": bool(imgs),
         "gallery_name": "店內環境" if imgs else "店的樣子",
-        "gallery_title": (f"走進{name_zh}" if imgs
-                          else (f"{lead.get('district')}的一個角落" if lead.get("district") else "我們的角落")),
+        "gallery_title": (content.get("gallery_title") or (f"走進{name_zh}" if imgs
+                          else theme.get("gallery_title", "{district}的一個角落").format(**fill))),
+        "services_title": content.get("services_title") or theme.get("services_title") or "我們能為您做的",
+        "signature": signature_block(theme, content, services),
+        "hero_photo": imgs[0] if imgs else "",
+        "about_photo": imgs[1] if len(imgs) > 1 else "",
         "name_zh": name_zh,
         "vcols": vertical_columns(content.get("tagline", "")),
         "vlen": max((len(c) for c in vertical_columns(content.get("tagline", ""))), default=6),
@@ -739,9 +849,14 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, 
                    for x, r, k in ((0, -8, "a"), (300, 6, "b"), (600, -5, "c")))
     idle = mset.get("idle") or {"kind": "float", "shapes": [0]}
     band = '<circle class="disc" cx="400" cy="92" r="64"/>' + band
+    band2 = '<circle class="disc" cx="400" cy="84" r="62"/>' + "".join(
+        f'<g transform="translate({x} 0) rotate({r} 100 100)">{drawable(mset.get(k, motif))}</g>' for x, r, k in ((40, -8, "a"), (300, -5, "c")))
+    closing_motif = motif if mset.get("hero") else mset.get("c", motif)
     return minify_css(tpl.render(b=b, t={**theme["palette"], "word": theme.get("word", "LOCAL"), "motif": Markup(motif),
                                          "motif_draw": Markup(drawable(motif)), "motif_idle": Markup(idle_classes(drawable(motif), idle)),
-                                         "motif_scene": Markup(scene_markup(idle_classes(drawable(motif), idle))),
+                                         "motif_scene": Markup(scene_markup(mset)),
+                                         "motif_band2": Markup(band2), "motif_closing": Markup(drawable(closing_motif)),
+                                         "motif_overlay": Markup(mset.get("b", motif)),
                                          "motif_b": Markup(mset.get("b", motif)), "motif_band": Markup(band)}, demo=demo))
 
 
@@ -765,13 +880,13 @@ def build_one(lead: dict, cfg: dict, themes: dict, *, demo: bool = True, use_ai:
     theme = themes.get(lead.get("theme") or "default", themes["default"])
     content = load_or_make_content(lead, theme, site_dir, use_ai, refresh_copy)
     og_ok = og_image(lead, content, theme, site_dir / "og.png")
-    html = render_site(lead, content, cfg, themes, demo=demo, og_png=og_ok)
+    html = render_site(lead, content, cfg, themes, demo=demo, og_png=og_ok, site_dir=site_dir)
     fonts = None
     if self_host_fonts:
         # 先算出這一頁用到的字，切出自架字型，再重畫一次
         fonts = fontkit.build_fonts(theme.get("mode", "bold"), html, site_dir)
         if fonts:
-            html = render_site(lead, content, cfg, themes, demo=demo, og_png=og_ok, fonts=fonts)
+            html = render_site(lead, content, cfg, themes, demo=demo, og_png=og_ok, fonts=fonts, site_dir=site_dir)
     if not fonts:
         shutil.rmtree(site_dir / "fonts", ignore_errors=True)
         if self_host_fonts:

@@ -22,7 +22,7 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
     const url = `http://127.0.0.1:${PORT}/${slug}/`;
     const r = { errors: [], overflow: {}, smallTargets: [], axe: [], emoji: false };
     r.heroFit = {};
-    for (const [n, vp] of [['700x900', {width:700,height:900}], ['820x1180', {width:820,height:1180}], ['1280x720', {width:1280,height:720}], ['1280x800', {width:1280,height:800}], ['1366x768', {width:1366,height:768}], ['1440x900', {width:1440,height:900}], ['1920x1080', {width:1920,height:1080}], ['390x844', {width:390,height:844}]]) {
+    for (const [n, vp] of [['700x900', {width:700,height:900}], ['820x1180', {width:820,height:1180}], ['1280x720', {width:1280,height:720}], ['1280x800', {width:1280,height:800}], ['1366x768', {width:1366,height:768}], ['1440x900', {width:1440,height:900}], ['1920x1080', {width:1920,height:1080}], ['360x640', {width:360,height:640}], ['375x667', {width:375,height:667}], ['390x844', {width:390,height:844}]]) {
       const pg = await browser.newPage({ viewport: vp }); await pg.goto(url, { waitUntil: 'load' }); await pg.evaluate(() => document.fonts.ready); await pg.waitForTimeout(2200);
       if (n === '1366x768') await pg.screenshot({ path: path.join(OUT, `${slug}-laptop-hero.png`) });  // capture before the probes below touch the DOM
       if (n !== '390x844') {
@@ -48,7 +48,10 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
       });
       // band: at least 24px between the CTA row and the highest band shape
       r.bandGap = r.bandGap || {};
-      r.bandGap[n] = await pg.evaluate(() => { const hero = document.querySelector('.hero'); if (hero.dataset.hero !== 'band') return 99; const cta = document.querySelector('.hero .cta').getBoundingClientRect(); const tops = [...document.querySelectorAll('.hero-foot .motif :is(path,circle,ellipse,rect)')].map(s => s.getBoundingClientRect().top); return Math.round(Math.min(...tops) - cta.bottom); });
+      r.bandGap[n] = await pg.evaluate(() => { const hero = document.querySelector('.hero'); if (hero.dataset.hero !== 'band') return 99; const cta = document.querySelector('.hero .cta').getBoundingClientRect(); const tops = [...document.querySelectorAll('.hero-foot .motif :is(path,circle,ellipse,rect)')].filter(s => s.closest('svg').getBoundingClientRect().width > 0).map(s => s.getBoundingClientRect().top); return Math.round(Math.min(...tops) - cta.bottom); });
+      // map card: the pin sits in its drawing, never on the address
+      r.mapClear = r.mapClear || {};
+      r.mapClear[n] = await pg.evaluate(() => { const pin = document.querySelector('.map-ph .pin'), ad = document.querySelector('.map-ph .addr'); if (!pin || !ad) return true; return pin.getBoundingClientRect().bottom <= ad.getBoundingClientRect().top; });
       r.heroFit[n] = await pg.evaluate(() => { const h = document.querySelector('.hero').getBoundingClientRect(); const bar = document.getElementById('demoBar'); const limit = innerHeight - (bar ? bar.getBoundingClientRect().height : 0); return Math.round(h.bottom) + '/' + Math.round(limit) + (h.bottom <= limit + 1 ? ' ok' : ' OVER'); });
       await pg.close();
     }
@@ -80,12 +83,12 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
         r.fn.menuClosedByTap = await page.evaluate(() => !document.getElementById('overlay').classList.contains('open'));
         await page.evaluate(() => document.getElementById('gallery').scrollIntoView()); await page.waitForTimeout(300);
         await page.click('#nextTile'); await page.waitForTimeout(700); await page.click('#nextTile'); await page.waitForTimeout(700);
-        r.fn.galleryCounterAfter2Next = await page.textContent('#tileNow');
+        r.fn.galleryCounterAfter2Next = await page.evaluate(() => document.getElementById('strip').dataset.at);
         await page.click('#prevTile'); await page.waitForTimeout(700);
-        r.fn.galleryCounterAfterPrev = await page.textContent('#tileNow');
+        r.fn.galleryCounterAfterPrev = await page.evaluate(() => document.getElementById('strip').dataset.at);
         r.fn.serviceLinksFocusable = await page.evaluate(() => [...document.querySelectorAll('.svc li > a')].every(a => { a.focus(); return document.activeElement === a; }));
         // two-line title alignment: left edges match (side layout) or centres match (band layout)
-        r.fn.bandVisibleMobile = await page.evaluate(() => { const hero = document.querySelector('.hero'); if (hero.dataset.hero !== 'band') return true; const m = document.querySelector('.motif').getBoundingClientRect(); const bar = document.querySelector('.hero-foot').getBoundingClientRect(); return m.bottom <= bar.top + 8 && m.height > 60; });
+        r.fn.bandVisibleMobile = await page.evaluate(() => { const hero = document.querySelector('.hero'); if (hero.dataset.hero !== 'band' || !document.querySelector('.hero .motif')) return true; const m = document.querySelector('.motif').getBoundingClientRect(); const bar = document.querySelector('.hero-foot').getBoundingClientRect(); return m.bottom <= bar.top + 8 && m.height > 60; });
         await page.evaluate(() => document.getElementById('gallery').scrollIntoView()); await page.waitForTimeout(400);
         // lightbox: only photo tiles open it (drawings are not pretend photos)
         const photoTiles = await page.evaluate(() => document.querySelectorAll('.strip .tile[role="button"]').length);
@@ -100,6 +103,7 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
           await page.click('.strip .tile:first-child', { position: { x: 40, y: 40 } }); await page.waitForTimeout(400);
           r.fn.lightbox = await page.evaluate(() => !document.getElementById('lb').open && !document.querySelector('.strip .tile[tabindex]'));
         }
+        r.fn.photoFull = await page.evaluate(() => { const hp = document.querySelector('.hero .hp'); if (!hp) return true; const a = hp.getBoundingClientRect(), h = document.querySelector('.hero').getBoundingClientRect(); return Math.abs(a.left) < 1 && Math.abs(a.width - innerWidth) < 1 && Math.abs(a.height - h.height) < 1; });
         r.fn.statementUnits = await page.evaluate(() => [...document.querySelectorAll('.statement .un')].every(el => el.getClientRects().length === 1));
         r.fn.factsLinks = await page.evaluate(() => [...document.querySelectorAll('.hero .fact')].filter(f => /電話|地址/.test(f.querySelector('b').textContent)).every(f => !!f.querySelector('a[href]')));
         r.fn.typeClearMobile = await page.evaluate(() => { const vt = document.querySelector('.tile.type .vtext'), cap = document.querySelector('.tile.type .cap'); if (!vt) return true; document.getElementById('gallery').scrollIntoView(); return vt.getBoundingClientRect().bottom <= cap.getBoundingClientRect().top + 1; });
@@ -135,7 +139,8 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
       if (name === 'desktop') {
         // every hero motif shape finishes its draw-in (idle motion or the closed state must never leave a shape undrawn); the weave stays out of the type lane
         await page.waitForTimeout(800);
-        r.motifDrawn = await page.evaluate(() => [...document.querySelectorAll('.hero .motif svg :is(path,circle,ellipse,rect)')].every(e => parseFloat(getComputedStyle(e).strokeDashoffset) === 0));
+        await page.evaluate(() => Promise.race([Promise.all(document.getAnimations().filter(a => a.animationName === 'draw').map(a => a.finished.catch(() => null))), new Promise(r => setTimeout(r, 8000))]));
+        r.motifUndrawn = await page.evaluate(() => [...document.querySelectorAll('.hero .motif svg :is(path,circle,ellipse,rect)')].filter(e => e.closest('svg').getBoundingClientRect().width > 0 && parseFloat(getComputedStyle(e).strokeDashoffset) !== 0).map(e => (e.getAttribute('class') || e.tagName) + ':' + getComputedStyle(e).strokeDashoffset + ':' + getComputedStyle(e).animationName + ':' + getComputedStyle(e).animationPlayState)); r.motifDrawn = r.motifUndrawn.length === 0;
         // self-hosted fonts: every declared face either loaded or was not needed; none failed
         r.fontFaces = await page.evaluate(() => [...document.fonts].map(f => f.status));
         r.weaveMasked = await page.evaluate(() => { const w = document.querySelector('.weave'); if (!w || getComputedStyle(w).display === 'none') return true; return !!w.querySelector('rect[mask]') && !!w.querySelector('mask linearGradient, linearGradient'); });
@@ -145,9 +150,17 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
         r.dragOpensLightbox = await page.evaluate(() => document.getElementById('lb').open);
         if (r.dragOpensLightbox) await page.keyboard.press('Escape');
         for (let k = 0; k < 8; k++) { await page.click('#nextTile', { force: true }); await page.waitForTimeout(350); }
-        r.stripEnd = await page.evaluate(() => ({ now: document.getElementById('tileNow').textContent, total: document.querySelectorAll('.strip .tile').length, nextDisabled: document.getElementById('nextTile').disabled }));
+        r.stripEnd = await page.evaluate(() => ({ now: document.getElementById('strip').dataset.at, total: document.querySelectorAll('.strip .tile').length, nextDisabled: document.getElementById('nextTile').disabled }));
         { const before = await page.evaluate(() => document.getElementById('strip').scrollLeft); await page.click('#prevTile', { force: true }); await page.waitForTimeout(600);
-          r.stripPrev = await page.evaluate(b => ({ now: document.getElementById('tileNow').textContent, moved: document.getElementById('strip').scrollLeft < b - 20 }), before); }
+          r.stripPrev = await page.evaluate(b => ({ now: document.getElementById('strip').dataset.at, moved: document.getElementById('strip').scrollLeft < b - 20 }), before); }
+        r.statusRing = await page.evaluate(() => { const st = document.querySelector('.fact>span.status'); return !st || getComputedStyle(st).overflow === 'visible'; });
+        r.photos = await page.evaluate(() => { const has = !!document.querySelector('.strip img'); if (!has) return true; const hp = document.querySelector('.hero .hp img'), ap = document.querySelector('.about .ph img'); return !!hp && hp.naturalWidth > 0 && (!ap || ap.complete); });
+        {
+          const ls = await browser.newPage({ viewport: { width: 844, height: 390 } }); await ls.goto(url, { waitUntil: 'load' }); await ls.waitForTimeout(800);
+          await ls.click('#menuBtn'); await ls.waitForTimeout(800);
+          r.landscapeMenu = await ls.evaluate(async () => { const ov = document.getElementById('overlay'); const first = ov.querySelector('a').getBoundingClientRect(); const brand = ov.querySelector('.ov-brand').getBoundingClientRect(); ov.scrollTop = ov.scrollHeight; await new Promise(r => setTimeout(r, 100)); const acts = ov.querySelector('.acts').getBoundingClientRect(); return { firstBelowBrand: first.top >= brand.bottom, actsReachable: acts.bottom <= innerHeight + 1 }; });
+          await ls.close();
+        }
         // lightbox sits in the middle of the window
         if (await page.evaluate(() => !!document.querySelector('.strip .tile[role="button"]'))) {
           await page.evaluate(() => document.querySelector('.strip .tile[role="button"]').click()); await page.waitForTimeout(700);
@@ -162,15 +175,15 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
         // reduced motion honoured
         const rm = await browser.newPage({ viewport: vp, reducedMotion: 'reduce' });
         await rm.goto(url, { waitUntil: 'load' }); await rm.waitForTimeout(300);
-        r.reducedMotion = await rm.evaluate(() => ({ h1: getComputedStyle(document.querySelector('h1 .w')).animationName, draw: getComputedStyle(document.querySelector('.motif svg :is(path,circle,ellipse,rect)')).animationName, dash: getComputedStyle(document.querySelector('.motif svg :is(path,circle,ellipse,rect)')).strokeDashoffset, reveal: getComputedStyle(document.querySelector('[data-reveal]')).transitionDuration, revealOpacity: getComputedStyle(document.querySelector('[data-reveal]')).opacity }));
+        r.reducedMotion = await rm.evaluate(() => ({ h1: getComputedStyle(document.querySelector('h1 .w')).animationName, draw: (m => m ? getComputedStyle(m).animationName : 'none')(document.querySelector('.motif svg :is(path,circle,ellipse,rect)')), dash: (m => m ? getComputedStyle(m).strokeDashoffset : '0px')(document.querySelector('.motif svg :is(path,circle,ellipse,rect)')), reveal: getComputedStyle(document.querySelector('[data-reveal]')).transitionDuration, revealOpacity: getComputedStyle(document.querySelector('[data-reveal]')).opacity }));
         await rm.close();
         // focus ring colour on a light section equals the ink token
         // keyboard-initiated focus so :focus-visible applies
         await page.evaluate(() => { document.addEventListener('keydown', () => document.querySelector('.svc li > a').focus(), { once: true }); });
         await page.keyboard.press('Shift'); await page.waitForTimeout(100);
-        r.focusRing = await page.evaluate(() => { const a = document.querySelector('.svc li > a'); const fv = a.matches(':focus-visible'); const oc = getComputedStyle(a).outlineColor; const ink = getComputedStyle(document.documentElement).getPropertyValue('--pd').trim(); const h = ink.replace('#',''); const rgb = `rgb(${parseInt(h.slice(0,2),16)}, ${parseInt(h.slice(2,4),16)}, ${parseInt(h.slice(4,6),16)})`; a.blur(); return { focusVisible: fv, outline: oc, ink: rgb, ok: fv && oc === rgb }; });
+        r.focusRing = await page.evaluate(() => { const a = document.querySelector('.svc li > a'); const fv = a.matches(':focus-visible'); const ring = getComputedStyle(a).outlineStyle === 'none' ? a.closest('li') : a; const oc = getComputedStyle(ring).outlineColor; const ink = getComputedStyle(document.documentElement).getPropertyValue('--pd').trim(); const h = ink.replace('#',''); const rgb = `rgb(${parseInt(h.slice(0,2),16)}, ${parseInt(h.slice(2,4),16)}, ${parseInt(h.slice(4,6),16)})`; a.blur(); return { focusVisible: fv, outline: oc, ink: rgb, ok: fv && oc === rgb }; });
         // band hero: motif never overlaps the title box; parallax never moves the facts bar
-        r.heroGeom = await page.evaluate(() => { const h = document.querySelector('h1').getBoundingClientRect(); const m = document.querySelector('.motif').getBoundingClientRect(); const band = document.querySelector('.hero').dataset.hero === 'band'; const bar = document.querySelector('.hero-foot').getBoundingClientRect(); const ox = Math.max(0, Math.min(h.right, m.right) - Math.max(h.left, m.left)); const oy = Math.max(0, Math.min(h.bottom, m.bottom) - Math.max(h.top, m.top)); return { band, overlapPct: Math.round(100 * ox * oy / (h.width * h.height)), bandAboveBar: !band || Math.round(m.bottom) <= Math.round(bar.top) + 8 }; });
+        r.heroGeom = await page.evaluate(() => { const h = document.querySelector('h1').getBoundingClientRect(); const m = (document.querySelector('.hero .motif') || document.querySelector('.hero .hp')).getBoundingClientRect(); const band = document.querySelector('.hero').dataset.hero === 'band' && !!document.querySelector('.hero .motif'); const bar = document.querySelector('.hero-foot').getBoundingClientRect(); const ox = Math.max(0, Math.min(h.right, m.right) - Math.max(h.left, m.left)); const oy = Math.max(0, Math.min(h.bottom, m.bottom) - Math.max(h.top, m.top)); return { band, overlapPct: Math.round(100 * ox * oy / (h.width * h.height)), bandAboveBar: !band || Math.round(m.bottom) <= Math.round(bar.top) + 8 }; });
         r.tiles = await page.evaluate(() => { const th = document.getElementById('tileHours'), hh = document.getElementById('heroHours'); const vt = document.querySelector('.tile.type .vtext'), cap = document.querySelector('.tile.type .cap'); const today = document.querySelector('#hours li.today'); const nb = document.querySelector('#heroHours .nb'); const tt = th ? th.textContent.trim() : ''; return { hoursMatch: !th || !today || tt === today.children[1].textContent.trim() || (nb && tt === nb.textContent.trim()), typeClear: !vt || vt.getBoundingClientRect().bottom <= cap.getBoundingClientRect().top + 1 }; });
         await page.mouse.move(20, 300); await page.waitForTimeout(1000);
         r.factsDrift = await page.evaluate(() => getComputedStyle(document.querySelector('.facts')).transform);
@@ -182,9 +195,9 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
         r.computed = await page.evaluate(() => {
           const ff = el => getComputedStyle(el).fontFamily;
           const t = document.querySelector('.tile:not(.tall)'), tall = document.querySelector('.tile.tall');
-          const rb = t.getBoundingClientRect(), tb = tall.getBoundingClientRect();
+          const rb = t.getBoundingClientRect(), tb = (tall || t).getBoundingClientRect();
           return { h1: ff(document.querySelector('h1')).split(',')[0], body: ff(document.body).split(',')[0], h1DiffersFromBody: ff(document.querySelector('h1')) !== ff(document.body),
-                   tileRatio: +(rb.width / rb.height).toFixed(2), tallRatio: +(tb.width / tb.height).toFixed(2),
+                   tileRatio: +(rb.width / rb.height).toFixed(2), tallRatio: tall ? +(tb.width / tb.height).toFixed(2) : 0.75,
                    ogImage: !!document.querySelector('meta[property="og:image"]'), fontsLoaded: document.fonts.check('600 20px "Noto Serif TC"') || document.fonts.check('800 20px "Noto Sans TC"') };
         });
         await page.addStyleTag({ content: '*,*::before,*::after{transition:none!important;animation:none!important;opacity:1}h1 .w,.tagline,.hero .cta,.hero .eyebrow,.hero-foot .fact,.strip .tile{opacity:1!important;transform:none!important}.hero .eyebrow::before{transform:none!important}.motif svg *,.cl-motif *{stroke-dashoffset:0!important}.js .closing .cl-motif{opacity:.22!important}' });
@@ -236,7 +249,7 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
       && fn.serviceLinksFocusable && Math.abs(fn.titleIndent) <= 2 && fn.modalFocusTrapped && !fn.factClipped && !fn.nbBroken && !fn.ctaOrphan && fn.visibleWithoutJs && v.scrollSpy === '#services' && c.h1DiffersFromBody && c.ogImage
       && v.anchorLanding && v.anchorLanding.solid && !v.anchorLanding.hidden && v.anchorLanding.top === 0
       && fn.overlayHoursSpans && v.heroGeom && (!v.heroGeom.band || v.heroGeom.overlapPct === 0) && v.heroGeom.bandAboveBar && v.factsDrift === 'none'
-      && fn.menuBtnClear && v.nmOneLine && v.motifDrawn && v.weaveMasked && fn.statusInline && !v.dragOpensLightbox && v.stripEnd && v.stripEnd.now === String(v.stripEnd.total) && v.stripEnd.nextDisabled && v.stripPrev && v.stripPrev.moved && v.stripPrev.now === String(v.stripEnd.total - 1) && v.lbCentred && fn.factsLinks && fn.statementUnits && v.reducedMotion.draw === 'none' && parseFloat(v.reducedMotion.dash) === 0 && v.fontFaces && v.fontFaces.length >= 2 && v.fontFaces.every(s => s !== 'error') && v.fontFaces.includes('loaded')
+      && fn.menuBtnClear && v.nmOneLine && v.motifDrawn && v.weaveMasked && fn.statusInline && !v.dragOpensLightbox && v.stripEnd && v.stripEnd.now === String(v.stripEnd.total) && v.stripEnd.nextDisabled && v.stripPrev && v.stripPrev.moved && +v.stripPrev.now < v.stripEnd.total && v.lbCentred && fn.factsLinks && fn.statementUnits && fn.photoFull && v.statusRing && v.photos && v.landscapeMenu && v.landscapeMenu.firstBelowBrand && v.landscapeMenu.actsReachable && v.mapClear && Object.values(v.mapClear).every(Boolean) && v.reducedMotion.draw === 'none' && parseFloat(v.reducedMotion.dash) === 0 && v.fontFaces && v.fontFaces.length >= 2 && v.fontFaces.every(s => s !== 'error') && v.fontFaces.includes('loaded')
       && v.tiles && v.tiles.hoursMatch && v.tiles.typeClear && fn.bandVisibleMobile && fn.typeClearMobile && fn.lightbox
       && v.closingClear && Object.values(v.closingClear).every(Boolean)
       && v.nameClear && Object.values(v.nameClear).every(x => x.real === 0 && x.long === 0) && v.bandGap && Object.values(v.bandGap).every(g => g >= 24)

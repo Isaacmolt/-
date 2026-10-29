@@ -60,7 +60,13 @@
       "戶外座位"
     ],
     "hero": "side",
-    "statement": "一杯咖啡的時間，在{district}慢下來"
+    "statement": "一杯咖啡的時間，在{district}慢下來",
+    "services_title": "今天想喝點什麼",
+    "gallery_title": "巷子裡的一張桌子",
+    "signature": {
+      "kind": "feature",
+      "label": "今日推薦"
+    }
   },
   "breakfast": {
     "label": "早午餐",
@@ -124,7 +130,13 @@
       "外帶區"
     ],
     "hero": "side",
-    "statement": "每天早上，現點現做的那一份"
+    "statement": "每天早上，現點現做的那一份",
+    "services_title": "早上吃點什麼",
+    "gallery_title": "早上七點的店裡",
+    "signature": {
+      "kind": "feature",
+      "label": "招牌"
+    }
   },
   "restaurant": {
     "label": "餐廳",
@@ -200,7 +212,13 @@
       "入口"
     ],
     "hero": "band",
-    "statement": "家常的味道，用心做好每一道菜"
+    "statement": "家常的味道，用心做好每一道菜",
+    "services_title": "今天的菜單",
+    "gallery_title": "好好吃飯的一張桌子",
+    "signature": {
+      "kind": "feature",
+      "label": "招牌菜"
+    }
   },
   "snack": {
     "label": "小吃",
@@ -277,7 +295,13 @@
       "外帶窗口"
     ],
     "hero": "band",
-    "statement": "巷口的老味道，一碗一碗慢慢煮"
+    "statement": "巷口的老味道，一碗一碗慢慢煮",
+    "services_title": "來一碗吧",
+    "gallery_title": "巷口的那一攤",
+    "signature": {
+      "kind": "feature",
+      "label": "招牌"
+    }
   },
   "hotpot": {
     "label": "火鍋",
@@ -342,7 +366,13 @@
       "入口"
     ],
     "hero": "band",
-    "statement": "湯頭熬得夠久，料才吃得出味道"
+    "statement": "湯頭熬得夠久，料才吃得出味道",
+    "services_title": "鍋裡有什麼",
+    "gallery_title": "一鍋熱湯的位置",
+    "signature": {
+      "kind": "feature",
+      "label": "招牌湯底"
+    }
   },
   "dessert": {
     "label": "甜點烘焙",
@@ -416,7 +446,13 @@
       "禮盒"
     ],
     "hero": "band",
-    "statement": "每天限量手作，甜得剛剛好"
+    "statement": "每天限量手作，甜得剛剛好",
+    "services_title": "今天有這些甜點",
+    "gallery_title": "櫃子裡的甜點",
+    "signature": {
+      "kind": "feature",
+      "label": "今日推薦"
+    }
   },
   "hair": {
     "label": "美髮",
@@ -452,7 +488,7 @@
       "剪一個適合你的樣子",
       "好的髮型，讓每天出門都有自信"
     ],
-    "about": "{name} 位於{city}{district}，是一間重視溝通的髮型沙龍。設計師會先了解您的生活習慣與喜好，再給出適合的建議，而不是只套用流行。剪、染、燙、護髮，我們都用對頭皮友善的產品，讓您安心。",
+    "about": "{name} 位於{city}{district}，是一間重視溝通的髮型沙龍。設計師會先了解你的生活習慣與喜好，再給出適合的建議，而不是只套用流行。剪、染、燙、護髮，我們都用對頭皮友善的產品，讓你安心。",
     "highlights": [
       "設計師一對一溝通",
       "使用頭皮友善產品",
@@ -485,7 +521,27 @@
       "店面"
     ],
     "hero": "band",
-    "statement": "先聽你說，再剪出適合你的樣子"
+    "statement": "先聽你說，再剪出適合你的樣子",
+    "services_title": "想怎麼剪，跟我們說",
+    "gallery_title": "鏡子前的那張椅子",
+    "signature": {
+      "kind": "steps",
+      "title": "第一次來，會這樣進行",
+      "steps": [
+        {
+          "title": "先聊聊",
+          "desc": "聊你的生活習慣、平常怎麼整理頭髮"
+        },
+        {
+          "title": "再動手",
+          "desc": "依髮質與臉型調整，過程隨時可以喊停"
+        },
+        {
+          "title": "教你整理",
+          "desc": "回家也能自己吹出差不多的樣子"
+        }
+      ]
+    }
   },
   "beauty": {
     "label": "美容美甲",
@@ -556,7 +612,27 @@
       "店面"
     ],
     "hero": "side",
-    "statement": "慢慢做、細細做，把時間留給自己"
+    "statement": "慢慢做、細細做，把時間留給自己",
+    "services_title": "想做哪一項",
+    "gallery_title": "安靜的一小時",
+    "signature": {
+      "kind": "steps",
+      "title": "從預約到完成",
+      "steps": [
+        {
+          "title": "挑款式",
+          "desc": "先看作品，或帶參考圖來一起討論"
+        },
+        {
+          "title": "慢慢做",
+          "desc": "照步驟施作，不趕時間"
+        },
+        {
+          "title": "保養建議",
+          "desc": "告訴你回家怎麼維持"
+        }
+      ]
+    }
   },
   "pet": {
     "label": "寵物",
@@ -625,7 +701,27 @@
       "店面"
     ],
     "hero": "side",
-    "statement": "不趕不吼，讓毛小孩安心洗香香"
+    "statement": "不趕不吼，讓毛小孩安心洗香香",
+    "services_title": "毛小孩可以做這些",
+    "gallery_title": "洗香香的地方",
+    "signature": {
+      "kind": "steps",
+      "title": "洗澡美容的流程",
+      "steps": [
+        {
+          "title": "到店檢查",
+          "desc": "先看皮膚、耳朵與指甲的狀況"
+        },
+        {
+          "title": "洗澡修剪",
+          "desc": "依毛量與個性調整步驟，不硬來"
+        },
+        {
+          "title": "完成回報",
+          "desc": "拍照告訴家長今天的狀況"
+        }
+      ]
+    }
   },
   "clinic": {
     "label": "診所",
@@ -697,7 +793,27 @@
       "入口"
     ],
     "hero": "side",
-    "statement": "看診不急，把每個問題說清楚"
+    "statement": "看診不急，把每個問題說清楚",
+    "services_title": "看診項目",
+    "gallery_title": "候診的地方",
+    "signature": {
+      "kind": "steps",
+      "title": "看診流程",
+      "steps": [
+        {
+          "title": "掛號報到",
+          "desc": "現場或電話預約都可以"
+        },
+        {
+          "title": "看診說明",
+          "desc": "把病情與用藥講清楚"
+        },
+        {
+          "title": "後續追蹤",
+          "desc": "需要回診時會提醒您"
+        }
+      ]
+    }
   },
   "gym": {
     "label": "健身運動",
@@ -734,7 +850,7 @@
       "從今天開始，一次一點",
       "教練陪你，不怕做錯"
     ],
-    "about": "{name} 位於{city}{district}，提供團體課程與一對一教練訓練。不管您是第一次踏進健身房，或是想突破瓶頸，教練都會依您的狀況安排課表，確保動作正確、循序漸進。歡迎預約免費體驗。",
+    "about": "{name} 位於{city}{district}，提供團體課程與一對一教練訓練。不管你是第一次踏進健身房，或是想突破瓶頸，教練都會依你的狀況安排課表，確保動作正確、循序漸進。歡迎預約免費體驗。",
     "highlights": [
       "新手友善、教練帶",
       "團課 / 一對一皆有",
@@ -767,7 +883,27 @@
       "入口"
     ],
     "hero": "side",
-    "statement": "不用很會，從第一堂開始陪你練"
+    "statement": "不用很會，從第一堂開始陪你練",
+    "services_title": "從哪一堂開始",
+    "gallery_title": "流汗的地方",
+    "signature": {
+      "kind": "steps",
+      "title": "第一次上課",
+      "steps": [
+        {
+          "title": "體態評估",
+          "desc": "先了解你的狀況與目標"
+        },
+        {
+          "title": "安排課表",
+          "desc": "從適合你的強度開始"
+        },
+        {
+          "title": "持續調整",
+          "desc": "每次上完一起看進度"
+        }
+      ]
+    }
   },
   "florist": {
     "label": "花店",
@@ -799,9 +935,9 @@
     "taglines": [
       "把心意，做成一束花",
       "{district}的每日鮮花",
-      "每一束都是現場為您綁的"
+      "每一束都是現場為你綁的"
     ],
-    "about": "{name} 位於{city}{district}，每日清晨採購新鮮花材，依季節與您的需求現場設計。從一束日常小花、節日花禮，到婚禮佈置與開幕盆花，都可以提前預訂。也提供同城配送。",
+    "about": "{name} 位於{city}{district}，每日清晨採購新鮮花材，依季節與你的需求現場設計。從一束日常小花、節日花禮，到婚禮佈置與開幕盆花，都可以提前預訂。也提供同城配送。",
     "highlights": [
       "每日新鮮花材",
       "客製設計、現場包製",
@@ -834,7 +970,27 @@
       "店面"
     ],
     "hero": "side",
-    "statement": "每一束花，都替你把話說出口"
+    "statement": "每一束花，都替你把話說出口",
+    "services_title": "想送什麼樣的花",
+    "gallery_title": "滿屋子的花",
+    "signature": {
+      "kind": "steps",
+      "title": "訂花三步驟",
+      "steps": [
+        {
+          "title": "說說心意",
+          "desc": "送給誰、什麼場合、預算多少"
+        },
+        {
+          "title": "挑花配色",
+          "desc": "依當季花材幫你搭配"
+        },
+        {
+          "title": "取花或外送",
+          "desc": "約好時間，準時完成"
+        }
+      ]
+    }
   },
   "auto": {
     "label": "車輛維修",
@@ -907,7 +1063,27 @@
       "店面"
     ],
     "hero": "band",
-    "statement": "先講清楚再動工，修車不再提心吊膽"
+    "statement": "先講清楚再動工，修車不再提心吊膽",
+    "services_title": "車子需要什麼",
+    "gallery_title": "車子進廠的地方",
+    "signature": {
+      "kind": "steps",
+      "title": "進廠流程",
+      "steps": [
+        {
+          "title": "先檢查",
+          "desc": "找出問題在哪裡"
+        },
+        {
+          "title": "先報價",
+          "desc": "說清楚要換什麼、多少錢"
+        },
+        {
+          "title": "再動工",
+          "desc": "完成後說明做了哪些事"
+        }
+      ]
+    }
   },
   "education": {
     "label": "教育補習",
@@ -982,7 +1158,27 @@
       "入口"
     ],
     "hero": "band",
-    "statement": "一個一個教，讓孩子真的聽懂"
+    "statement": "一個一個教，讓孩子真的聽懂",
+    "services_title": "課程介紹",
+    "gallery_title": "上課的教室",
+    "signature": {
+      "kind": "steps",
+      "title": "試上流程",
+      "steps": [
+        {
+          "title": "預約試上",
+          "desc": "先來上一堂看看"
+        },
+        {
+          "title": "了解程度",
+          "desc": "依孩子的程度安排班級"
+        },
+        {
+          "title": "定期回報",
+          "desc": "學習狀況主動和家長說"
+        }
+      ]
+    }
   },
   "wellness": {
     "label": "按摩放鬆",
@@ -1050,7 +1246,27 @@
       "入口"
     ],
     "hero": "band",
-    "statement": "找到痠痛的源頭，讓身體鬆下來"
+    "statement": "找到痠痛的源頭，讓身體鬆下來",
+    "services_title": "今天想放鬆哪裡",
+    "gallery_title": "放鬆的一小時",
+    "signature": {
+      "kind": "steps",
+      "title": "第一次來",
+      "steps": [
+        {
+          "title": "先聊聊",
+          "desc": "哪裡痠、哪裡緊、喜歡的力道"
+        },
+        {
+          "title": "對症放鬆",
+          "desc": "依狀況調整手法與時間"
+        },
+        {
+          "title": "居家建議",
+          "desc": "教您幾個簡單的伸展"
+        }
+      ]
+    }
   },
   "lodging": {
     "label": "住宿",
@@ -1119,7 +1335,27 @@
       "入口"
     ],
     "hero": "band",
-    "statement": "在{district}住一晚，像回到朋友家"
+    "statement": "在{district}住一晚，像回到朋友家",
+    "services_title": "住在這裡",
+    "gallery_title": "今晚住的地方",
+    "signature": {
+      "kind": "steps",
+      "title": "入住小提醒",
+      "steps": [
+        {
+          "title": "線上訂房",
+          "desc": "確認日期與人數"
+        },
+        {
+          "title": "抵達入住",
+          "desc": "下午就可以先來放行李"
+        },
+        {
+          "title": "在地建議",
+          "desc": "附近吃的玩的都可以問我們"
+        }
+      ]
+    }
   },
   "default": {
     "label": "在地商家",
@@ -1177,6 +1413,26 @@
       "入口"
     ],
     "hero": "side",
-    "statement": "在{district}，認真做好每一件小事"
+    "statement": "在{district}，認真做好每一件小事",
+    "services_title": "我們能為您做的",
+    "gallery_title": "{district}的一個角落",
+    "signature": {
+      "kind": "steps",
+      "title": "怎麼找我們",
+      "steps": [
+        {
+          "title": "先聯絡",
+          "desc": "LINE 或電話都可以"
+        },
+        {
+          "title": "說需求",
+          "desc": "告訴我們您想要什麼"
+        },
+        {
+          "title": "約時間",
+          "desc": "到店或線上都可以"
+        }
+      ]
+    }
   }
 }

@@ -49,7 +49,7 @@ def main() -> Path:
     names = []
     for i in range(6):
         n = f"{i + 1:02d}.jpg"
-        fake_photo(site / "img" / n, i)
+        fake_photo(site / "img" / n, i, *((900, 1200) if i in (1, 4) else (1200, 900)))  # 兩張直式，測直式磚
         names.append(n)
     content = json.loads((SITES_DIR / "demo-cafe" / "content.json").read_text(encoding="utf-8"))
     content["gallery"] = names
