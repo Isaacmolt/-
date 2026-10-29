@@ -22,7 +22,7 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
     const url = `http://127.0.0.1:${PORT}/${slug}/`;
     const r = { errors: [], overflow: {}, smallTargets: [], axe: [], emoji: false };
     r.heroFit = {};
-    for (const [n, vp] of [['700x900', {width:700,height:900}], ['820x1180', {width:820,height:1180}], ['1280x720', {width:1280,height:720}], ['1280x800', {width:1280,height:800}], ['1366x768', {width:1366,height:768}], ['1440x900', {width:1440,height:900}], ['1920x1080', {width:1920,height:1080}], ['1366x657', {width:1366,height:657}], ['1536x730', {width:1536,height:730}], ['1440x789', {width:1440,height:789}], ['320x568', {width:320,height:568}], ['360x640', {width:360,height:640}], ['375x667', {width:375,height:667}], ['390x844', {width:390,height:844}]]) {
+    for (const [n, vp] of [['700x900', {width:700,height:900}], ['820x1180', {width:820,height:1180}], ['1280x720', {width:1280,height:720}], ['1280x800', {width:1280,height:800}], ['1366x768', {width:1366,height:768}], ['1440x900', {width:1440,height:900}], ['1920x1080', {width:1920,height:1080}], ['1366x657', {width:1366,height:657}], ['1536x730', {width:1536,height:730}], ['1440x789', {width:1440,height:789}], ['320x568', {width:320,height:568}], ['360x640', {width:360,height:640}], ['375x667', {width:375,height:667}], ['390x844', {width:390,height:844}], ['844x390', {width:844,height:390}]]) {
       const pg = await browser.newPage({ viewport: vp }); await pg.goto(url, { waitUntil: 'load' }); await pg.evaluate(() => document.fonts.ready); await pg.waitForTimeout(2200);
       if (n === '1366x768') await pg.screenshot({ path: path.join(OUT, `${slug}-laptop-hero.png`) });  // capture before the probes below touch the DOM
       if (n !== '390x844') {
@@ -65,7 +65,7 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
       // map card: the pin sits in its drawing, never on the address
       r.mapClear = r.mapClear || {};
       r.mapClear[n] = await pg.evaluate(() => { const pin = document.querySelector('.map-ph .pin'), ad = document.querySelector('.map-ph .addr'); if (!pin || !ad) return true; return pin.getBoundingClientRect().bottom <= ad.getBoundingClientRect().top; });
-      r.heroFit[n] = await pg.evaluate(() => { const h = innerWidth <= 640 ? document.querySelector('.hero .cta').getBoundingClientRect() : document.querySelector('.hero').getBoundingClientRect(); const bar = document.getElementById('demoBar'); const limit = innerHeight - (bar ? bar.getBoundingClientRect().height : 0); return Math.round(h.bottom) + '/' + Math.round(limit) + (h.bottom <= limit + 1 ? ' ok' : ' OVER'); });
+      r.heroFit[n] = await pg.evaluate(() => { const h = innerWidth <= 640 || innerHeight <= 450 ? document.querySelector('.hero .cta').getBoundingClientRect() : document.querySelector('.hero').getBoundingClientRect(); const bar = document.getElementById('demoBar'); const limit = innerHeight - (bar ? bar.getBoundingClientRect().height : 0); return Math.round(h.bottom) + '/' + Math.round(limit) + (h.bottom <= limit + 1 ? ' ok' : ' OVER'); });
       await pg.close();
     }
     for (const [name, vp] of [['desktop', { width: 1440, height: 900 }], ['mobile', { width: 390, height: 844 }]]) {
@@ -118,7 +118,7 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
           await page.keyboard.press('ArrowRight'); await page.waitForTimeout(150); await page.keyboard.press('ArrowRight'); await page.waitForTimeout(150); await page.keyboard.press('ArrowLeft'); await page.waitForTimeout(150);
           const lbNow = await page.textContent('#lbNow');
           await page.keyboard.press('Escape'); await page.waitForTimeout(300);
-          r.fn.lightbox = await page.evaluate(([o, n]) => o && n.trim().startsWith('2') && !document.getElementById('lb').open && document.activeElement === document.querySelector('.strip .tile[role="button"]'), [lbOpen, lbNow]);
+          r.fn.lightbox = await page.evaluate(([o, n]) => o && n.trim().startsWith('2') && !document.getElementById('lb').open && document.activeElement === document.querySelectorAll('.strip .tile[role="button"]')[+n.trim().split(' ')[0] - 1], [lbOpen, lbNow]);
         } else {
           await page.click('.strip .tile:first-child', { position: { x: 40, y: 40 } }); await page.waitForTimeout(400);
           r.fn.lightbox = await page.evaluate(() => !document.getElementById('lb').open && !document.querySelector('.strip .tile[tabindex]'));
@@ -144,8 +144,10 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
         r.fn.modalFocusTrapped = inside1 && inside2 && inside3 && inside4;
         // overlay hours mirror the facts bar as separate spans (no glued string)
         await page.click('#menuBtn'); await page.waitForTimeout(400);
+        r.fn.overlayRow = await page.evaluate(() => { const ov = document.getElementById('overlay'), br = ov.querySelector('.ov-brand').getBoundingClientRect(), mb = document.getElementById('menuBtn').getBoundingClientRect(); const acts = ov.querySelector('.acts'), ab = acts.getBoundingClientRect(), kids = [...acts.children].map(k => k.getBoundingClientRect()); const gap = parseFloat(getComputedStyle(acts).columnGap) || 0; const used = kids.reduce((t, k) => t + k.width, 0) + gap * (kids.length - 1); return { brandClear: br.right <= mb.left - 4, filled: Math.abs(used - ab.width) <= 2 }; });
         r.fn.overlayHoursSpans = await page.evaluate(() => { const n = document.querySelectorAll('#ovHours > span').length; const t = document.getElementById('ovHours').textContent; return n >= 2 || (n === 1 && !/營業中\d|公休明天|休息中\d/.test(t)); });
         await page.keyboard.press('Escape'); await page.waitForTimeout(300);
+        r.fn.dotCentred = await page.evaluate(() => { const i = document.querySelector('#heroStatus i'), t = document.querySelector('#heroHours > span'); if (!i || !t || getComputedStyle(i).display === 'none') return true; const a = i.getBoundingClientRect(), l = t.getClientRects()[0]; return Math.abs((a.top + a.bottom) / 2 - (l.top + l.bottom) / 2) <= 2; });
         r.fn.statusInline = await page.evaluate(() => { const i = document.querySelector('#heroStatus i'), t = document.querySelector('#heroHours > span'); if (!i || !t) return true; const a = i.getBoundingClientRect(), b = t.getBoundingClientRect(); return a.right <= b.left + 1 && a.top >= b.top - 2 && a.bottom <= b.bottom + 2; });
         r.fn.factClipped = await page.evaluate(() => [...document.querySelectorAll('.fact > span')].some(sp => sp.scrollWidth > sp.clientWidth + 1 && !sp.classList.contains('num')));
         // no-break spans must stay on one line (no CJK orphans)
@@ -163,6 +165,7 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
         // every hero motif shape finishes its draw-in (idle motion or the closed state must never leave a shape undrawn); the weave stays out of the type lane
         await page.waitForTimeout(800);
         await page.evaluate(() => Promise.race([Promise.all(document.getAnimations().filter(a => a.animationName === 'draw').map(a => a.finished.catch(() => null))), new Promise(r => setTimeout(r, 8000))]));
+        r.drift = await page.evaluate(() => Math.max(0, ...[...document.querySelectorAll('.hero .motif .d')].filter(g => g.closest('svg').getBoundingClientRect().width > 0).map(g => { const an = g.getAnimations().filter(a => a.animationName === 'drift'); if (!an.length) return 0; const at = g.getBoundingClientRect(); an.forEach(a => { a.pause(); a.currentTime = a.effect.getComputedTiming().duration; }); const end = g.getBoundingClientRect(); an.forEach(a => { a.currentTime = 0; }); const st = g.getBoundingClientRect(); an.forEach(a => a.play()); return Math.max(Math.abs(end.left - st.left), Math.abs(end.top - st.top)); })));
         r.motifUndrawn = await page.evaluate(() => [...document.querySelectorAll('.hero .motif svg :is(path,circle,ellipse,rect)')].filter(e => e.closest('svg').getBoundingClientRect().width > 0 && parseFloat(getComputedStyle(e).strokeDashoffset) !== 0).map(e => (e.getAttribute('class') || e.tagName) + ':' + getComputedStyle(e).strokeDashoffset + ':' + getComputedStyle(e).animationName + ':' + getComputedStyle(e).animationPlayState)); r.motifDrawn = r.motifUndrawn.length === 0;
         // self-hosted fonts: every declared face either loaded or was not needed; none failed
         r.fontFaces = await page.evaluate(() => [...document.fonts].map(f => f.status));
@@ -176,6 +179,7 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
         r.stripEnd = await page.evaluate(() => ({ now: document.getElementById('strip').dataset.at, total: document.querySelectorAll('.strip .tile').length, nextDisabled: document.getElementById('nextTile').disabled }));
         { const before = await page.evaluate(() => document.getElementById('strip').scrollLeft); await page.click('#prevTile', { force: true }); await page.waitForTimeout(600);
           r.stripPrev = await page.evaluate(b => ({ now: document.getElementById('strip').dataset.at, moved: document.getElementById('strip').scrollLeft < b - 20 }), before); }
+        r.leader = await page.evaluate(() => [...document.querySelectorAll('.svc li')].every(li => { const ld = li.querySelector('.ld'), pr = li.querySelector('.price'), h = li.querySelector('h3'); if (!ld || !pr || getComputedStyle(ld).display === 'none') return true; const a = ld.getBoundingClientRect(), p = pr.getBoundingClientRect(), t = h.getBoundingClientRect(); return a.width > 0 && Math.abs(p.left - a.right) <= 40 && Math.abs(a.left - t.right) <= 32 && a.top >= t.top && a.bottom <= t.bottom + 4; }));
         r.statusRing = await page.evaluate(() => { const st = document.querySelector('.fact>span.status'); return !st || getComputedStyle(st).overflow === 'visible'; });
         r.photos = await page.evaluate(() => { const has = !!document.querySelector('.strip img'); if (!has) return true; const hp = document.querySelector('.hero .hp img'), ap = document.querySelector('.about .ph img'); return !!hp && hp.naturalWidth > 0 && (!ap || ap.complete); });
         {
@@ -183,6 +187,12 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
           await ls.click('#menuBtn'); await ls.waitForTimeout(800);
           r.landscapeMenu = await ls.evaluate(async () => { const ov = document.getElementById('overlay'); const first = ov.querySelector('a').getBoundingClientRect(); const brand = ov.querySelector('.ov-brand').getBoundingClientRect(); ov.scrollTop = ov.scrollHeight; await new Promise(r => setTimeout(r, 100)); const acts = ov.querySelector('.acts').getBoundingClientRect(); return { firstBelowBrand: first.top >= brand.bottom, actsReachable: acts.bottom <= innerHeight + 1 }; });
           await ls.close();
+        }
+        r.clock = {};
+        for (const [k, when] of [['sun1900', '2026-11-01T11:00:00Z'], ['sun0130', '2026-10-31T17:30:00Z']]) {
+          const ck = await browser.newPage({ viewport: { width: 1280, height: 800 } }); await ck.clock.setFixedTime(new Date(when)); await ck.goto(url, { waitUntil: 'load' }); await ck.waitForTimeout(300);
+          r.clock[k] = await ck.evaluate(() => { const li = document.querySelector('#hours li.today'); return { text: document.getElementById('infoStatusText') ? document.getElementById('infoStatusText').textContent : '', today: li ? li.dataset.day : null, tag: li && li.querySelector('.tag') ? li.querySelector('.tag').textContent : '' }; });
+          await ck.close();
         }
         // lightbox sits in the middle of the window
         if (await page.evaluate(() => !!document.querySelector('.strip .tile[role="button"]'))) {
@@ -236,6 +246,7 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
         await dark.evaluate(() => { document.querySelectorAll('[data-reveal]').forEach(el => el.classList.add('in')); document.querySelector('.closing').classList.add('in'); });
         await dark.waitForTimeout(200);
         await dark.screenshot({ path: path.join(OUT, `${slug}-desktop-dark.png`), fullPage: true });
+        r.fabDark = await dark.evaluate(() => { const f = document.querySelector('.fab'); if (!f) return true; const cs = getComputedStyle(f); return /0px 0px 0px 1px/.test(cs.boxShadow) && cs.backgroundColor !== getComputedStyle(document.body).backgroundColor; });
         await dark.addScriptTag({ content: axeSource });
         const dres = await dark.evaluate(async () => await axe.run(document, { runOnly: ['wcag2aa'] }));
         r.axeDark = dres.violations.map(v => ({ id: v.id, nodes: v.nodes.length, sample: v.nodes[0].target[0] }));
@@ -273,6 +284,8 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
   report.system = { noHero: Object.keys(motifs).filter(k => !k.startsWith('_') && !motifs[k].hero), darkAccent: Object.keys(themes).filter(k => !k.startsWith('_') && contrast(themes[k].palette.a, '#0f1115') < 4.5) };
   const sysOk = !report.system.noHero.length && !report.system.darkAccent.length;
   console.log('system:', JSON.stringify(report.system), sysOk ? 'PASS' : 'FAIL');
+  // known schedules: demo-cafe closes Mondays (Sunday evening points to Tuesday); _qa-edge runs Fri-Sat 17:00-02:00 and closes Sundays
+  const clockOk = (slug, c) => { if (!c) return false; if (slug === 'demo-cafe') return /週二 10:00 開門/.test(c.sun1900.text); if (slug === '_qa-edge') return c.sun0130.today === '6' && c.sun0130.tag === '現在' && /營業中/.test(c.sun0130.text) && /02:00 打烊/.test(c.sun0130.text); return true; };
   let allOk = sysOk;
   for (const slug of slugs) {
     const v = report[slug], fn = v.fn || {}, c = v.computed || {};
@@ -285,12 +298,13 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
       && v.closingClear && Object.values(v.closingClear).every(Boolean)
       && v.nameClear && Object.values(v.nameClear).every(x => x.real === 0 && x.long === 0) && v.bandGap && Object.values(v.bandGap).every(g => g >= 24)
       && v.kinsoku && Object.values(v.kinsoku).every(k => k === 0)
+      && fn.overlayRow && fn.overlayRow.brandClear && fn.overlayRow.filled && fn.dotCentred && v.drift <= 20 && v.leader && v.fabDark && clockOk(slug, v.clock)
       && v.reducedMotion && v.reducedMotion.h1 === 'none' && v.reducedMotion.revealOpacity === '1' && v.focusRing && v.focusRing.ok
       && Math.abs(c.tileRatio - 1.33) < 0.05 && Math.abs(c.tallRatio - 0.75) < 0.05 && !v.errors.length && !v.smallTargets.length
       && !v.axe.length && !(v.axeDark || []).length && !v.emoji && Object.values(v.heroFit).every(x => x.includes('ok')) && Object.values(v.overflow).every(o => o === 0);
     allOk = allOk && ok;
     console.log(`${slug}: ${ok ? 'PASS' : 'FAIL'}`);
-    if (!ok) console.log(JSON.stringify({ fn, scrollSpy: v.scrollSpy, heroGeom: v.heroGeom, tiles: v.tiles, closingClear: v.closingClear, nameClear: v.nameClear, bandGap: v.bandGap, kinsoku: v.kinsoku, factsDrift: v.factsDrift, anchorLanding: v.anchorLanding, reducedMotion: v.reducedMotion, focusRing: v.focusRing, computed: c, axe: v.axe, axeDark: v.axeDark, errors: v.errors, small: v.smallTargets, heroFit: v.heroFit, overflow: v.overflow, emoji: v.emoji }, null, 2));
+    if (!ok) console.log(JSON.stringify({ fn, scrollSpy: v.scrollSpy, heroGeom: v.heroGeom, tiles: v.tiles, closingClear: v.closingClear, nameClear: v.nameClear, bandGap: v.bandGap, kinsoku: v.kinsoku, drift: v.drift, leader: v.leader, fabDark: v.fabDark, clock: v.clock, layout: v.layout, ctaClear: v.ctaClear, mapClear: v.mapClear, landscapeMenu: v.landscapeMenu, factsDrift: v.factsDrift, anchorLanding: v.anchorLanding, reducedMotion: v.reducedMotion, focusRing: v.focusRing, computed: c, axe: v.axe, axeDark: v.axeDark, errors: v.errors, small: v.smallTargets, heroFit: v.heroFit, overflow: v.overflow, emoji: v.emoji }, null, 2));
   }
   const lh = report.lighthouse;
   const lhOk = lh && typeof lh === 'object' && ['performance', 'accessibility', 'best-practices', 'seo'].every(k => lh[k] >= 90);

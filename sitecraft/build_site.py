@@ -418,13 +418,34 @@ def vertical_columns(text: str) -> list[str]:
     return cols[:3] or [text]
 
 
-def scene_markup(mset: dict) -> str:
-    """hero 插畫：有 hero（多筆、兩種線寬、強調色填色）就用，沒有就用主圖騰；後面墊一個實心強調色圓。"""
+ACCENTS = {
+    "circle": '<circle class="disc" cx="134" cy="76" r="58"/>',
+    "arch": '<path class="disc" d="M88 156V80a48 48 0 0 1 96 0v76z"/>',
+    "blob": '<path class="disc" d="M94 36c30-22 80-8 88 30s-8 70-46 72-70-14-68-46 0-38 26-56z"/>',
+    "sun": '<path class="disc" d="M70 150a64 64 0 0 1 128 0z"/>',
+    "square": '<rect class="disc" x="90" y="28" width="96" height="96" rx="20" transform="rotate(8 138 76)"/>',
+}
+ACCENT_OF = {"cafe": "circle", "hair": "arch", "pet": "blob", "breakfast": "sun", "restaurant": "circle", "snack": "blob",
+             "hotpot": "sun", "dessert": "arch", "beauty": "blob", "clinic": "square", "gym": "square", "florist": "arch",
+             "auto": "sun", "education": "square", "wellness": "blob", "lodging": "arch", "default": "circle"}
+
+
+def scene_markup(mset: dict, key: str = "default") -> str:
+    """hero 插畫：有 hero（多筆、兩種線寬、強調色填色）就用，沒有就用主圖騰；後面墊一塊這個類別專屬形狀的強調色。"""
     if mset.get("hero"):
         art = idle_classes(drawable(mset["hero"]), mset.get("hero_idle") or {"shapes": []})
     else:
         art = idle_classes(drawable(mset["a"]), mset.get("idle") or {"kind": "float", "shapes": [0]})
-    return '<circle class="disc" cx="134" cy="76" r="58"/>' + art
+    return ACCENTS[ACCENT_OF.get(key, "circle")] + art
+
+
+def print_scene(main: str, small: str = "", ground: bool = True) -> str:
+    """雙色印刷感的插畫：先畫一層偏移的強調色填色，再疊上線條（線條會在捲到時描出來）。"""
+    shapes = f'<g transform="translate(14 10) scale(.84)">{{m}}</g>' + (f'<g transform="translate(134 130) scale(.34)">{{s}}</g>' if small else "")
+    tone = shapes.format(m=main, s=small)
+    line = shapes.format(m=drawable(main), s=drawable(small) if small else "")
+    return (f'<g class="tone" transform="translate(6 6)">{tone}</g>'
+            + ('<path pathLength="1" d="M-6 196H214"/>' if ground else "") + f'<g class="ln">{line}</g>')
 
 
 def photo_tall(src: str, site_dir: Path | None) -> bool | None:
@@ -561,6 +582,7 @@ def parse_hours(hours_json: str) -> tuple[list[dict], list[dict]]:
         parts = re.split(r"[:：]\s*", desc, maxsplit=1)
         label = parts[0].strip() if parts else WEEKDAY_LABELS[(i + 1) % 7]
         text = parts[1].strip() if len(parts) > 1 else desc
+        text = re.sub(r"\s*,\s*", "、", text)
         closed = any(k in text for k in ("休息", "Closed", "closed", "公休"))
         # Google 的 weekdayDescriptions 從星期一開始；JS getDay() 星期日 = 0
         weekday.append({"day": (i + 1) % 7, "label": label, "text": text or "休息", "closed": closed})
@@ -735,9 +757,27 @@ def og_image(lead: dict, content: dict, theme: dict, out: Path) -> bool:
         if art is not None:
             img.alpha_composite(art, (700, 40))
     d = ImageDraw.Draw(img)
-    zh_size = 128 if len(zh) <= 5 else 104 if len(zh) <= 7 else 84
-    f_zh = _voice_font(spec_zh, zh_size) or (ImageFont.truetype(base, zh_size) if base else None)
-    f_en = _voice_font(spec_en, 64) or (ImageFont.truetype(base, 56) if base else None)
+    avail = 600
+    zh_lines, zh_size, f_zh = [zh] if zh else [], 128, None
+    for size in (128, 112, 100, 90, 80, 72):
+        f_zh = _voice_font(spec_zh, size) or (ImageFont.truetype(base, size) if base else None)
+        zh_size = size
+        if not zh or (f_zh and f_zh.getlength(zh) <= avail):
+            break
+    if zh and f_zh and f_zh.getlength(zh) > avail:
+        groups = ["".join(g) for g in cjk_groups(list(zh))]
+        best = min(range(1, len(groups)), key=lambda i: abs(len("".join(groups[:i])) - len("".join(groups[i:]))), default=1)
+        zh_lines = ["".join(groups[:best]), "".join(groups[best:])]
+        for size in (100, 90, 80, 72, 64, 56):
+            f_zh = _voice_font(spec_zh, size) or (ImageFont.truetype(base, size) if base else None)
+            zh_size = size
+            if f_zh and all(f_zh.getlength(t) <= avail for t in zh_lines):
+                break
+    f_en = None
+    for size in (64, 56, 48, 40, 34):
+        f_en = _voice_font(spec_en, size) or (ImageFont.truetype(base, size) if base else None)
+        if not en or (f_en and f_en.getlength(en) <= avail):
+            break
     f_small = _voice_font(("NotoSansTC[wght].ttf", {"Weight": 500}), 30) or (ImageFont.truetype(base, 30) if base else None)
     f_tag = _voice_font(spec_zh if mode == "editorial" else ("NotoSansTC[wght].ttf", {"Weight": 400}), 40) or f_small
     if not (f_zh and f_small):
@@ -748,8 +788,10 @@ def og_image(lead: dict, content: dict, theme: dict, out: Path) -> bool:
     d.text((148, 94), eyebrow, font=f_small, fill=(255, 255, 255, 220))
     y = 150
     if zh:
-        d.text((76, y), zh, font=f_zh, fill=white)
-        y += int(zh_size * 1.3)
+        for t in zh_lines:
+            d.text((76, y), t, font=f_zh, fill=white)
+            y += int(zh_size * 1.22)
+        y += int(zh_size * .08)
     if en and f_en:
         d.text((80, y), en, font=f_en, fill=white)
         y += 84
@@ -911,21 +953,23 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, 
     tpl = _env.get_template("onepage.html.j2")
     from markupsafe import Markup
     # 橫幅：兩側是主圖騰與第三圖騰，中間是這一類的場景插畫（像一組靜物，不是三個圖示）
-    hero_art = idle_classes(drawable(mset["hero"]), mset.get("hero_idle") or {"shapes": []}) if mset.get("hero") else drawable(mset.get("b", motif))
+    key = lead.get("theme") or "default"
+    hero_block = scene_markup(mset, key)
     band = (f'<g transform="translate(150 52) rotate(-8 100 100) scale(.7)">{drawable(motif)}</g>'
-            f'<g transform="translate(300 0)">{hero_art}</g>'
+            f'<g transform="translate(300 0)">{hero_block}</g>'
             f'<g transform="translate(496 52) rotate(-5 100 100) scale(.7)">{drawable(mset.get("c", motif))}</g>')
     idle = mset.get("idle") or {"kind": "float", "shapes": [0]}
-    band = '<circle class="disc" cx="400" cy="92" r="64"/>' + band
-    band2 = '<circle class="disc" cx="134" cy="76" r="58"/>' + hero_art
+
+    band2 = hero_block
     closing_motif = motif if mset.get("hero") else mset.get("c", motif)
     closing_draw = idle_classes(drawable(closing_motif), mset.get("idle") or {"shapes": []}) if closing_motif is motif else drawable(closing_motif)
     return minify_css(tpl.render(b=b, t={**theme["palette"], "word": theme.get("word", "LOCAL"), "motif": Markup(motif),
                                          "motif_draw": Markup(drawable(motif)), "motif_idle": Markup(idle_classes(drawable(motif), idle)),
-                                         "motif_scene": Markup(scene_markup(mset)),
+                                         "motif_scene": Markup(scene_markup(mset, key)),
+                                         "motif_feature": Markup(print_scene(mset.get("hero") or motif, ground=False)),
                                          "motif_band2": Markup(band2), "motif_closing": Markup(closing_draw),
                                          "motif_b_draw": Markup(drawable(mset.get("b", motif))),
-                                         "motif_about": Markup('<circle class="disc" cx="120" cy="70" r="52"/>' + drawable(mset.get("c", motif))),
+                                         "motif_about": Markup(print_scene(mset.get("b", motif), mset.get("c", motif))),
                                          "motif_overlay": Markup(mset.get("b", motif)),
                                          "motif_b": Markup(mset.get("b", motif)), "motif_band": Markup(band)}, demo=demo))
 
@@ -1009,6 +1053,9 @@ def main() -> None:
     load_env()
     cfg = load_config()
     themes = load_themes()
+    b_ = cfg["brand"]
+    if not b_.get("contact_email") and not str(b_.get("contact_line", "")).startswith("http"):
+        print("! 提醒：config.json／.env 沒有填 CONTACT_EMAIL 或 CONTACT_LINE，示範網站底部的橫幅不會有「聯絡我們」按鈕，老闆看了沒辦法直接找你。")
 
     if args.index:
         print("[index] 作品集 →", build_index(cfg, themes))
