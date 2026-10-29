@@ -139,7 +139,7 @@ async function hoverContrast(pg) {
         r.fn.galleryCounterAfter2Next = await page.evaluate(() => document.getElementById('strip').dataset.at);
         await page.click('#prevTile'); await page.waitForTimeout(700);
         r.fn.galleryCounterAfterPrev = await page.evaluate(() => document.getElementById('strip').dataset.at);
-        r.fn.serviceLinksFocusable = await page.evaluate(() => [...document.querySelectorAll('.svc li > a')].every(a => { a.focus(); return document.activeElement === a; }));
+        r.fn.serviceLinksFocusable = await page.evaluate(() => [...document.querySelectorAll(':is(.svc li > a, .price-chart .arr)')].every(a => { a.focus(); return document.activeElement === a; }));
         // two-line title alignment: left edges match (side layout) or centres match (band layout)
         r.fn.bandVisibleMobile = await page.evaluate(() => { const hero = document.querySelector('.hero'); if (hero.dataset.hero !== 'band' || !document.querySelector('.hero .motif')) return true; const m = document.querySelector('.motif').getBoundingClientRect(); const bar = document.querySelector('.hero-foot').getBoundingClientRect(); return m.bottom <= bar.top + 8 && m.height > 60; });
         await page.evaluate(() => document.getElementById('gallery').scrollIntoView()); await page.waitForTimeout(400);
@@ -236,7 +236,7 @@ async function hoverContrast(pg) {
         await page.evaluate(() => document.activeElement.blur());
         r.navSolid = await page.evaluate(() => document.getElementById('nav').classList.contains('solid'));
         r.rhythm = await page.evaluate(() => { const secs = [...document.querySelectorAll('main > section:not(.hero)')]; const tones = secs.map(x => getComputedStyle(x).backgroundColor); return tones.every((t, i) => i === 0 || t !== tones[i - 1]); });
-        r.rowLabels = await page.evaluate(() => [...document.querySelectorAll('.svc li > a')].every(a => { const t = a.querySelector('.arr-t'); return t && t.textContent.trim().length >= 2; }) && (!document.querySelector('.fab') || !!document.querySelector('.fab a[href*="maps"]')));
+        r.rowLabels = await page.evaluate(() => [...document.querySelectorAll(':is(.svc li > a, .price-chart .arr)')].every(a => { const t = a.querySelector('.arr-t'); return t && t.textContent.trim().length >= 2; }) && (!document.querySelector('.fab') || !!document.querySelector('.fab a[href*="maps"]')));
         r.ctaLabel = await page.evaluate(() => [...document.querySelectorAll('.feature .btn')].every(a => !a.getAttribute('href').startsWith('tel:') || !/LINE/.test(a.textContent)));
         await page.evaluate(() => { document.documentElement.style.scrollBehavior = ''; scrollTo(0, 0); }); await page.waitForTimeout(300);
         r.statusRing = await page.evaluate(() => { const st = document.querySelector('.fact>span.status'); return !st || getComputedStyle(st).overflow === 'visible'; });
@@ -271,9 +271,9 @@ async function hoverContrast(pg) {
         await rm.close();
         // focus ring colour on a light section equals the ink token
         // keyboard-initiated focus so :focus-visible applies
-        await page.evaluate(() => { document.addEventListener('keydown', () => document.querySelector('.svc li > a').focus(), { once: true }); });
+        await page.evaluate(() => { document.addEventListener('keydown', () => document.querySelector(':is(.svc li > a, .price-chart .arr)').focus(), { once: true }); });
         await page.keyboard.press('Shift'); await page.waitForTimeout(100);
-        r.focusRing = await page.evaluate(() => { const a = document.querySelector('.svc li > a'); const fv = a.matches(':focus-visible'); const ring = getComputedStyle(a).outlineStyle === 'none' ? a.closest('li') : a; const oc = getComputedStyle(ring).outlineColor; const ink = getComputedStyle(document.documentElement).getPropertyValue(document.body.dataset.mode === 'bold' ? '--a' : '--pd').trim();  /* the bold menu board is dark, so its ring is the accent */ const h = ink.replace('#',''); const rgb = `rgb(${parseInt(h.slice(0,2),16)}, ${parseInt(h.slice(2,4),16)}, ${parseInt(h.slice(4,6),16)})`; a.blur(); return { focusVisible: fv, outline: oc, ink: rgb, ok: fv && oc === rgb }; });
+        r.focusRing = await page.evaluate(() => { const a = document.querySelector(':is(.svc li > a, .price-chart .arr)'); const fv = a.matches(':focus-visible'); const ring = getComputedStyle(a).outlineStyle === 'none' ? a.closest('li, tr') : a; const oc = getComputedStyle(ring).outlineColor; const ink = getComputedStyle(document.documentElement).getPropertyValue(document.body.dataset.mode === 'bold' ? '--a' : '--pd').trim();  /* the bold menu board is dark, so its ring is the accent */ const h = ink.replace('#',''); const rgb = `rgb(${parseInt(h.slice(0,2),16)}, ${parseInt(h.slice(2,4),16)}, ${parseInt(h.slice(4,6),16)})`; a.blur(); return { focusVisible: fv, outline: oc, ink: rgb, ok: fv && oc === rgb }; });
         await page.evaluate(() => { document.addEventListener('keydown', () => { const a = document.querySelector('.feature .btn'); if (a) a.focus(); }, { once: true }); });
         await page.keyboard.press('Shift'); await page.waitForTimeout(100);
         r.featureRing = await page.evaluate(() => { const a = document.querySelector('.feature .btn'); if (!a) return { ok: true }; const fv = a.matches(':focus-visible'), cs = getComputedStyle(a); const ring = cs.outlineColor, card = getComputedStyle(a.closest('.feature')).backgroundColor, active = document.activeElement === a; a.blur(); return { ok: fv && active && parseFloat(cs.outlineWidth) >= 2 && ring !== card, fv, active, width: cs.outlineWidth, ring, card }; });
