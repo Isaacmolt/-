@@ -52,6 +52,15 @@ _env = Environment(
 )
 
 
+def _cur(v):
+    """價格裡的「NT$」包一層，讓高反差的拉丁字型（Bodoni）站可以把幣別換成內文字型，不會讀成 NTS。"""
+    from markupsafe import Markup, escape
+    return Markup(str(escape(v)).replace("NT$", '<span class="cur">NT$</span>'))
+
+
+_env.filters["cur"] = _cur
+
+
 # ---------------------------------------------------------------------------
 # 文案：content.json > Claude > 主題預設
 # ---------------------------------------------------------------------------
@@ -524,8 +533,8 @@ def idle_classes(markup: str, idle: dict) -> str:
         if n not in kinds:
             return el
         kind, eph, k = kinds[n]
-        if k:
-            el = re.sub(r"^<(\w+)", lambda t: f'<{t.group(1)} style="--i:{k}"', el)
+        # drawable() 已經放了 style="--i:n"（描線順序）；閒置動作要的是同一種微動之間的錯開，直接改掉，不重複屬性
+        el = re.sub(r'style="--i:\d+"', f'style="--i:{k}"', el) if 'style="--i:' in el else re.sub(r"^<(\w+)", lambda t: f'<{t.group(1)} style="--i:{k}"', el)
         add = f"idle idle-{kind}" + (" eph" if eph else "")  # eph：蒸氣、熱水這類「休息時就不在」的筆畫
         cm = re.search(r"""class=(['"])(.*?)\1""", el)
         if cm:

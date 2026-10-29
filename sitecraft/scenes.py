@@ -58,6 +58,22 @@ STYLE_OF = {  # 店面樣式：依類別（餐飲遮陽棚、沙龍拱窗、服�
 ROOM_OF = {"hair": "salon", "beauty": "salon", "pet": "grooming", "hotpot": "dining", "restaurant": "dining"}
 
 
+def _lamp(x: float, kind: str = "dome", drop: float = 0) -> str:
+    """一盞吊燈（含燈罩的強調色）包成一組，CSS 讓它以吊線頂端為軸慢慢晃（休息時也在晃，頁面不會死掉）。"""
+    if kind == "pendant":  # 吧台的大燈罩
+        body = (f'<path class="fine" d="M{x} 0v46"/><path d="M{x - 22} 70c0-14 10-24 22-24s22 10 22 24z"/>'
+                f'<path class="fine" d="M{x - 8} 76a8 5 0 0 0 16 0"/>')
+    elif kind == "lantern":  # 鍋物的圓燈籠
+        body = (f'<ellipse class="acc" cx="{x}" cy="58" rx="15" ry="18"/>'
+                f'<path class="fine" d="M{x} 0v40"/><ellipse cx="{x}" cy="58" rx="15" ry="18"/>'
+                f'<path class="fine" d="M{x - 15} 58h30M{x - 10} 44h20M{x - 10} 72h20"/>')
+    else:  # 沙龍的小圓燈（drop：吊線再長一點）
+        y = 40 + drop
+        body = (f'<path class="acc" d="M{x - 12} {y}c0-8 5-12 12-12s12 4 12 12z"/>'
+                f'<path class="fine" d="M{x} 0v{30 + drop}"/><path d="M{x - 12} {y}c0-8 5-12 12-12s12 4 12 12z"/>')
+    return f'<g class="sway">{body}</g>'
+
+
 def _plate(x: float, y: float) -> str:
     """門上的小牌子：頁面判斷營業中／休息中後由 JS 寫字（沒有 JS 就不顯示）。"""
     return (f'<g class="plate"><path d="M{x + 12} {y}l10-8 10 8"/><rect x="{x}" y="{y}" width="44" height="18" rx="3"/>'
@@ -271,17 +287,17 @@ def interior(mset: dict, drawable, key: str = "default", wide: bool = False) -> 
 # 橫幅舞台兩側（左翼 x 0–100、右翼 x 500–600，地板 y=266）：(左線條, 右線條, 偏移色塊, 強調色填色)
 _WINGS = {
     "salon": (  # 左：接待櫃台、花瓶與吊燈；右：牆上層架的瓶罐，地上一籃毛巾
-        '<path class="fine" d="M50 0v52"/><path d="M38 64c0-8 5-12 12-12s12 4 12 12z"/>'
+        _lamp(50, drop=24) +
         '<path d="M10 206h84"/><path d="M16 206v60M88 206v60"/><path class="fine" d="M16 226h72"/>'
         '<path d="M28 206l-2-14h12l-2 14"/><path class="fine" d="M32 192c-2-10-8-16-14-18M32 192c2-12 8-18 16-20M32 192c0-10 2-18 6-22"/>'
         '<path d="M60 206v-8a8 8 0 0 1 16 0v8"/><path class="fine" d="M68 190v-4"/>',
-        '<path class="fine" d="M550 0v52"/><path d="M538 64c0-8 5-12 12-12s12 4 12 12z"/>'
+        _lamp(550, drop=24) +
         '<path d="M512 118h80"/><path class="fine" d="M522 118l6 8M582 118l-6 8"/>'
         '<path d="M524 118v-22h9v22M526 96v-5h5"/><path d="M542 118v-28h10v28M544 90v-5h6"/><path d="M562 118v-18h12v18"/>'
         '<path d="M520 266l6-34h56l6 34"/><path class="fine" d="M524 244h60"/>'
         '<rect x="528" y="220" width="52" height="10" rx="5"/><rect x="534" y="210" width="40" height="10" rx="5"/>',
         '<path d="M10 206h84v60H10z"/><path d="M520 266l6-34h56l6 34z"/>',
-        '<path class="acc" d="M38 64c0-8 5-12 12-12s12 4 12 12zM538 64c0-8 5-12 12-12s12 4 12 12z"/><rect class="acc2" x="528" y="220" width="52" height="10" rx="5"/>'),
+        '<rect class="acc2" x="528" y="220" width="52" height="10" rx="5"/>'),
     "dining": (  # 左：通往廚房的門，掛著暖簾；右：飲料冰櫃
         '<path d="M14 266V92h76v174"/><path d="M14 92h76v52H14"/><path class="fine" d="M39 92v52M65 92v52"/>'
         '<path class="fine" d="M30 170c-4-8 4-12 0-20M52 166c-4-8 4-12 0-20M74 170c-4-8 4-12 0-20"/>',
@@ -305,9 +321,7 @@ def counter(mset: dict, drawable) -> str:
     """吧台／工作檯：兩盞吊燈、牆上的畫框與層架，檯面上是這個類別的工具與小物。"""
     b, c = mset.get("b", mset["a"]), mset.get("c", mset["a"])
     lines = (
-        '<path class="fine" d="M110 0v46M290 0v46"/>'
-        '<path d="M88 70c0-14 10-24 22-24s22 10 22 24zM268 70c0-14 10-24 22-24s22 10 22 24z"/>'
-        '<path class="fine" d="M102 76a8 5 0 0 0 16 0M282 76a8 5 0 0 0 16 0"/>'
+        _lamp(110, "pendant") + _lamp(290, "pendant") +
         '<rect x="26" y="92" width="56" height="68" rx="2"/><rect class="fine" x="33" y="99" width="42" height="54"/>'
         + _place(c, 54, 146, 30, 32)
         + '<path d="M232 122h140"/><path class="fine" d="M246 122l8 10M358 122l-8 10"/>'
@@ -335,7 +349,7 @@ def salon(mset: dict, drawable) -> str:
                         f'<path class="fine" d="M{x + 14} 80c8-8 20-10 30-6M{x + 10} 132l16-16"/>')
     lines = (
         '<path d="M0 266H400"/><path class="fine" d="M0 252H400"/>'
-        '<path class="fine" d="M104 0v30M264 0v30"/><path d="M92 40c0-8 5-12 12-12s12 4 12 12zM252 40c0-8 5-12 12-12s12 4 12 12z"/>'
+        + _lamp(104) + _lamp(264)
         + mirror(70) + mirror(230)
         + '<path d="M56 150h296v8H56z"/>' + _place(c, 180, 150, 24, 40)
         + '<path d="M246 150v-14h7v14M248 136v-4h3"/><path d="M322 150v-16h9v16M324 134v-4h5"/>'
@@ -350,7 +364,6 @@ def salon(mset: dict, drawable) -> str:
             '<path d="M230 150V96a34 34 0 0 1 68 0v54z"/><path d="M286 196h48v70h-48z"/></g>')
     glass = '<g class="sc-paper"><path d="M70 150V96a34 34 0 0 1 68 0v54z"/><path d="M230 150V96a34 34 0 0 1 68 0v54z"/></g>'
     return ('<rect class="sc-bg" width="400" height="300"/>' + tone + glass
-            + '<path class="acc" d="M92 40c0-8 5-12 12-12s12 4 12 12zM252 40c0-8 5-12 12-12s12 4 12 12z"/>'
             + '<path class="acc2" d="M78 214h52a5 5 0 0 1 0 10H78a5 5 0 0 1 0-10z"/>'
             + f'<g class="sc-ln">{drawable(lines)}</g>')
 
@@ -392,7 +405,7 @@ def dining(mset: dict, drawable) -> str:
                    for x in (300, 320, 340, 360))
     lines = (
         '<path d="M0 266H400"/><path class="fine" d="M0 150H400"/>'
-        + lantern(110) + lantern(200) + lantern(290) + tags
+        + _lamp(110, "lantern") + _lamp(200, "lantern") + _lamp(290, "lantern") + tags
         + '<path d="M96 196h208"/><path class="fine" d="M96 196v6h208v-6"/><path d="M118 202v64M282 202v64"/>'
         + _place(b, 200, 196, 58, 90) + _place(c, 272, 196, 22, 36)
         + '<path class="fine" d="M104 192a16 4 0 0 0 32 0M106 186l22-8M288 192a8 3 0 0 0 0-1"/><path d="M140 196v-9h11v9zM250 196v-9h11v9z"/>'
@@ -402,8 +415,7 @@ def dining(mset: dict, drawable) -> str:
     )
     tone = ('<g class="sc-tone" transform="translate(7 7)"><path d="M96 196h208v6H96z"/><rect x="22" y="70" width="70" height="52"/>'
             '<path d="M300 70h74v58h-74z"/></g>')
-    lanterns = "".join(f'<ellipse class="acc" cx="{x}" cy="58" rx="15" ry="18"/>' for x in (110, 200, 290))
-    return ('<rect class="sc-bg" width="400" height="300"/>' + tone + lanterns
+    return ('<rect class="sc-bg" width="400" height="300"/>' + tone
             + '<rect class="sc-paper" x="22" y="70" width="70" height="52" rx="3"/>'
             + f'<g class="sc-ln">{drawable(lines)}</g>')
 
@@ -469,7 +481,7 @@ def street(mset: dict, name: str, drawable, seed: str = "", key: str = "default"
         + '<path d="M268 266V128h124v138"/><path class="fine" d="M264 128h132"/>'
         f'<rect x="282" y="164" width="96" height="42"/><path class="fine" d="{grille}"/>'
         '<rect class="fine" x="290" y="222" width="34" height="44"/>'
-        '<path d="M64 266V146h16"/><path class="acc" d="M76 146h14l-3 8h-8z"/>'
+        '<path d="M50 266V146h16"/><path class="acc" d="M62 146h14l-3 8h-8z"/>'
         '<circle cx="300" cy="256" r="9"/><circle cx="354" cy="256" r="9"/>'
         '<path d="M288 250c0-14 9-22 22-22h10c4 0 6 3 6 7v15z"/><path d="M296 222h26"/><path d="M326 250h14"/>'
         '<path d="M340 250c4-10 4-22-2-34"/><path d="M336 214h14"/><path class="fine" d="M344 226l10 30"/>'
@@ -483,6 +495,29 @@ def street(mset: dict, name: str, drawable, seed: str = "", key: str = "default"
     sky = ""
     if night:  # 晚上：月亮、幾顆星、店門口打出來的一片光
         stars = "".join(f'<circle cx="{rnd.randint(20, 380)}" cy="{rnd.randint(14, 56)}" r="{rnd.choice((1, 1.3, 1.6))}"/>' for _ in range(14))
-        sky = f'<g class="star">{stars}</g><path class="beam" d="M140 266h90l26 20H114z"/><path class="beam" d="M76 154h14l26 112H50z"/>'
-    return ('<rect class="sc-bg" width="400" height="300"/><circle class="acc2" cx="340" cy="52" r="22"/>' + sky + tone + lit
-            + f'<g class="sc-ln">{drawable(lines)}</g>' + _vsign(far, 99, 96, 98))
+        sky = f'<g class="star">{stars}</g><path class="beam" d="M140 266h90l26 20H114z"/><path class="beam" d="M62 154h14l26 112H36z"/>'
+    # 門口依類別放一樣東西：髮廊的旋轉燈、餐飲的立牌、寵物的腳印招牌、鍋物的燈籠，其他放一盆植物
+    uid = rnd.randint(1000, 9999)
+    room, style = ROOM_OF.get(key, ""), STYLE_OF.get(key, "awning")
+    prop_defs = prop_fill = ""
+    if room == "salon":
+        stripes = "".join(f'<path d="M238 {y}l10-6v5l-10 6z"/>' for y in range(210, 276, 12))
+        prop_defs = f'<clipPath id="bp{uid}"><rect x="238" y="214" width="10" height="40" rx="5"/></clipPath>'
+        prop_fill = f'<g clip-path="url(#bp{uid})"><g class="pole acc">{stripes}</g></g>'
+        prop = '<rect x="238" y="214" width="10" height="40" rx="5"/><path d="M236 214h14M236 254h14M243 254v12"/><circle cx="243" cy="209" r="4"/>'
+    elif room == "grooming":
+        prop_fill = '<circle class="sc-paper" cx="99" cy="214" r="12"/>' + f'<g class="acc">{_place(mset["a"], 99, 222, 14, 16)}</g>'
+        prop = '<path class="fine" d="M99 194v8"/><circle cx="99" cy="214" r="12"/>'
+    elif style == "noren":
+        prop_fill = '<ellipse class="acc" cx="128" cy="202" rx="8" ry="10"/><ellipse class="acc" cx="242" cy="202" rx="8" ry="10"/>'
+        prop = ('<path class="fine" d="M128 192v0M242 192v0"/><ellipse cx="128" cy="202" rx="8" ry="10"/><ellipse cx="242" cy="202" rx="8" ry="10"/>'
+                '<path class="fine" d="M120 202h16M234 202h16M128 212v6M242 212v6"/>')
+    elif style == "awning":
+        prop = ('<path d="M236 266l5-30h20l5 30"/><rect x="240" y="240" width="22" height="18" rx="1"/>'
+                '<path class="fine" d="M244 246h14M244 251h10"/>')
+        prop_fill = '<rect class="sc-paper" x="240" y="240" width="22" height="18" rx="1"/>'
+    else:
+        prop = ('<path d="M238 266l3-16h18l3 16"/><path class="fine" d="M250 250c-2-12-8-18-14-20M250 250c1-14 6-20 13-22M250 250c-6-6-6-14-2-20"/>')
+    return (f'<defs>{prop_defs}</defs>' if prop_defs else '') + (
+            '<rect class="sc-bg" width="400" height="300"/><circle class="acc2" cx="340" cy="52" r="22"/>' + sky + tone + lit + prop_fill
+            + f'<g class="sc-ln">{drawable(lines + prop)}</g>' + _vsign(far, 99, 96, 98))
