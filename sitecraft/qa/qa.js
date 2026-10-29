@@ -143,9 +143,11 @@ const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}\u{FE0F}]
         // phone action bar: once the hero buttons are gone it is pinned to the bottom edge, full width, every cell labelled,
         // and stays there through the services, the hours and the closing section
         r.fn.barFixed = [];
+        const barOk = () => { const f = document.querySelector('.fab'); if (!f) return true; const b = f.getBoundingClientRect(), bar = document.getElementById('demoBar'); const floor = bar ? bar.getBoundingClientRect().top : innerHeight; return f.classList.contains('show') && !f.inert && Math.abs(b.bottom - floor) <= 1 && b.left <= 0 && b.right >= innerWidth && [...f.querySelectorAll('a')].every(a => (a.querySelector('.t') || {}).textContent && a.querySelector('.t').getBoundingClientRect().width > 0); };
         for (const sel of ['#services', '#info', 'footer']) {
-          await page.evaluate(s => { const el = document.querySelector(s); el.scrollIntoView({ block: 'end' }); }, sel); await page.waitForTimeout(700);
-          r.fn.barFixed.push(await page.evaluate(() => { const f = document.querySelector('.fab'); if (!f) return true; const b = f.getBoundingClientRect(), bar = document.getElementById('demoBar'); const floor = bar ? bar.getBoundingClientRect().top : innerHeight; return f.classList.contains('show') && !f.inert && Math.abs(b.bottom - floor) <= 1 && b.left <= 0 && b.right >= innerWidth && [...f.querySelectorAll('a')].every(a => (a.querySelector('.t') || {}).textContent && a.querySelector('.t').getBoundingClientRect().width > 0); }));
+          await page.evaluate(s => { const el = document.querySelector(s); el.scrollIntoView({ block: 'end' }); }, sel);
+          // smooth scroll + the bar's slide-in transition: wait for it to settle (up to 3 s) instead of sampling at a fixed moment
+          r.fn.barFixed.push(await page.waitForFunction(barOk, null, { timeout: 3000 }).then(() => true, () => false));
         }
         await page.evaluate(() => scrollTo(0, 0)); await page.waitForTimeout(400);
         r.fn.statementUnits = await page.evaluate(() => [...document.querySelectorAll('.statement .un')].every(el => el.getClientRects().length === 1));
