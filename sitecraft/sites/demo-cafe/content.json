@@ -37,5 +37,19 @@
   "line_url": "https://line.me/R/ti/p/@demo-cafe",
   "facebook_url": "https://www.facebook.com/demo.cafe",
   "instagram_url": "https://www.instagram.com/demo.cafe",
-  "gallery": []
+  "gallery": [],
+  "directions": [
+    [
+      "公車",
+      "在「範例路口」站下車，走路 2 分鐘"
+    ],
+    [
+      "停車",
+      "巷口有幾格路邊停車，假日比較難找"
+    ],
+    [
+      "找門口",
+      "藍色鐵捲門旁的木門，門口有一盆橄欖樹"
+    ]
+  ]
 }

@@ -209,7 +209,7 @@ def load_or_make_content(lead: dict, theme: dict, site_dir: Path, use_ai: bool, 
     if (lead.get("theme") or "") == "pet":
         copy = pet_words(copy)
     content = {
-        "_說明": "改這個檔案再執行 build_site.py --slug <slug> --rebuild 就會更新網站。gallery 放 img/ 裡的檔名。",
+        "_說明": "改這個檔案再執行 build_site.py --slug <slug> --rebuild 就會更新網站。gallery 放 img/ 裡的檔名；directions 是「怎麼來」，例如 [[\"捷運\", \"2 號出口走路 5 分鐘\"]]。",
         "name": lead["name"],
         "tagline": copy["tagline"],
         "statement": copy.get("statement", ""),
@@ -221,6 +221,7 @@ def load_or_make_content(lead: dict, theme: dict, site_dir: Path, use_ai: bool, 
         "facebook_url": lead.get("facebook_url", ""),
         "instagram_url": lead.get("instagram_url", ""),
         "gallery": [],
+        "directions": [],
     }
     site_dir.mkdir(parents=True, exist_ok=True)
     cj.write_text(json.dumps(content, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -379,25 +380,51 @@ def scene_tile(key: str, mset: dict, name: str, seed: str, theme_key: str = "def
 
 
 def map_art(seed: str) -> str:
-    """地圖卡的示意街廓：幾條主要道路、巷弄與街區，圖釘在中央（每家店不同、每次一樣）。"""
+    """地圖卡的示意街廓：手繪感的街區（每格裡幾棟房子或一小塊綠地），主要道路畫中線，店所在的那一格塗強調色，
+    圖釘在中央，右上角一個指北符號。每家店不同、每次一樣；只是示意，真正的位置按「載入地圖」看。"""
     from markupsafe import Markup
     rnd = random.Random(seed + "map")
-    roads, lanes, blocks = [], [], []
-    for y in (rnd.randint(60, 90), rnd.randint(170, 200)):
-        tilt = rnd.randint(-14, 14)
-        roads.append(f'<path d="M-20 {y - tilt}L420 {y + tilt}"/>')
-    for x in (rnd.randint(70, 110), rnd.randint(250, 300)):
-        tilt = rnd.randint(-18, 18)
-        roads.append(f'<path d="M{x - tilt} -20L{x + tilt} 320"/>')
-    for _ in range(5):
-        x, y = rnd.randint(0, 400), rnd.randint(0, 300)
-        lanes.append(f'<path d="M{x} {y}l{rnd.choice((-1, 1)) * rnd.randint(40, 90)} {rnd.randint(-30, 30)}"/>')
-    for _ in range(4):
-        x, y = rnd.randint(20, 340), rnd.randint(20, 240)
-        blocks.append(f'<rect x="{x}" y="{y}" width="{rnd.randint(30, 60)}" height="{rnd.randint(22, 44)}" rx="4"/>')
+    W, H, cx, cy = 480, 260, 240, 120
+    xs = [-40, rnd.randint(60, 90), rnd.randint(170, 200), rnd.randint(290, 320), rnd.randint(400, 430), W + 40]
+    ys = [-40, rnd.randint(38, 56), rnd.randint(132, 148), rnd.randint(214, 230), H + 40]
+    mx, my = rnd.choice((2, 3)), 2  # 主要道路：一條直的、一條橫的
+    hw = lambda i, main: 11 if i == main else 6
+    blocks, foot, parks, shop = [], [], [], ""
+    for i in range(len(xs) - 1):
+        for j in range(len(ys) - 1):
+            x0, x1 = xs[i] + hw(i, mx), xs[i + 1] - hw(i + 1, mx)
+            y0, y1 = ys[j] + hw(j, my), ys[j + 1] - hw(j + 1, my)
+            w, h = x1 - x0, y1 - y0
+            if w < 20 or h < 20:
+                continue
+            r = f'<rect x="{x0}" y="{y0}" width="{w}" height="{h}" rx="6"/>'
+            if x0 <= cx <= x1 and y0 <= cy + 22 <= y1 + 30 and not shop:
+                shop = r
+                continue
+            if rnd.random() < .16:
+                parks.append(r)
+                for _ in range(3):
+                    tx, ty = rnd.randint(x0 + 10, max(x0 + 11, x1 - 10)), rnd.randint(y0 + 10, max(y0 + 11, y1 - 10))
+                    parks.append(f'<circle class="tr" cx="{tx}" cy="{ty}" r="{rnd.randint(5, 8)}"/>')
+                continue
+            blocks.append(r)
+            # 街區裡的房子：沿著街邊排一排小方塊
+            n = max(1, int(w // 34))
+            bw = (w - 8 - (n - 1) * 4) / n
+            for k in range(n):
+                bh = rnd.randint(12, max(13, min(26, int(h / 2) - 4)))
+                fx = x0 + 4 + k * (bw + 4)
+                foot.append(f'<rect x="{fx:.0f}" y="{y0 + 4}" width="{bw:.0f}" height="{bh}" rx="2"/>')
+                if h > 60 and rnd.random() < .7:
+                    bh2 = rnd.randint(12, max(13, min(24, int(h / 2) - 6)))
+                    foot.append(f'<rect x="{fx:.0f}" y="{y1 - 4 - bh2}" width="{bw:.0f}" height="{bh2}" rx="2"/>')
+    mid = (f'<path d="M{xs[mx]} -20V{H + 20}"/>' f'<path d="M-20 {ys[my]}H{W + 20}"/>')
+    north = (f'<g class="mn" transform="translate({W - 36} 56)"><circle r="15"/><path d="M0 -10L5 6L0 3L-5 6Z"/>'
+             '<text y="-19" text-anchor="middle">N</text></g>')
     return Markup(
-        '<svg class="mapart" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true">'
-        f'<g class="mb">{"".join(blocks)}</g><g class="ml">{"".join(lanes)}</g><g class="mr">{"".join(roads)}</g></svg>')
+        f'<svg class="mapart" viewBox="0 0 {W} {H}" preserveAspectRatio="xMidYMid slice" aria-hidden="true">'
+        f'<g class="mb">{"".join(blocks)}</g><g class="mp">{"".join(parks)}</g><g class="mf">{"".join(foot)}</g>'
+        f'<g class="ms">{shop}</g><g class="mc">{mid}</g>{north}</svg>')
 
 
 def feature_cta(label: str, line_url: str) -> str:
@@ -459,19 +486,41 @@ ACCENTS = {
     "halo": '<circle class="disc" cx="100" cy="102" r="80"/>',
     "glow": '<circle class="disc" cx="100" cy="112" r="64"/>',  # 鍋物：鍋子正後方一圈暖光  # 寵物：整顆頭後面一個置中的圓，不半遮臉
     "mirror": '<path class="disc" d="M132 38h38a26 26 0 0 1 26 26v80h-90V64a26 26 0 0 1 26-26z"/>',  # 髮廊：鏡子的偏移色塊（印刷錯位感）
+    # 寵物：狗頭後面一顆大肥皂泡（亮邊加一道反光），不再是蓋住浴缸的淡色圓
+    "bubble": ('<circle class="disc" cx="136" cy="60" r="44"/><circle class="disc" cx="46" cy="50" r="12"/>'
+               '<path class="disc hl" d="M101 48a36 36 0 0 1 16-19"/><path class="disc hl" d="M40 46a7 7 0 0 1 4-4"/>'),
 }
-ACCENT_OF = {"cafe": "circle", "hair": "mirror", "pet": "halo", "breakfast": "sun", "restaurant": "circle", "snack": "blob",
+ACCENT_OF = {"cafe": "circle", "hair": "mirror", "pet": "bubble", "breakfast": "sun", "restaurant": "circle", "snack": "blob",
              "hotpot": "glow", "dessert": "arch", "beauty": "blob", "clinic": "square", "gym": "square", "florist": "arch",
              "auto": "sun", "education": "square", "wellness": "blob", "lodging": "arch", "default": "circle"}
 
 
+def scroll_wrap(markup: str, spec: dict) -> str:
+    """首屏插畫跟著捲動的那一筆：把指定序號的形狀包進 <g class="scr-…">（咖啡壺裡的咖啡越捲越滿、泡泡往上飄）。
+    包在外層 g，原本形狀上的描線與閒置動畫不受影響；不支援捲動動畫或減少動態時就是原圖。"""
+    kinds = {i: k for k, idx in spec.items() if isinstance(idx, list) for i in idx}
+    if not kinds:
+        return markup
+    n = -1
+
+    def tag(mm: re.Match) -> str:
+        nonlocal n
+        n += 1
+        return f'<g class="scr-{kinds[n]}">{mm.group(0)}</g>' if n in kinds else mm.group(0)
+    return re.sub(r"<(?:path|circle|ellipse|rect)\b[^>]*>", tag, markup)
+
+
 def scene_markup(mset: dict, key: str = "default") -> str:
     """hero 插畫：有 hero（多筆、兩種線寬、強調色填色）就用，沒有就用主圖騰；後面墊一塊這個類別專屬形狀的強調色。"""
+    scroll = mset.get("hero_scroll") or {}
     if mset.get("hero"):
-        art = idle_classes(drawable(mset["hero"]), mset.get("hero_idle") or {"shapes": []})
+        art = scroll_wrap(idle_classes(drawable(mset["hero"]), mset.get("hero_idle") or {"shapes": []}), scroll)
     else:
         art = idle_classes(drawable(mset["a"]), mset.get("idle") or {"kind": "float", "shapes": [0]})
-    return ACCENTS[ACCENT_OF.get(key, "circle")] + art
+    accent = ACCENTS[ACCENT_OF.get(key, "circle")]
+    if scroll.get("disc"):
+        accent = f'<g class="scr-{scroll["disc"]}">{accent}</g>'
+    return accent + art
 
 
 def print_scene(main: str, small: str = "", ground: bool = True) -> str:
@@ -762,8 +811,10 @@ VOICE_OG = {
 }
 
 
-def latin_url(url: str, latin: str) -> str:
-    """沒有自架字型時的 Google Fonts 連結：拉丁字型換掉時，Fraunces 換成同一套 Bodoni Moda。"""
+def latin_url(url: str, latin: str, head: str = "") -> str:
+    """沒有自架字型時的 Google Fonts 連結：拉丁字型換掉時，Fraunces 換成同一套 Bodoni Moda；標題用粉圓時加上 Huninn。"""
+    if head == "huninn":
+        url = url.replace("&display=swap", "&family=Huninn&display=swap")
     if latin == "bodoni":
         return re.sub(r"family=Fraunces:[^&]*", "family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,600;1,6..96,400", url)
     return url
@@ -779,6 +830,8 @@ def _voice_font(spec, size):
         return None
     try:
         f = ImageFont.truetype(str(path), size)
+        if not axes:
+            return f
         order = [a["name"].decode() if isinstance(a, dict) else a.decode() for a in f.get_variation_axes()]
         f.set_variation_by_axes([axes.get(n, 0) for n in order])
         return f
@@ -852,6 +905,8 @@ def og_image(lead: dict, content: dict, theme: dict, out: Path) -> bool:
     spec_zh, spec_en = VOICE_OG.get(mode, VOICE_OG["bold"])
     if theme.get("latin") == "bodoni":
         spec_en = ("BodoniModa-Italic[opsz,wght].ttf", {"Optical Size": 28, "Weight": 400})
+    if theme.get("head_font") == "huninn":
+        spec_zh = spec_en = ("Huninn-Regular.ttf", {})
     base = find_cjk_font()
     W, H = 1200, 630
     img = Image.new("RGB", (W, H), _hex(pal["pd"]))
@@ -1040,6 +1095,8 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, 
         "tagline": content.get("tagline", ""),
         "about_paragraphs": [about_opening(t_, name, city_district) if i_ == 0 else t_ for i_, t_ in enumerate(about)],
         "highlights": content.get("highlights", []), "services": services,
+        # 關於我們的三個數字（沒有三大特色的類別用）：[{"n": "90", "u": "分鐘", "t": "第一次來預留的時間"}]
+        "about_stats": content.get("about_stats") or theme.get("about_stats", []),
         "services_linked": any(s_["href"] for s_ in services),
         "og_image": (url.rstrip("/") + "/og.png") if og_png else "",
         "gallery_items": gallery_items,
@@ -1084,6 +1141,8 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, 
         "vcols": vertical_columns(alt_line(theme, content.get("tagline", ""), fill)),
         "vlen": max((len(c) for c in vertical_columns(alt_line(theme, content.get("tagline", ""), fill))), default=6),
         "map_art": map_art(lead["slug"]),
+        # 怎麼來：content.json 的 directions，例如 [["捷運", "大安站 2 號出口走路 5 分鐘"], ["停車", "巷口有機車格"]]
+        "directions": [d for d in content.get("directions", []) if isinstance(d, (list, tuple)) and len(d) == 2 and d[1]],
         "address_disp": address_display(address),
         "closing_closed": closing_closed(lead.get("theme") or "default"),
         "scrim": _lum(theme["palette"]["p"]) > 0.2,
@@ -1092,10 +1151,11 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, 
         "services_lead": content.get("services_lead") or theme.get("services_lead") or "用實在的價格，認真做好每一件事。",
         "address_html": address_html(address, lead.get("city", ""), lead.get("district", "")),
         "mode": theme.get("mode", "bold"), "hero_layout": theme.get("hero", "side"),
-        "fonts_url": latin_url(mode["url"], theme.get("latin", "")), "fonts": fonts or [],
+        "fonts_url": latin_url(mode["url"], theme.get("latin", ""), theme.get("head_font", "")), "fonts": fonts or [],
         "font_display": fontkit.LATIN_FAMILY.get(theme.get("latin", ""), mode["display"]),
-        "font_head": next((f["family"] for f in (fonts or []) if f.get("kind") == "head"), mode["head"]),
-        "head_weight": mode["weight"],
+        "font_head": next((f["family"] for f in (fonts or []) if f.get("kind") == "head"),
+                          fontkit.HEAD_FAMILY.get(theme.get("head_font", ""), mode["head"])),
+        "head_weight": theme.get("head_weight") or mode["weight"],
         "statement_pre": pre, "statement_em": em, "statement_post": post, "statement_name": statement_name,
         # 兩段都短（一行放得下）就各自不拆，只在逗號換行；斷詞器不認得的詞（毛小孩）也不會被切開
         "statement_units": bool(pre) and len(pre) <= 11 and len(em) <= 11 and not post,
@@ -1157,7 +1217,8 @@ def build_one(lead: dict, cfg: dict, themes: dict, *, demo: bool = True, use_ai:
     fonts = None
     if self_host_fonts:
         # 先算出這一頁用到的字，切出自架字型，再重畫一次
-        fonts = fontkit.build_fonts(theme.get("mode", "bold"), html, site_dir, latin=theme.get("latin", ""))
+        fonts = fontkit.build_fonts(theme.get("mode", "bold"), html, site_dir, latin=theme.get("latin", ""),
+                                    head=theme.get("head_font", ""))
         if fonts:
             html = render_site(lead, content, cfg, themes, demo=demo, og_png=og_ok, fonts=fonts, site_dir=site_dir)
     if not fonts:

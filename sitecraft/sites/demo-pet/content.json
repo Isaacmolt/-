@@ -40,8 +40,22 @@
     }
   ],
   "phone": "07 555 6666",
-  "line_url": "https://lin.ee/demoPets",
+  "line_url": "https://line.me/R/ti/p/@demo-pets",
   "facebook_url": "https://www.facebook.com/demo.pets",
   "instagram_url": "",
-  "gallery": []
+  "gallery": [],
+  "directions": [
+    [
+      "開車",
+      "門口可以臨停，方便抱毛小孩上下車"
+    ],
+    [
+      "停車",
+      "隔壁巷子有收費停車場"
+    ],
+    [
+      "找門口",
+      "一樓，玻璃門上貼著一排腳印"
+    ]
+  ]
 }

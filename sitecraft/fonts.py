@@ -30,6 +30,7 @@ SOURCES = {
     "SpaceGrotesk[wght].ttf": RAW + "ofl/spacegrotesk/SpaceGrotesk%5Bwght%5D.ttf",
     "BodoniModa[opsz,wght].ttf": RAW + "ofl/bodonimoda/BodoniModa%5Bopsz%2Cwght%5D.ttf",
     "BodoniModa-Italic[opsz,wght].ttf": RAW + "ofl/bodonimoda/BodoniModa-Italic%5Bopsz%2Cwght%5D.ttf",
+    "Huninn-Regular.ttf": RAW + "ofl/huninn/Huninn-Regular.ttf",
 }
 
 # 拉丁字型可依類別換掉（themes.json 的 latin）：沙龍用高反差的 Didone，和咖啡廳的 Fraunces 分開
@@ -41,7 +42,18 @@ LATIN_FILES = {
          "style": "italic", "wght": (400, 400), "axes": {"opsz": 28}, "preload": True},
     ],
 }
-LATIN_FAMILY = {"bodoni": "Bodoni Moda"}
+# 粉圓（Huninn）同時有中文與拉丁字：標題整套換成它時，拉丁字型就不另外切
+LATIN_FILES["huninn"] = []
+LATIN_FAMILY = {"bodoni": "Bodoni Moda", "huninn": "Huninn"}
+
+# 標題字型也可依類別換掉（themes.json 的 head_font）：寵物用圓體，和診所、教室的黑體分開。只有一個字重
+HEAD_FILES = {
+    "huninn": [
+        {"family": "Huninn", "src": "Huninn-Regular.ttf", "out": "huninn", "kind": "head",
+         "style": "normal", "wght": (400, 400), "axes": {}, "preload": True},
+    ],
+}
+HEAD_FAMILY = {"huninn": "Huninn"}
 
 # 每種字型語氣要切哪些檔：family 是 @font-face 用的名稱（標題子集另取名字，
 # 缺字時才會順著 font-family 清單退到同字重的內文字型，而不是退到系統字型）
@@ -159,13 +171,15 @@ def _subset(src: Path, out: Path, chars: set[str], wght: tuple[int, int], axes: 
     font.save(str(out))
 
 
-def build_fonts(mode: str, html: str, site_dir: Path, log=print, latin: str = "") -> list[dict] | None:
+def build_fonts(mode: str, html: str, site_dir: Path, log=print, latin: str = "", head: str = "") -> list[dict] | None:
     """把這個站需要的字型切好放到 site_dir/fonts/。回傳 @font-face 要用的清單；做不到回 None。"""
     if not available():
         return None
     files = MODE_FILES.get(mode) or MODE_FILES["bold"]
     if latin in LATIN_FILES:
         files = LATIN_FILES[latin] + [f for f in files if f["kind"] != "latin"]
+    if head in HEAD_FILES:
+        files = HEAD_FILES[head] + [f for f in files if f["kind"] != "head"]
     if not ensure_sources({f["src"] for f in files}, log):
         return None
     chars = charset_from_html(html)

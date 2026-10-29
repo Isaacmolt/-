@@ -3,7 +3,7 @@
   "name": "範例髮型 Demo Hair",
   "tagline": "剪一個適合你的樣子",
   "about": [
-    "第一次來，大約預留一個半小時；想先問價格，傳訊息或打電話都可以。",
+    "想先問價格，傳訊息或打電話都可以；我們會先把大概的範圍說清楚，不會到了結帳才多出來。",
     "染燙前會先看髮質，不適合的不硬做，寧可下次再來。"
   ],
   "highlights": [],
@@ -30,8 +30,22 @@
     }
   ],
   "phone": "02 2777 8888",
-  "line_url": "https://lin.ee/demoHair",
+  "line_url": "https://line.me/R/ti/p/@demo-hair",
   "facebook_url": "",
   "instagram_url": "https://www.instagram.com/demo.hair",
-  "gallery": []
+  "gallery": [],
+  "directions": [
+    [
+      "捷運",
+      "範例站 2 號出口，走路 5 分鐘"
+    ],
+    [
+      "機車",
+      "樓下騎樓可以停機車"
+    ],
+    [
+      "找門口",
+      "二樓，樓梯口有一根會轉的燈柱"
+    ]
+  ]
 }
