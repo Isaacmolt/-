@@ -918,7 +918,11 @@ def og_image(lead: dict, content: dict, theme: dict, out: Path) -> bool:
     glow = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     gd = ImageDraw.Draw(glow)
     ac = _hex(pal["a"])
-    gd.ellipse((800, 60, 1160, 420), fill=ac + (150,))
+    if theme.get("disc") == "bubble":  # 寵物：一顆肥皂泡（亮邊加反光），黃色的耳朵與小鴨才不會融進黃色圓塊
+        gd.ellipse((820, 70, 1150, 400), fill=(255, 255, 255, 20), outline=(255, 255, 255, 150), width=3)
+        gd.arc((862, 112, 1108, 358), 200, 240, fill=(255, 255, 255, 220), width=7)
+    else:
+        gd.ellipse((800, 60, 1160, 420), fill=ac + (150,))
     glow = glow.filter(ImageFilter.GaussianBlur(2))
     img = Image.alpha_composite(img.convert("RGBA"), glow)
     photo = og_photo(content, out.parent)
@@ -1181,6 +1185,8 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, 
     hero_block = scene_markup(mset, key)
     # 橫幅版型：首屏下半部是這一類的店裡（一張有地平線、比例一致的完整場景）
     band = scenes.interior(mset, drawable, key, wide=True)
+    # 沙龍在桌機另有一張「舞台」：兩面高鏡與椅子站在店名兩側（其他尺寸仍用上面那條場景）
+    stage = scenes.salon_stage(mset, drawable) if scenes.ROOM_OF.get(key) == "salon" else ""
     idle = mset.get("idle") or {"kind": "float", "shapes": [0]}
 
     band2 = hero_block
@@ -1197,7 +1203,7 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, 
                                          "motif_hero": Markup(drawable(mset.get("hero") or motif)),
                                          "motif_photo": Markup(drawable(mset["photo"])) if mset.get("photo") else "",
                                          "motif_label": Markup(lbl_markup),
-                                         "motif_b": Markup(mset.get("b", motif)), "motif_band": Markup(band)}, demo=demo))
+                                         "motif_b": Markup(mset.get("b", motif)), "motif_band": Markup(band), "motif_stage": Markup(stage)}, demo=demo))
 
 
 CSS_COMMENT = re.compile(r"/\*.*?\*/", re.S)
