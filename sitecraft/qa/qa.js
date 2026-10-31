@@ -93,7 +93,7 @@ async function hoverContrast(pg) {
                  nav: [...document.querySelectorAll('.nav ul a, .nav .call')].filter(a => a.getBoundingClientRect().width > 0).every(a => a.getClientRects().length === 1 && a.getBoundingClientRect().height < 50),
                  hoursRows: [...document.querySelectorAll('#hours li')].every(li => { const n = li.children[1]; const lh = parseFloat(getComputedStyle(n).lineHeight) || 28; return n.getBoundingClientRect().height <= lh * (n.querySelector('.sep') ? 2 : 1) + 4; }),
                  sig: [...document.querySelectorAll('div.receipt, .sig.steps.appt, .sig.steps.record')].every(e => { const b = e.getBoundingClientRect(); return e.scrollWidth <= e.clientWidth + 1 && b.left >= -1 && b.right <= innerWidth + 1; }),
-                 bandArt: (m => !m || innerWidth <= 880 || innerHeight < 700 || m.getBoundingClientRect().height >= 140)(document.querySelector('.hero[data-hero="band"] .hero-foot .motif svg.m1')) };
+                 bandArt: (m => !m || innerWidth <= 880 || innerHeight < 700 || m.getBoundingClientRect().height >= 140)([...document.querySelectorAll('.hero[data-hero="band"] .hero-foot .motif svg:is(.m1,.m3)')].find(x => x.getBoundingClientRect().width > 0)) };
       });
       // map card: the pin sits in its drawing, never on the address
       r.mapClear = r.mapClear || {};

@@ -585,7 +585,7 @@ def salon_stage(mset: dict, drawable) -> str:
             '<path d="M88 344h64a6 6 0 0 1 0 12H88a6 6 0 0 1 0-12z"/><path d="M848 344h64a6 6 0 0 1 0 12h-64a6 6 0 0 1 0-12z"/>'
             '<path d="M398 312h60v92h-60z"/><path d="M660 404l6-36h60l6 36z"/></g>')
     glass_d = "M60 300V130a60 60 0 0 1 120 0v170zM820 300V130a60 60 0 0 1 120 0v170z"
-    glass = f'<g class="sc-paper"><path d="{glass_d}"/></g>'
+    glass = '<g class="sc-paper">' + "".join(f'<path d="M{x} 300V130a60 60 0 0 1 120 0v170z"/>' for x in (60, 820)) + '</g>'
     glint = (f'<clipPath id="stageGlass"><path d="{glass_d}"/></clipPath>'
              '<g clip-path="url(#stageGlass)"><g class="glint"><path d="M20 300L110 70h22L42 300z"/><path d="M780 300L870 70h22L802 300z"/></g></g>')
     seats = ('<path class="acc2" d="M88 344h64a6 6 0 0 1 0 12H88a6 6 0 0 1 0-12z"/>'
