@@ -566,11 +566,11 @@ def salon_stage(mset: dict, drawable) -> str:
 
     lines = (
         '<path d="M0 404H1000"/>'
-        + _lamp(120, drop=10) + _lamp(880, drop=10)
-        + mirror(60) + mirror(820) + chair(120) + chair(880)
+        + _lamp(100, drop=10) + _lamp(900, drop=10)
+        + mirror(40) + mirror(840) + chair(100) + chair(900)
         # 左邊最外側一盆高植物，右邊牆上一排層架
-        + '<path d="M12 404l4-34h30l4 34z"/><path class="fine" d="M31 370c-4-30-16-46-28-52M31 370c2-36 14-56 30-64M31 370c-8-18-8-38 0-52"/>'
-        + '<path d="M954 220h40"/><path class="fine" d="M958 220l4 6M990 220l-4 6"/><path d="M962 220v-16h8v16M976 220v-22h8v22"/>'
+        + '<path d="M2 404l4-34h30l4 34z"/><path class="fine" d="M21 370c-4-30-16-46-28-52M21 370c2-36 14-56 30-64M21 370c-8-18-8-38 0-52"/>'
+        + '<path d="M950 404l4-34h30l4 34z"/><path class="fine" d="M969 370c4-30 16-46 28-52M969 370c-2-36-14-56-30-64M969 370c8-18 8-38 0-52"/>'
         # 中間：推車、插花小桌、毛巾籃（都在 y 300 以下）
         + '<path d="M398 404v-92h60v92"/><path d="M398 312h60M398 348h60M398 384h60"/>'
         '<circle class="fine" cx="404" cy="406" r="3"/><circle class="fine" cx="452" cy="406" r="3"/>'
@@ -581,14 +581,14 @@ def salon_stage(mset: dict, drawable) -> str:
         '<rect x="670" y="352" width="52" height="10" rx="5"/><rect x="676" y="342" width="40" height="10" rx="5"/>'
     )
     tone = ('<g class="sc-tone" transform="translate(7 7)">'
-            '<path d="M44 300h152v8H44z"/><path d="M804 300h152v8H804z"/>'
-            '<path d="M88 344h64a6 6 0 0 1 0 12H88a6 6 0 0 1 0-12z"/><path d="M848 344h64a6 6 0 0 1 0 12h-64a6 6 0 0 1 0-12z"/>'
+            '<path d="M24 300h152v8H24z"/><path d="M824 300h152v8H824z"/>'
+            '<path d="M68 344h64a6 6 0 0 1 0 12H68a6 6 0 0 1 0-12z"/><path d="M868 344h64a6 6 0 0 1 0 12h-64a6 6 0 0 1 0-12z"/>'
             '<path d="M398 312h60v92h-60z"/><path d="M660 404l6-36h60l6 36z"/></g>')
-    glass_d = "M60 300V130a60 60 0 0 1 120 0v170zM820 300V130a60 60 0 0 1 120 0v170z"
-    glass = '<g class="sc-paper">' + "".join(f'<path d="M{x} 300V130a60 60 0 0 1 120 0v170z"/>' for x in (60, 820)) + '</g>'
+    glass_d = "M40 300V130a60 60 0 0 1 120 0v170zM840 300V130a60 60 0 0 1 120 0v170z"
+    glass = '<g class="sc-paper">' + "".join(f'<path d="M{x} 300V130a60 60 0 0 1 120 0v170z"/>' for x in (40, 840)) + '</g>'
     glint = (f'<clipPath id="stageGlass"><path d="{glass_d}"/></clipPath>'
-             '<g clip-path="url(#stageGlass)"><g class="glint"><path d="M20 300L110 70h22L42 300z"/><path d="M780 300L870 70h22L802 300z"/></g></g>')
-    seats = ('<path class="acc2" d="M88 344h64a6 6 0 0 1 0 12H88a6 6 0 0 1 0-12z"/>'
-             '<path class="acc2" d="M848 344h64a6 6 0 0 1 0 12h-64a6 6 0 0 1 0-12z"/>'
+             '<g clip-path="url(#stageGlass)"><g class="glint"><path d="M0 300L90 70h22L22 300z"/><path d="M800 300L890 70h22L822 300z"/></g></g>')
+    seats = ('<path class="acc2" d="M68 344h64a6 6 0 0 1 0 12H68a6 6 0 0 1 0-12z"/>'
+             '<path class="acc2" d="M868 344h64a6 6 0 0 1 0 12h-64a6 6 0 0 1 0-12z"/>'
              '<rect class="acc2" x="670" y="352" width="52" height="10" rx="5"/>')
     return tone + glass + glint + seats + f'<g class="sc-ln">{drawable(lines)}</g>'
