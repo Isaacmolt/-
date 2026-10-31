@@ -363,7 +363,10 @@ def salon(mset: dict, drawable) -> str:
     tone = ('<g class="sc-tone" transform="translate(7 7)"><path d="M56 150h296v8H56z"/><path d="M70 150V96a34 34 0 0 1 68 0v54z"/>'
             '<path d="M230 150V96a34 34 0 0 1 68 0v54z"/><path d="M286 196h48v70h-48z"/></g>')
     glass = '<g class="sc-paper"><path d="M70 150V96a34 34 0 0 1 68 0v54z"/><path d="M230 150V96a34 34 0 0 1 68 0v54z"/></g>'
-    return ('<rect class="sc-bg" width="400" height="300"/>' + tone + glass
+    # 鏡面上的一道反光：首屏時跟著捲動滑過兩面鏡子（--hp），其他地方就停在原位
+    glint = ('<clipPath id="mirrorGlass"><path d="M70 150V96a34 34 0 0 1 68 0v54z"/><path d="M230 150V96a34 34 0 0 1 68 0v54z"/></clipPath>'
+             '<g clip-path="url(#mirrorGlass)"><g class="glint"><path d="M48 160L104 56h16L64 160z"/><path d="M208 160L264 56h16L224 160z"/></g></g>')
+    return ('<rect class="sc-bg" width="400" height="300"/>' + tone + glass + glint
             + '<path class="acc2" d="M78 214h52a5 5 0 0 1 0 10H78a5 5 0 0 1 0-10z"/>'
             + f'<g class="sc-ln">{drawable(lines)}</g>')
 

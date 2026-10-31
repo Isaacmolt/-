@@ -487,8 +487,8 @@ ACCENTS = {
     "glow": '<circle class="disc" cx="100" cy="112" r="64"/>',  # 鍋物：鍋子正後方一圈暖光  # 寵物：整顆頭後面一個置中的圓，不半遮臉
     "mirror": '<path class="disc" d="M132 38h38a26 26 0 0 1 26 26v80h-90V64a26 26 0 0 1 26-26z"/>',  # 髮廊：鏡子的偏移色塊（印刷錯位感）
     # 寵物：狗頭後面一顆大肥皂泡（亮邊加一道反光），不再是蓋住浴缸的淡色圓
-    "bubble": ('<circle class="disc" cx="136" cy="60" r="44"/><circle class="disc" cx="46" cy="50" r="12"/>'
-               '<path class="disc hl" d="M101 48a36 36 0 0 1 16-19"/><path class="disc hl" d="M40 46a7 7 0 0 1 4-4"/>'),
+    "bubble": ('<circle class="disc" cx="34" cy="40" r="28"/><circle class="disc" cx="96" cy="26" r="8"/>'
+               '<path class="disc hl" d="M14 34a22 22 0 0 1 10-13"/><path class="disc hl" d="M92 24a5 5 0 0 1 3-3"/>'),
 }
 ACCENT_OF = {"cafe": "circle", "hair": "mirror", "pet": "bubble", "breakfast": "sun", "restaurant": "circle", "snack": "blob",
              "hotpot": "glow", "dessert": "arch", "beauty": "blob", "clinic": "square", "gym": "square", "florist": "arch",
@@ -596,7 +596,7 @@ def label_icon(markup: str, idle: dict, key: str) -> tuple[str, str]:
     """區塊標籤的小圖與它的簽名動作：剪刀（兩片刀刃開合）→ snip、會冒煙的杯子 → steam、寵物 → 腳印 trail。"""
     kind, shapes = idle.get("kind"), list(idle.get("shapes", []))
     if key == "pet":
-        return markup, "trail"
+        return markup, "stamp"  # 一個腳印「蓋」下去（原本一排四個腳印在小尺寸像污點）
     if kind == "rotate" and len(shapes) == 2:
         tags, motion = {shapes[0]: "snA", shapes[1]: "snB"}, "snip"
     elif kind == "float" and idle.get("steam"):
@@ -1142,7 +1142,8 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, 
         "vlen": max((len(c) for c in vertical_columns(alt_line(theme, content.get("tagline", ""), fill))), default=6),
         "map_art": map_art(lead["slug"]),
         # 怎麼來：content.json 的 directions，例如 [["捷運", "大安站 2 號出口走路 5 分鐘"], ["停車", "巷口有機車格"]]
-        "directions": [d for d in content.get("directions", []) if isinstance(d, (list, tuple)) and len(d) == 2 and d[1]],
+        "directions": [[d[0], re.sub(r"(\d)\s+(?=[^\x00-\x7f])", "\\1\u00a0", d[1])] for d in content.get("directions", [])
+                       if isinstance(d, (list, tuple)) and len(d) == 2 and d[1]],
         "address_disp": address_display(address),
         "closing_closed": closing_closed(lead.get("theme") or "default"),
         "scrim": _lum(theme["palette"]["p"]) > 0.2,
