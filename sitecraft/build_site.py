@@ -986,6 +986,7 @@ def og_image(lead: dict, content: dict, theme: dict, out: Path) -> bool:
 
 def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, og_png: bool = False,
                 fonts: list[dict] | None = None, site_dir: Path | None = None) -> str:
+    from markupsafe import Markup
     theme = themes.get(lead.get("theme") or "default", themes["default"])
     brand = cfg["brand"]
     weekday_hours, periods = parse_hours(lead.get("hours_json", ""))
@@ -1095,8 +1096,13 @@ def render_site(lead: dict, content: dict, cfg: dict, themes: dict, demo: bool, 
         "tagline": content.get("tagline", ""),
         "about_paragraphs": [about_opening(t_, name, city_district) if i_ == 0 else t_ for i_, t_ in enumerate(about)],
         "highlights": content.get("highlights", []), "services": services,
-        # 關於我們的三個數字（沒有三大特色的類別用）：[{"n": "90", "u": "分鐘", "t": "第一次來預留的時間"}]
-        "about_stats": content.get("about_stats") or theme.get("about_stats", []),
+        # 關於我們的三個數字：只用老闆在 content.json 確認過的（[{"n": "90", "u": "分鐘", "t": "第一次來預留的時間"}]），
+        # 類別預設不放數字，免得把「1 位設計師」這種不一定成立的事寫成事實
+        "about_stats": content.get("about_stats", []),
+        # 髮型手帖（沒有作品照的美髮類）：幾種常剪的髮型畫成線條半身像，配一句說明；有照片時不放
+        "style_book": [] if imgs else [dict(it, art=Markup(drawable(scenes.hairstyle(it.get("kind", "bob")))))
+                                       for it in (content.get("style_book") or theme.get("style_book") or {}).get("items", [])],
+        "style_book_title": (content.get("style_book") or theme.get("style_book") or {}).get("title", ""),
         "services_linked": any(s_["href"] for s_ in services),
         "og_image": (url.rstrip("/") + "/og.png") if og_png else "",
         "gallery_items": gallery_items,
